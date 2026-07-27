@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MSMI 2026</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon-180.png">
+<link rel="icon" href="./favicon.ico">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="MSMI 2026">
+<meta name="theme-color" content="#12303D">
+<script>
+(function(){try{var t=localStorage.getItem('msmi-theme')||'light';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300&family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<style>
+:root{
+ --fog:#E9F1F3; --base:#1C3C4B; --stage:#12303D; --tide:#2E5A6E; --mist:#A6C6D1;
+ --bg:var(--fog); --card:#FFFFFF; --deep:var(--stage);
+ --ink:#1C3C4B; --muted:#4A7286; --rule:rgba(166,198,209,.5);
+ --accent:#9A741F; --gold-l:#C9A24B; --green:#4F8577; --deep-ink:#E9F1F3;
+ --serif:'Newsreader',Georgia,serif;
+ --sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
+ --r:16px; --shadow:0 1px 3px rgba(28,60,75,.08);
+ --navh:calc(62px + env(safe-area-inset-bottom,0px));
+}
+html[data-theme="dark"]{
+ --bg:#0E2833; --card:#12303D; --deep:#1C3C4B; --ink:#E9F1F3; --muted:#A6C6D1;
+ --rule:rgba(46,90,110,.75); --accent:#C9A24B; --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+html[data-theme="light"]{color-scheme:light} html[data-theme="dark"]{color-scheme:dark}
+*{box-sizing:border-box} html,body{margin:0;padding:0} html{background:var(--bg)}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;
+ -webkit-text-size-adjust:100%;padding-bottom:calc(var(--navh) + 18px)}
+a{color:inherit}
+button{font-family:var(--sans);color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px}
+.eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h2.sect{font-family:var(--serif);font-weight:500;font-size:2rem;letter-spacing:-.01em;margin:.1em 0 .7em}
+.page{display:none} .page.on{display:block}
+
+#themeBtn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;z-index:70;
+ width:44px;height:44px;border-radius:50%;border:1px solid var(--rule);background:var(--card);
+ display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);font-size:18px}
+#themeBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.hero{background:var(--deep);color:var(--deep-ink);border-radius:20px;padding:26px 20px 22px;
+ margin:calc(env(safe-area-inset-top,0px) + 14px) 0 18px}
+.hero .top{display:flex;justify-content:space-between;align-items:center;padding-right:48px}
+.hero .kick{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+.hero .mark{font-family:'Archivo',sans-serif;font-weight:300;font-size:.78rem;letter-spacing:.1em;color:var(--mist)}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.3rem,10.5vw,3.2rem);line-height:1.02;
+ letter-spacing:-.015em;margin:.3em 0 .25em}
+.hero p{color:var(--mist);font-size:1rem;margin:0 0 18px;max-width:34ch}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{border:1px solid rgba(166,198,209,.28);border-radius:12px;padding:11px 10px}
+.stat b{display:block;font-family:var(--serif);font-size:1.3rem;font-weight:500;line-height:1.15}
+.stat span{font-size:.76rem;color:var(--mist)}
+
+.ctrls{display:flex;gap:8px;margin:0 0 16px}
+.ctrls button,.ctrls a{flex:1;min-height:46px;border-radius:999px;border:1px solid var(--rule);
+ background:var(--card);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;
+ align-items:center;justify-content:center;text-decoration:none}
+.ctrls button:focus-visible,.ctrls a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card.next{box-shadow:0 0 0 2px var(--accent),var(--shadow)}
+.chead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.timepill{flex:0 0 auto;background:var(--bg);border-radius:12px;padding:8px 12px;font-weight:700;
+ font-size:.95rem;text-align:center;line-height:1.2}
+.timepill small{display:block;font-weight:500;font-size:.68rem;color:var(--muted)}
+.card h3{font-family:var(--serif);font-weight:500;font-size:1.8rem;letter-spacing:-.015em;margin:.08em 0 .05em;line-height:1.06}
+.cmeta{color:var(--muted);font-size:.92rem}
+.count{font-size:.9rem;color:var(--muted);margin-top:6px;font-weight:600}
+.card.next .count{color:var(--ink);font-size:1rem}
+.flag{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.tag{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+ border:1px solid var(--rule);border-radius:999px;padding:2px 8px;color:var(--muted);margin-left:6px;vertical-align:middle}
+
+.hbar{background:var(--deep);color:var(--deep-ink);border-radius:12px;padding:13px 14px;margin-top:14px}
+.hbar .hrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.hbar .hlabel{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist)}
+.hbar .hwho{font-weight:700;color:var(--gold-l);font-size:.95rem}
+.hbar .hwho i{font-style:normal;color:var(--mist);font-weight:500}
+.tees{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tee{border:1px solid rgba(166,198,209,.3);border-radius:8px;padding:5px 9px;font-size:.78rem;color:var(--mist);white-space:nowrap}
+.tee b{font-size:.98rem;color:var(--deep-ink);margin-left:5px}
+.hnote{margin-top:9px;font-size:.78rem;color:var(--mist)}
+
+.pwrap{margin-top:14px}
+.pwrap .lab{font-size:.85rem;color:var(--muted);margin-bottom:7px}
+.plist{display:flex;flex-wrap:wrap;gap:7px}
+.p{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;
+ background:var(--bg);border:2px solid transparent;font-size:.9rem;font-weight:600;cursor:pointer}
+.p i{font-style:normal;font-weight:500;color:var(--muted);font-size:.8rem}
+.p.me{background:var(--deep);color:var(--deep-ink)} .p.me i{color:var(--mist)}
+.p.on{border-color:var(--accent)}
+.p:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gsep{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.gsep.mine{color:var(--ink)}
+.tbd{margin-top:12px;font-size:.9rem;color:var(--muted)}
+
+.btnrow{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;
+ border:1px solid var(--rule);border-radius:12px;text-decoration:none;font-weight:700;font-size:.92rem;
+ background:var(--card);cursor:pointer}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.addr{font-size:.82rem;color:var(--muted);margin-top:9px}
+.note{margin-top:10px;font-size:.83rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:10px}
+
+/* betting */
+.money .row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-top:1px solid var(--rule);font-size:.92rem}
+.money .row:first-of-type{border-top:0}
+.money .net{font-family:var(--serif);font-size:2.4rem;font-weight:500;line-height:1;margin:.1em 0 .1em}
+.money .net.up{color:var(--green)} .money input{width:96px;min-height:40px;text-align:right;
+ border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink);
+ font-family:var(--sans);font-size:1rem;padding:0 9px}
+.money input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.money .lbl{color:var(--muted);font-size:.8rem}
+
+/* schedule */
+.daycard{background:var(--card);border-radius:var(--r);padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.daycard h3{font-family:var(--serif);font-weight:500;font-size:1.45rem;margin:0 0 4px}
+.srow{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--rule);text-decoration:none}
+.srow .t{flex:0 0 74px;font-weight:700;font-size:.9rem;padding-top:11px}
+.srow .b{flex:1 1 auto;min-width:0}
+.srow .b .n{font-weight:700;font-size:1.05rem}
+.srow .b .a{font-size:.8rem;color:var(--muted)}
+.srow .arw{flex:0 0 34px;height:34px;border-radius:50%;background:var(--bg);display:flex;
+ align-items:center;justify-content:center;margin-top:8px}
+.venue{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--r);
+ padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);text-decoration:none}
+.venue .b{flex:1 1 auto;min-width:0}
+.venue .n{font-weight:700;font-size:1.05rem}
+.venue .a{font-size:.8rem;color:var(--muted)}
+.venue .arw{color:var(--muted);font-size:1.1rem}
+
+/* tables */
+#search{width:100%;min-height:46px;border:1px solid var(--rule);border-radius:12px;background:var(--card);
+ color:var(--ink);font-family:var(--sans);font-size:1rem;padding:0 14px;margin-bottom:14px}
+#search:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tblock{margin-bottom:20px}
+.tblock h3{font-family:var(--serif);font-weight:500;font-size:1.25rem;margin:0 0 7px}
+.scroll{overflow-x:auto;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);-webkit-overflow-scrolling:touch}
+table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:.92rem}
+th,td{padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--rule)}
+thead th{position:sticky;top:0;background:var(--bg);z-index:2;font-size:.66rem;letter-spacing:.08em;
+ text-transform:uppercase;color:var(--muted);font-weight:700}
+th.nm,td.nm{position:sticky;left:0;background:var(--card);z-index:1;text-align:left;min-width:142px;
+ font-weight:600;box-shadow:1px 0 0 var(--rule)}
+thead th.nm{background:var(--bg);z-index:3}
+tr.meta td,tr.meta th.nm{color:var(--muted);font-size:.76rem;background:var(--bg)}
+tr.chad td,tr.chad th.nm{background:var(--bg);font-weight:700}
+tr[hidden]{display:none}
+.idx{font-size:.78rem;color:var(--muted);font-weight:500;margin-left:6px}
+
+/* hotel */
+.mapimg{width:100%;border-radius:var(--r);display:block;box-shadow:var(--shadow)}
+.frame{width:100%;height:70vh;border:0;border-radius:var(--r);background:var(--card);display:block}
+.lodge{background:var(--card);border-radius:var(--r);padding:15px 17px;margin-bottom:10px;box-shadow:var(--shadow)}
+.lodge b{display:block;font-size:1.02rem}
+.lodge span{font-size:.86rem;color:var(--muted)}
+
+/* scorecard sheet */
+.sheet{position:fixed;inset:0;z-index:90;background:rgba(18,48,61,.55);display:none;
+ align-items:flex-end;justify-content:center}
+.sheet.on{display:flex}
+.sheetbox{background:var(--bg);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;
+ border-radius:20px 20px 0 0;padding:16px 14px calc(20px + env(safe-area-inset-bottom,0px))}
+.sheethead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
+.sheethead h3{font-family:var(--serif);font-weight:500;font-size:1.7rem;margin:0}
+.xbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--rule);background:var(--card);
+ font-size:20px;cursor:pointer;flex:0 0 auto}
+.teesel{display:flex;gap:6px;overflow-x:auto;margin:10px 0 4px;padding-bottom:4px}
+.teesel button{flex:0 0 auto;min-height:40px;padding:0 13px;border-radius:999px;border:1px solid var(--rule);
+ background:var(--card);font-size:.85rem;font-weight:600;cursor:pointer}
+.teesel button.on{background:var(--deep);color:var(--deep-ink);border-color:var(--deep)}
+.teesel button:disabled{opacity:.45}
+.strokebox{background:var(--deep);color:var(--deep-ink);border-radius:12px;padding:12px 14px;margin:10px 0}
+.strokebox .big{font-family:var(--serif);font-size:1.9rem;font-weight:500;line-height:1;color:var(--gold-l)}
+.sctable{width:100%;border-collapse:separate;border-spacing:0;font-size:.9rem;background:var(--card);
+ border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);table-layout:fixed}
+.sctable th,.sctable td{padding:7px 2px;text-align:center;border-bottom:1px solid var(--rule)}
+.sctable th.rh,.sctable td.rh{text-align:left;padding-left:11px;font-size:.7rem;letter-spacing:.06em;
+ text-transform:uppercase;color:var(--muted);font-weight:700;width:56px}
+.sctable thead th{background:var(--bg);font-size:.78rem}
+.sctable td.tot{background:var(--bg);font-weight:700}
+.sctable td.stroke{position:relative;font-weight:700}
+.sctable td.stroke::after{content:"";position:absolute;top:4px;left:50%;transform:translateX(-50%);
+ width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.sctable td.stroke2::after{width:13px;border-radius:3px}
+.legend{font-size:.8rem;color:var(--muted);margin-top:10px}
+
+/* bottom nav */
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--deep);
+ display:flex;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -1px 12px rgba(18,48,61,.18)}
+#nav button{flex:1;min-width:0;background:none;border:0;padding:9px 1px 8px;cursor:pointer;color:var(--mist);
+ display:flex;flex-direction:column;align-items:center;gap:3px;min-height:62px;font-size:.64rem;
+ font-weight:700;letter-spacing:.01em;white-space:nowrap}
+#nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;
+ stroke-linecap:round;stroke-linejoin:round}
+#nav button.on{color:var(--deep-ink)}
+#nav button:focus-visible{outline:2px solid var(--gold-l);outline-offset:-3px}
+
+footer{padding:26px 0 8px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);margin-top:26px}
+footer p{margin:.45em 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+<div id="boot" style="margin:60px 16px;padding:16px;border:2px solid #9A741F;border-radius:12px;
+ font-family:system-ui,sans-serif;font-size:15px;line-height:1.5;color:#1C3C4B;background:#fff">
+ <b>The script didn't run.</b><br>If you're seeing this, the page loaded but its JavaScript never
+ finished. Screenshot this box — the reason will appear below if there was one.
+ <div id="booterr" style="margin-top:10px;font-family:ui-monospace,monospace;font-size:13px;color:#8A2F2F"></div>
+</div>
+<button id="themeBtn" aria-label="Switch theme">🌙</button>
+
+<!-- ============ TRIP ============ -->
+<section class="page on" id="pg-trip">
+ <div class="wrap">
+  <div class="hero">
+   <div class="top"><span class="kick">MSMI · Michigan</span><span class="mark">epicminds</span></div>
+   <h1>Golf Trip<br>2026</h1>
+   <p>Tee times, partners, handicaps, scorecards and directions — built for the phone.</p>
+   <div class="stats">
+    <div class="stat"><b>Aug 2–6</b><span>Trip dates</span></div>
+    <div class="stat"><b id="stRounds">–</b><span>Your rounds</span></div>
+    <div class="stat"><b>6.0</b><span>Index</span></div>
+   </div>
+  </div>
+  <div class="ctrls">
+   <button id="grpBtn" aria-pressed="true">My group</button>
+   <a href="tel:+18663485249">Call Treetops</a>
+  </div>
+  <div id="next"></div>
+  <div id="rounds"></div>
+ </div>
+</section>
+
+<!-- ============ SCHEDULE ============ -->
+<section class="page" id="pg-sched">
+ <div class="wrap" style="padding-top:calc(env(safe-area-inset-top,0px) + 20px)">
+  <div class="eyebrow">At a glance</div>
+  <h2 class="sect">Full Schedule</h2>
+  <div id="sched"></div>
+  <div class="eyebrow" style="margin-top:30px">Tap for directions</div>
+  <h2 class="sect">Courses</h2>
+  <div id="venues"></div>
+ </div>
+</section>
+
+<!-- ============ MONEY ============ -->
+<section class="page" id="pg-money">
+ <div class="wrap" style="padding-top:calc(env(safe-area-inset-top,0px) + 20px)">
+  <div class="eyebrow">Break even is the goal</div>
+  <h2 class="sect">Betting</h2>
+  <div id="money"></div>
+ </div>
+</section>
+
+<!-- ============ HANDICAPS ============ -->
+<section class="page" id="pg-hcp">
+ <div class="wrap" style="padding-top:calc(env(safe-area-inset-top,0px) + 20px)">
+  <div class="eyebrow">Every player, every tee</div>
+  <h2 class="sect">Handicaps</h2>
+  <input id="search" type="search" placeholder="Search a name…" autocomplete="off">
+  <div id="tables"></div>
+ </div>
+</section>
+
+<!-- ============ HOTEL ============ -->
+<section class="page" id="pg-hotel">
+ <div class="wrap" style="padding-top:calc(env(safe-area-inset-top,0px) + 20px)">
+  <div class="eyebrow">Home base</div>
+  <h2 class="sect">Treetops Resort</h2>
+  <div class="card">
+   <div class="cmeta">3962 Wilkinson Rd, Gaylord, MI 49735</div>
+   <div class="btnrow">
+    <a class="btn" href="tel:+18663485249">Call front desk</a>
+   </div>
+   <div class="btnrow">
+    <a class="btn" href="https://maps.apple.com/?q=Treetops%20Resort&amp;address=3962%20Wilkinson%20Rd,%20Gaylord,%20MI%2049735">Open in Apple Maps <span>↗</span></a>
+   </div>
+   <div class="note">Check-in is at the Lodge — front desk and lobby. Five separate lodging clusters on
+    the property, so ask there which building you're in.</div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:26px">Property map</div>
+  <h2 class="sect" style="font-size:1.5rem">Getting around</h2>
+  <div class="card" id="mapcard">
+   <div id="mapslot"></div>
+   <div class="btnrow">
+    <a class="btn" href="https://www.treetops.com/interactive-map/">Open live property map <span>↗</span></a>
+   </div>
+   <div class="note" id="mapnote">Saved image — pinch to zoom, works with no signal. The live map needs a connection.</div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:26px">Where you might be</div>
+  <h2 class="sect" style="font-size:1.5rem">Lodging</h2>
+  <div id="lodging"></div>
+
+  <footer>
+   <p><strong>Fri 8/7 — not playing.</strong></p>
+   <p>Sunday's Threetops pairings and Tuesday afternoon's tee time were blank in the pairings sheet.</p>
+   <p>Thursday afternoon course is assumed to be Tribute; the schedule column said Classic. Both scorecards are loaded.</p>
+   <p>Tap any player on a round card to switch the handicap bar to their numbers.</p>
+  </footer>
+ </div>
+</section>
+
+<!-- ============ SCORECARD SHEET ============ -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Scorecard">
+ <div class="sheetbox" id="sheetbox"></div>
+</div>
+
+<nav id="nav"></nav>
+
+<script>
+const DATA = {"hcp":{"courses":[{"name":"MASTERPIECE","tees":[{"tee":"BLACK","col":2,"slope":150,"rating":75,"par":71},{"tee":"BLUE","col":3,"slope":144,"rating":72.6,"par":71},{"tee":"WHITE","col":4,"slope":137,"rating":70.5,"par":71},{"tee":"GOLD (M)","col":5,"slope":130,"rating":67.7,"par":71},{"tee":"RED (M)","col":6,"slope":123,"rating":64.4,"par":71},{"tee":"GOLD (L)","col":7,"slope":136,"rating":73.6,"par":71},{"tee":"RED (L)","col":8,"slope":130,"rating":69.8,"par":71}]},{"name":"SIGNATURE","tees":[{"tee":"BLACK","col":9,"slope":140,"rating":72.9,"par":70},{"tee":"BLUE","col":10,"slope":139,"rating":71,"par":70},{"tee":"WHITE","col":11,"slope":135,"rating":69.2,"par":70},{"tee":"GOLD (M)","col":12,"slope":131,"rating":66.8,"par":70},{"tee":"GOLD (L)","col":13,"slope":140,"rating":72.8,"par":70},{"tee":"RED (L)","col":14,"slope":131,"rating":67.9,"par":70}]},{"name":"PREMIER","tees":[{"tee":"BLACK","col":15,"slope":142,"rating":73.3,"par":72},{"tee":"BLUE","col":16,"slope":132,"rating":71,"par":72},{"tee":"WHITE","col":17,"slope":126,"rating":68.8,"par":72},{"tee":"GOLD (M)","col":18,"slope":121,"rating":66.6,"par":72},{"tee":"RED (M)","col":19,"slope":113,"rating":64.5,"par":72},{"tee":"GOLD (L)","col":20,"slope":130,"rating":71.6,"par":72},{"tee":"RED (L)","col":21,"slope":121,"rating":69.4,"par":72}]},{"name":"TRADITION","tees":[{"tee":"BLACK","col":22,"slope":130,"rating":70,"par":70},{"tee":"BLUE","col":23,"slope":118,"rating":67.8,"par":70},{"tee":"WHITE (M)","col":24,"slope":115,"rating":66.4,"par":70},{"tee":"RED (M)","col":25,"slope":111,"rating":63.1,"par":70},{"tee":"WHITE (L)","col":26,"slope":131,"rating":71.5,"par":70},{"tee":"RED (L)","col":27,"slope":116,"rating":67.4,"par":70}]},{"name":"BLACK LAKE","tees":[{"tee":"GOLD","col":28,"slope":143,"rating":74.8,"par":72},{"tee":"BLUE","col":29,"slope":140,"rating":73.4,"par":72},{"tee":"WHITE","col":30,"slope":137,"rating":71.9,"par":72},{"tee":"SILVER (M)","col":31,"slope":127,"rating":69,"par":72},{"tee":"GREEN (M)","col":32,"slope":121,"rating":64.9,"par":72},{"tee":"SILVER (L)","col":33,"slope":142,"rating":74.2,"par":72},{"tee":"GREEN (L)","col":34,"slope":131,"rating":70.2,"par":72}]},{"name":"TRIBUTE","tees":[{"tee":"BLACK","col":35,"slope":140,"rating":74.7,"par":72},{"tee":"BLUE","col":36,"slope":136,"rating":72.9,"par":72},{"tee":"WHITE (M)","col":37,"slope":128,"rating":69.5,"par":72},{"tee":"GREEN (M)","col":38,"slope":116,"rating":65.2,"par":72},{"tee":"WHITE (L)","col":39,"slope":136,"rating":75.7,"par":72},{"tee":"GREEN (L)","col":40,"slope":124,"rating":69.9,"par":72}]},{"name":"CLASSIC","tees":[{"tee":"BLACK","col":41,"slope":129,"rating":70.9,"par":72},{"tee":"WHITE","col":42,"slope":128,"rating":69.5,"par":72},{"tee":"GREEN (M)","col":43,"slope":121,"rating":67.4,"par":72},{"tee":"RED (M)","col":44,"slope":108,"rating":61.9,"par":72},{"tee":"GREEN (L)","col":45,"slope":129,"rating":72.8,"par":72},{"tee":"RED (L)","col":46,"slope":113,"rating":64.9,"par":72}]}],"players":[{"name":"NICK ALBERS","index":10.4,"h":{"MASTERPIECE":[18,15,12,9,5,15,11],"SIGNATURE":[16,14,12,9,16,10],"PREMIER":[14,11,8,6,3,12,9],"TRADITION":[12,9,7,3,14,8],"BLACK LAKE":[16,14,13,9,4,15,10],"TRIBUTE":[16,13,9,4,16,9],"CLASSIC":[11,9,7,0,13,3]}},{"name":"JOE ASSISE","index":10.3,"h":{"MASTERPIECE":[18,15,12,9,5,15,11],"SIGNATURE":[16,14,12,9,16,10],"PREMIER":[14,11,8,6,3,11,8],"TRADITION":[12,9,7,3,13,8],"BLACK LAKE":[16,14,12,9,4,15,10],"TRIBUTE":[15,13,9,4,16,9],"CLASSIC":[11,9,6,0,13,3]}},{"name":"RON COCKRUM","index":19.1,"h":{"MASTERPIECE":[29,26,23,19,14,26,21],"SIGNATURE":[27,24,22,19,26,20],"PREMIER":[25,21,18,15,12,22,18],"TRADITION":[22,18,16,12,24,17],"BLACK LAKE":[27,25,23,18,13,26,20],"TRIBUTE":[26,24,19,13,27,19],"CLASSIC":[21,19,16,8,23,12]}},{"name":"JOE DENTZER","index":11.7,"h":{"MASTERPIECE":[20,17,14,10,6,17,12],"SIGNATURE":[17,15,13,10,17,11],"PREMIER":[16,13,10,7,4,13,10],"TRADITION":[13,10,8,5,15,9],"BLACK LAKE":[18,16,14,10,5,17,12],"TRIBUTE":[17,15,11,5,18,11],"CLASSIC":[12,11,8,1,14,5]}},{"name":"JOHN ELLIS","index":18.2,"h":{"MASTERPIECE":[28,25,22,18,13,25,20],"SIGNATURE":[25,23,21,18,25,19],"PREMIER":[24,20,17,14,11,21,17],"TRADITION":[21,17,15,11,23,16],"BLACK LAKE":[26,24,22,17,12,25,19],"TRIBUTE":[25,23,18,12,26,18],"CLASSIC":[20,18,15,7,22,11]}},{"name":"JIM HIRSCH","index":12.2,"h":{"MASTERPIECE":[20,17,14,11,7,17,13],"SIGNATURE":[18,16,14,11,18,12],"PREMIER":[17,13,10,8,5,14,10],"TRADITION":[14,11,9,5,16,10],"BLACK LAKE":[18,17,15,11,6,18,12],"TRIBUTE":[18,16,11,6,18,11],"CLASSIC":[13,11,8,2,15,5]}},{"name":"RODNEY HUNT","index":19.5,"h":{"MASTERPIECE":[30,26,23,19,15,26,21],"SIGNATURE":[27,25,22,19,27,21],"PREMIER":[26,22,19,15,12,22,18],"TRADITION":[22,18,16,12,24,17],"BLACK LAKE":[27,26,24,19,14,27,21],"TRIBUTE":[27,24,20,13,27,19],"CLASSIC":[21,20,16,9,23,12]}},{"name":"RICH JUNG","index":25.5,"h":{"MASTERPIECE":[38,34,30,26,21,33,28],"SIGNATURE":[34,32,30,26,34,27],"PREMIER":[33,29,25,22,18,29,25],"TRADITION":[29,24,22,18,31,24],"BLACK LAKE":[35,33,31,26,20,34,28],"TRIBUTE":[34,32,26,19,34,26],"CLASSIC":[28,26,23,14,30,18]}},{"name":"STEVE KAJITA","index":20.4,"h":{"MASTERPIECE":[31,28,24,20,16,27,22],"SIGNATURE":[28,26,24,20,28,22],"PREMIER":[27,23,20,16,13,23,19],"TRADITION":[23,19,17,13,25,18],"BLACK LAKE":[29,27,25,20,15,28,22],"TRIBUTE":[28,25,21,14,28,20],"CLASSIC":[22,21,17,9,24,13]}},{"name":"RANDY KRAUS","index":9.1,"h":{"MASTERPIECE":[16,13,11,7,3,14,9],"SIGNATURE":[14,12,10,7,14,8],"PREMIER":[13,10,7,4,2,10,7],"TRADITION":[10,7,6,2,12,7],"BLACK LAKE":[14,13,11,7,3,14,9],"TRIBUTE":[14,12,8,3,15,8],"CLASSIC":[9,8,5,-1,11,2]}},{"name":"EDDIE KUHR","index":23.9,"h":{"MASTERPIECE":[36,32,28,24,19,31,26],"SIGNATURE":[33,30,28,25,32,26],"PREMIER":[31,27,23,20,16,27,23],"TRADITION":[27,23,21,17,29,22],"BLACK LAKE":[33,31,29,24,18,32,26],"TRIBUTE":[32,30,25,18,32,24],"CLASSIC":[26,25,21,13,28,17]}},{"name":"JOE LEONE","index":24.8,"h":{"MASTERPIECE":[37,33,30,25,20,32,27],"SIGNATURE":[34,32,29,26,34,27],"PREMIER":[32,28,24,21,17,28,24],"TRADITION":[29,24,22,17,30,23],"BLACK LAKE":[34,32,30,25,19,33,27],"TRIBUTE":[33,31,26,19,34,25],"CLASSIC":[27,26,22,14,29,18]}},{"name":"JIM LORESCH","index":23.0,"h":{"MASTERPIECE":[35,31,27,23,18,30,25],"SIGNATURE":[31,29,27,23,31,25],"PREMIER":[30,26,22,19,16,26,22],"TRADITION":[26,22,20,16,28,21],"BLACK LAKE":[32,30,28,23,18,31,25],"TRIBUTE":[31,29,24,17,31,23],"CLASSIC":[25,24,20,12,27,16]}},{"name":"DAMI MUI","index":23.6,"h":{"MASTERPIECE":[35,32,28,24,19,31,26],"SIGNATURE":[32,30,27,24,32,25],"PREMIER":[31,27,23,20,16,27,23],"TRADITION":[27,22,20,16,29,22],"BLACK LAKE":[33,31,29,24,18,32,26],"TRIBUTE":[32,29,24,17,32,24],"CLASSIC":[26,24,21,12,28,17]}},{"name":"VINCE MUI","index":12.7,"h":{"MASTERPIECE":[21,18,15,11,7,18,13],"SIGNATURE":[19,17,14,12,19,13],"PREMIER":[17,14,11,8,5,14,11],"TRADITION":[15,11,9,6,16,10],"BLACK LAKE":[19,17,15,11,6,18,13],"TRIBUTE":[18,16,12,6,19,12],"CLASSIC":[13,12,9,2,15,6]}},{"name":"LARRY PRESTA","index":24.9,"h":{"MASTERPIECE":[37,33,30,25,21,33,27],"SIGNATURE":[34,32,29,26,34,27],"PREMIER":[33,28,25,21,17,28,24],"TRADITION":[29,24,22,18,30,23],"BLACK LAKE":[34,32,30,25,20,33,27],"TRIBUTE":[34,31,26,19,34,25],"CLASSIC":[27,26,22,14,29,18]}},{"name":"LOU PRIGNANO","index":9.8,"h":{"MASTERPIECE":[17,14,11,8,4,14,10],"SIGNATURE":[15,13,11,8,15,9],"PREMIER":[14,10,8,5,2,11,8],"TRADITION":[11,8,6,3,13,7],"BLACK LAKE":[15,14,12,8,3,15,10],"TRIBUTE":[15,13,9,3,15,9],"CLASSIC":[10,9,6,-1,12,3]}},{"name":"LARRY PRYSTALSKI","index":13.8,"h":{"MASTERPIECE":[22,19,16,13,8,19,15],"SIGNATURE":[20,18,16,13,20,14],"PREMIER":[19,15,12,9,6,15,12],"TRADITION":[16,12,10,7,17,12],"BLACK LAKE":[20,18,17,13,8,20,14],"TRIBUTE":[20,18,13,7,20,13],"CLASSIC":[15,13,10,3,17,7]}},{"name":"MATT RYAN","index":25.0,"h":{"MASTERPIECE":[37,33,30,25,21,33,28],"SIGNATURE":[34,32,29,26,34,27],"PREMIER":[33,28,25,21,18,28,24],"TRADITION":[29,24,22,18,30,23],"BLACK LAKE":[34,32,30,25,20,34,27],"TRIBUTE":[34,31,26,19,34,25],"CLASSIC":[27,26,22,14,29,18]}},{"name":"CHAD SCHURECHT","index":6.0,"h":{"MASTERPIECE":[12,9,7,4,0,10,6],"SIGNATURE":[10,8,6,4,10,5],"PREMIER":[9,6,3,1,-2,7,4],"TRADITION":[7,4,3,-1,8,4],"BLACK LAKE":[10,9,7,4,-1,10,5],"TRIBUTE":[10,8,4,-1,11,4],"CLASSIC":[6,4,2,-4,8,-1]}},{"name":"RON TANAKA","index":13.4,"h":{"MASTERPIECE":[22,19,16,12,8,19,14],"SIGNATURE":[20,17,15,12,19,13],"PREMIER":[18,15,12,9,6,15,12],"TRADITION":[15,12,10,6,17,11],"BLACK LAKE":[20,18,16,12,7,19,14],"TRIBUTE":[19,17,13,7,20,13],"CLASSIC":[14,13,10,3,16,6]}},{"name":"BRIAN VOSSELLER","index":19.9,"h":{"MASTERPIECE":[30,27,24,20,15,27,22],"SIGNATURE":[28,25,23,20,27,21],"PREMIER":[26,22,19,16,12,22,19],"TRADITION":[23,19,17,13,25,18],"BLACK LAKE":[28,26,24,19,14,27,21],"TRIBUTE":[27,25,20,14,28,20],"CLASSIC":[22,20,17,9,24,13]}},{"name":"JT WOOD","index":23.1,"h":{"MASTERPIECE":[35,31,28,23,19,30,25],"SIGNATURE":[32,29,27,24,31,25],"PREMIER":[30,26,23,19,16,26,22],"TRADITION":[27,22,20,16,28,21],"BLACK LAKE":[32,30,28,23,18,31,25],"TRIBUTE":[31,29,24,17,32,23],"CLASSIC":[25,24,20,12,27,16]}},{"name":"JIM YEE","index":26.7,"h":{"MASTERPIECE":[39,36,32,27,22,35,30],"SIGNATURE":[36,34,31,28,36,29],"PREMIER":[35,30,27,23,19,30,26],"TRADITION":[31,26,24,19,32,25],"BLACK LAKE":[37,34,32,27,21,36,29],"TRIBUTE":[36,33,28,21,36,27],"CLASSIC":[29,28,24,15,31,20]}}]},"sc":{"MASTERPIECE":{"par":[5,3,4,3,5,3,4,4,4,5,4,4,3,4,4,3,4,5],"hcp":[13,17,1,11,3,15,5,7,9,4,6,2,12,14,16,18,8,10],"tees":[{"label":"Black","sheet":"BLACK","y":[524,201,419,201,539,180,406,452,431,605,431,488,208,446,363,152,443,579]},{"label":"Blue","sheet":"BLUE","y":[465,181,376,184,510,162,373,400,389,589,387,453,176,407,343,146,378,516]},{"label":"White","sheet":"WHITE","y":[430,140,343,167,461,150,357,371,377,502,368,419,153,384,323,126,356,494]},{"label":"Gold","sheet":"GOLD (M)","y":[392,125,335,108,431,143,315,353,363,422,356,377,136,358,303,108,340,456]},{"label":"Red","sheet":"RED (M)","y":[351,82,283,103,399,128,303,324,314,408,319,309,104,327,287,76,322,423]}]},"SIGNATURE":{"par":[4,3,4,3,4,5,4,3,4,5,3,4,4,4,5,4,3,4],"hcp":[7,17,3,15,1,5,9,13,11,4,14,10,2,8,6,18,16,12],"tees":[{"label":"Black","sheet":"BLACK","y":[447,176,467,186,421,512,416,190,411,556,175,423,440,418,485,368,199,363]},{"label":"Blue","sheet":"BLUE","y":[422,160,443,167,392,503,378,175,394,523,164,388,420,389,461,361,188,343]},{"label":"White","sheet":"WHITE","y":[402,144,433,149,364,496,354,154,364,492,145,336,392,361,438,347,164,308]},{"label":"Gold","sheet":"GOLD (M)","y":[376,142,411,114,324,481,317,128,344,453,128,305,326,339,414,342,148,295]}]},"PREMIER":{"par":[4,5,4,3,4,5,4,3,4,4,3,5,4,4,4,5,3,4],"hcp":[5,11,1,13,17,15,3,7,9,8,16,10,4,2,18,12,14,6],"tees":[{"label":"Black","sheet":"BLACK","y":[431,517,421,162,313,499,373,183,406,407,195,485,396,451,362,546,214,471]},{"label":"Blue","sheet":"BLUE","y":[399,494,396,143,289,462,333,167,382,362,168,465,380,405,334,494,180,421]},{"label":"White","sheet":"WHITE","y":[377,472,375,127,279,429,307,150,367,349,145,444,360,355,315,459,170,354]},{"label":"Gold","sheet":"GOLD (M)","y":[370,444,325,117,269,423,292,146,327,320,133,339,348,312,307,430,162,315]},{"label":"Red","sheet":"RED (M)","y":[326,439,319,103,219,386,238,123,321,314,120,335,267,306,250,422,147,310]}]},"TRADITION":{"par":[4,4,5,4,4,3,4,4,3,5,4,3,4,4,3,4,3,5],"hcp":[9,3,7,5,1,13,11,17,15,8,2,14,18,6,10,4,16,12],"tees":[{"label":"Black","sheet":"BLACK","y":[372,384,525,402,435,172,369,313,167,537,491,190,319,409,138,427,160,544]},{"label":"Blue","sheet":"BLUE","y":[345,369,461,381,410,161,309,300,152,481,458,160,293,388,123,403,138,504]},{"label":"White","sheet":"WHITE (M)","y":[320,366,454,359,392,150,284,276,133,455,428,141,275,388,119,381,115,472]},{"label":"Red","sheet":"RED (M)","y":[273,347,395,300,341,137,256,236,95,405,403,108,257,256,100,361,91,430]}]},"BLACK LAKE":{"par":[5,4,4,4,3,4,4,3,5,4,4,3,4,3,5,4,4,5],"hcp":[11,5,17,1,15,9,7,13,3,6,16,12,14,18,4,8,2,10],"tees":[{"label":"Gold","sheet":"GOLD","y":[515,427,396,453,236,375,421,179,560,430,351,174,373,206,515,443,391,590]},{"label":"Blue","sheet":"BLUE","y":null},{"label":"White","sheet":"WHITE","y":null},{"label":"Silver","sheet":"SILVER (M)","y":null},{"label":"Green","sheet":"GREEN (M)","y":null}]},"TRIBUTE":{"par":[4,4,4,5,4,3,5,4,3,4,5,4,3,4,4,5,3,4],"hcp":[13,9,17,7,5,11,3,1,15,12,8,6,14,4,16,2,18,10],"tees":[{"label":"Black / Back","sheet":"BLACK","y":[404,450,430,556,478,216,607,435,240,394,551,420,205,407,452,542,158,399]},{"label":"Blue / Middle","sheet":"BLUE","y":null},{"label":"White / Forward","sheet":"WHITE (M)","y":null},{"label":"Green / Front","sheet":"GREEN (M)","y":null}]},"CLASSIC":{"par":[5,4,4,4,5,3,4,3,4,5,4,5,3,4,3,4,4,4],"hcp":[1,11,9,3,5,13,7,17,15,4,18,8,10,6,14,2,12,16],"tees":[{"label":"Black / Back","sheet":"BLACK","y":[373,361,400,484,186,396,118,285,452,479,337,519,184,427,175,362,354,375]},{"label":"White / Middle","sheet":"WHITE","y":null},{"label":"Green / Forward","sheet":"GREEN (M)","y":null},{"label":"Red / Front","sheet":"RED (M)","y":null}]},"THREETOPS":{"par":[3,3,3,3,3,3,3,3,3],"hcp":[7,4,1,9,3,5,6,8,2],"tees":[{"label":"Back","sheet":null,"y":[143,156,219,168,150,169,150,140,140]},{"label":"Middle","sheet":null,"y":[125,139,207,140,135,147,135,124,135]},{"label":"Front","sheet":null,"y":[100,114,137,86,105,78,130,103,125]}]}},"names":{"NICK":"Nick Albers","JOE A":"Joe Assise","COCK":"Ron Cockrum","JOE D":"Joe Dentzer","JOHN E":"John Ellis","JIM H":"Jim Hirsch","RODNEY":"Rodney Hunt","RICH":"Rich Jung","STEVE":"Steve Kajita","RANDY":"Randy Kraus","EDDIE":"Eddie Kuhr","JOE L":"Joe Leone","JIM L":"Jim Loresch","DAMI":"Dami Mui","VINCE":"Vince Mui","CAPTAIN":"Larry Presta","LOU":"Lou Prignano","LOU P":"Lou Prignano","LEFTY":"Larry Prystalski","MATT R":"Matt Ryan","CHAD":"Chad Schurecht","RON T":"Ron Tanaka","BRIAN":"Brian Vosseller","JT":"JT Wood","YEE":"Jim Yee"},"rounds":[{"id":"sun-pm","day":"SUN","dayLabel":"Sunday, August 2","title":"Threetops","venue":"Treetops","fmt":"Par 3's only","time":"2:00 PM","iso":"2026-08-02T14:00:00-04:00","maps":"https://maps.apple.com/?q=Treetops%20Golf&address=4282%20Fazio%20Dr,%20Gaylord,%20MI%2049735","addr":"4282 Fazio Dr, Gaylord MI","course":"THREETOPS","nohcp":true,"note":"Par-3 course \u2014 not in the pairings sheet, so no course handicap. Scorecard is here.","tbd":"Pairings TBD","groups":[]},{"id":"mon-am","day":"MON","dayLabel":"Monday, August 3","title":"Masterpiece","venue":"Treetops","fmt":"4-Man Best Ball","time":"9:40 AM","iso":"2026-08-03T09:40:00-04:00","maps":"https://maps.apple.com/?q=Treetops%20Resort&address=3962%20Wilkinson%20Rd,%20Gaylord,%20MI%2049735","addr":"3962 Wilkinson Rd, Gaylord MI","course":"MASTERPIECE","groups":[["RICH","COCK","JOE L"],["LOU P","JT","NICK","RODNEY"],["RON T","CHAD","YEE","RANDY"],["JOHN E","EDDIE","STEVE","CAPTAIN"],["JOE A","VINCE","LEFTY","BRIAN"],["MATT R","JOE D","JIM H","JIM L"]]},{"id":"mon-pm","day":"MON","dayLabel":"Monday, August 3","title":"Tradition","venue":"Treetops","fmt":"Scramble","time":"3:30 PM","iso":"2026-08-03T15:30:00-04:00","maps":"https://maps.apple.com/?q=Treetops%20Golf&address=4282%20Fazio%20Dr,%20Gaylord,%20MI%2049735","addr":"4282 Fazio Dr, Gaylord MI","course":"TRADITION","groups":[["CHAD","RODNEY","CAPTAIN"],["RANDY","JIM H","RON T","JT"],["LOU P","JOHN E","COCK","EDDIE"],["NICK","BRIAN","LEFTY","MATT R"],["JOE A","JIM L","JOE D","JOE L"]]},{"id":"tue-am","day":"TUE","dayLabel":"Tuesday, August 4","title":"Black Lake","venue":"Onaway","fmt":"Roommates (2-Man BB)","time":"10:30 AM","iso":"2026-08-04T10:30:00-04:00","maps":"https://maps.apple.com/?q=Black%20Lake%20Golf%20Club&address=2800%20Maxon%20Rd,%20Onaway,%20MI%2049765","addr":"2800 Maxon Rd, Onaway MI","course":"BLACK LAKE","note":"About 50 minutes from Treetops.","groups":[["JIM H","COCK","JIM L","RON T"],["JOE D","NICK","VINCE","DAMI"],["MATT R","JT","EDDIE","YEE"],["JOHN E","LOU","CHAD","RANDY"],["RICH","STEVE","LEFTY","RODNEY"],["JOE A","BRIAN","JOE L","CAPTAIN"]]},{"id":"tue-pm","day":"TUE","dayLabel":"Tuesday, August 4","title":"Black Lake","venue":"Onaway","fmt":"3-Man Best Ball","time":null,"iso":null,"maps":"https://maps.apple.com/?q=Black%20Lake%20Golf%20Club&address=2800%20Maxon%20Rd,%20Onaway,%20MI%2049765","optional":true,"addr":"2800 Maxon Rd, Onaway MI","course":"BLACK LAKE","groups":[["JOE D","RON T","JIM H"],["JOHN E","DAMI","MATT R","EDDIE"],["VINCE","LOU P","CHAD","NICK"]]},{"id":"wed-am","day":"WED","dayLabel":"Wednesday, August 5","title":"Signature","venue":"Treetops","fmt":"Crystal Ball","time":"9:20 AM","iso":"2026-08-05T09:20:00-04:00","maps":"https://maps.apple.com/?q=Treetops%20Golf&address=4282%20Fazio%20Dr,%20Gaylord,%20MI%2049735","addr":"4282 Fazio Dr, Gaylord MI","course":"SIGNATURE","groups":[["DAMI","NICK","LEFTY","EDDIE"],["JOE D","CHAD","VINCE","MATT R"],["RANDY","JIM L","CAPTAIN","BRIAN"],["JIM H","LOU P","JOE L","YEE"],["RON T","RICH","RODNEY","JT"],["COCK","STEVE","JOE A","JOHN E"]]},{"id":"wed-pm","day":"WED","dayLabel":"Wednesday, August 5","title":"Premier","venue":"Treetops","fmt":"Alternate Shot","time":"3:30 PM","iso":"2026-08-05T15:30:00-04:00","maps":"https://maps.apple.com/?q=Treetops%20Golf&address=4282%20Fazio%20Dr,%20Gaylord,%20MI%2049735","addr":"4282 Fazio Dr, Gaylord MI","course":"PREMIER","groups":[["LEFTY","EDDIE","CHAD","VINCE"],["RANDY","JIM L","DAMI","JOE L"],["LOU P","CAPTAIN","NICK","JIM H"],["RODNEY","JT","JOE A","JOE D"],["MATT R","COCK","JOHN E","RON T"]]},{"id":"thu-am","day":"THU","dayLabel":"Thursday, August 6","title":"Tribute","venue":"Otsego Club","fmt":"2-Man Best Ball","time":"9:40 AM","iso":"2026-08-06T09:40:00-04:00","maps":"https://maps.apple.com/?q=Otsego%20Club&address=696%20M-32,%20Gaylord,%20MI%2049735","addr":"696 M-32, Gaylord MI","course":"TRIBUTE","groups":[["JOHN E","RON T","LOU","CAPTAIN"],["EDDIE","VINCE","NICK","JIM H"],["YEE","DAMI","JIM L","JT"],["CHAD","JOE A","MATT R","RICH"],["RODNEY","LEFTY","BRIAN","STEVE"],["JOE L","JOE D","RANDY","COCK"]]},{"id":"thu-pm","day":"THU","dayLabel":"Thursday, August 6","title":"Tribute","venue":"Otsego Club","fmt":"3-Man Best Ball","time":"3:30 PM","iso":"2026-08-06T15:30:00-04:00","maps":"https://maps.apple.com/?q=Otsego%20Club&address=696%20M-32,%20Gaylord,%20MI%2049735","optional":true,"assumed":true,"addr":"696 M-32, Gaylord MI","course":"TRIBUTE","alt":"CLASSIC","note":"Schedule column said Classic, game grid said Tribute. Both scorecards are loaded.","groups":[["LOU","NICK","EDDIE"],["VINCE","MATT R","CHAD"],["DAMI","JIM H","JT"]]}],"venues":[{"k":"Home base","n":"Treetops Resort","a":"3962 Wilkinson Rd, Gaylord, MI 49735","m":"https://maps.apple.com/?q=Treetops%20Resort&address=3962%20Wilkinson%20Rd,%20Gaylord,%20MI%2049735"},{"k":"Par-3 course","n":"Threetops","a":"4282 Fazio Dr, Gaylord, MI 49735","m":"https://maps.apple.com/?q=Treetops%20Golf&address=4282%20Fazio%20Dr,%20Gaylord,%20MI%2049735"},{"k":"Monday AM","n":"Masterpiece","a":"3962 Wilkinson Rd, Gaylord, MI 49735","m":"https://maps.apple.com/?q=Treetops%20Resort&address=3962%20Wilkinson%20Rd,%20Gaylord,%20MI%2049735"},{"k":"Monday PM","n":"Tradition","a":"4282 Fazio Dr, Gaylord, MI 49735","m":"https://maps.apple.com/?q=Treetops%20Golf&address=4282%20Fazio%20Dr,%20Gaylord,%20MI%2049735"},{"k":"Tuesday","n":"Black Lake","a":"2800 Maxon Rd, Onaway, MI 49765","m":"https://maps.apple.com/?q=Black%20Lake%20Golf%20Club&address=2800%20Maxon%20Rd,%20Onaway,%20MI%2049765"},{"k":"Wednesday AM","n":"Signature","a":"4282 Fazio Dr, Gaylord, MI 49735","m":"https://maps.apple.com/?q=Treetops%20Golf&address=4282%20Fazio%20Dr,%20Gaylord,%20MI%2049735"},{"k":"Wednesday PM","n":"Premier","a":"4282 Fazio Dr, Gaylord, MI 49735","m":"https://maps.apple.com/?q=Treetops%20Golf&address=4282%20Fazio%20Dr,%20Gaylord,%20MI%2049735"},{"k":"Thursday","n":"Tribute / Classic","a":"696 M-32, Gaylord, MI 49735","m":"https://maps.apple.com/?q=Otsego%20Club&address=696%20M-32,%20Gaylord,%20MI%2049735"}],"lodging":[["The Lodge","Check-in and front desk. Rooms in the centre of the resort, lobby fireplace, Bar 81."],["The Inn","Overlooks the Jones driving range and ski hill. Indoor pool and arcade."],["North Condominiums","Near the north golf courses. Sleeps up to 12."],["The Chalets","Base of the ski slopes, putting-green access."],["Jones Cottages","Private cottages built for groups."]],"buyin":20};
+const ME="CHAD", ME_FULL="CHAD SCHURECHT", BUYIN=DATA.buyin;
+
+const byFull={}; DATA.hcp.players.forEach(p=>byFull[p.name]=p);
+const cx={}; DATA.hcp.courses.forEach(c=>cx[c.name]=c);
+const rounds=DATA.rounds;
+const golfRounds=rounds.length;
+
+function fullName(n){return DATA.names[n]||n}
+function playerOf(n){const f=DATA.names[n];return f?(byFull[f.toUpperCase()]||null):null}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function isL(t){return t.indexOf('(L)')>-1}
+function shortTee(t){const s=t.replace(' (M)','').replace(' (L)','');
+ return ({BLACK:'Blk',BLUE:'Blu',WHITE:'Wht',GOLD:'Gld',RED:'Red',SILVER:'Slv',GREEN:'Grn'})[s]||s}
+
+/* course handicap for nick on course, by sheet tee name */
+function chFor(nick,course,sheetTee){
+ const c=cx[course],p=playerOf(nick); if(!c||!p) return null;
+ const i=c.tees.findIndex(t=>t.tee===sheetTee); if(i<0) return null;
+ return p.h[course][i];
+}
+function strokesFor(nick,course){
+ const c=cx[course],p=playerOf(nick); if(!c||!p) return [];
+ return c.tees.map((t,i)=>({tee:t.tee,v:p.h[course][i]})).filter(x=>!isL(x.tee));
+}
+
+/* ---------- state ---------- */
+let mineOnly=(localStorage.getItem('msmi-group')||'mine')==='mine';
+const sel={};
+let bets={}; try{bets=JSON.parse(localStorage.getItem('msmi-bets')||'{}')}catch(e){bets={}}
+function selFor(r){return sel[r.id]||ME}
+function myGroup(r){for(let i=0;i<r.groups.length;i++) if(r.groups[i].indexOf(ME)>-1) return i; return -1}
+function startOf(r){return r.iso?new Date(r.iso):null}
+function nextRound(){const t=rounds.filter(r=>r.iso);
+ for(const r of t) if(startOf(r).getTime()+4.5*36e5>Date.now()) return r; return t[t.length-1]}
+function cd(r){
+ if(!r.iso) return '';
+ const d=startOf(r).getTime()-Date.now(),a=Math.abs(d);
+ const m=Math.floor(a/6e4),h=Math.floor(m/60),dy=Math.floor(h/24);
+ const s=dy>=1?dy+' day'+(dy>1?'s':'')+' '+(h%24)+' hr':h>=1?h+' hr '+(m%60)+' min':m+' min';
+ return d>0?'Tee off in '+s:'Teed off '+s+' ago';
+}
+
+/* ---------- handicap bar ---------- */
+function hbar(r){
+ if(r.nohcp) return '<div class="hbar"><div class="hrow"><span class="hlabel">Course handicap</span>'
+  +'<span class="hwho">Par-3 event</span></div><div class="hnote">Not in the pairings sheet — scorecard only.</div></div>';
+ const nick=selFor(r),p=playerOf(nick),me=nick===ME;
+ let h='<div class="hbar"><div class="hrow"><span class="hlabel">'+(me?'Your course handicap':'Course handicap')
+  +'</span><span class="hwho">'+esc(fullName(nick))+' <i>'+(p?p.index.toFixed(1):'')+'</i></span></div>';
+ [r.course,r.alt].filter(Boolean).forEach(cn=>{
+  const rows=strokesFor(nick,cn); if(!rows.length) return;
+  h+='<div class="hnote" style="margin-top:10px">'+cn+'</div><div class="tees">'
+   +rows.map(x=>'<span class="tee">'+shortTee(x.tee)+'<b>'+x.v+'</b></span>').join('')+'</div>';
+ });
+ if(!me) h+='<div class="hnote">Tap your own name to switch back.</div>';
+ return h+'</div>';
+}
+function chip(r,n){
+ const p=playerOf(n),on=selFor(r)===n;
+ return '<button class="p'+(n===ME?' me':'')+(on?' on':'')+'" data-r="'+r.id+'" data-n="'+esc(n)+'" '
+  +'aria-pressed="'+on+'">'+esc(fullName(n))+'<i>'+(p?p.index.toFixed(1):'?')+'</i></button>';
+}
+function players(r){
+ if(!r.groups.length) return r.tbd?'<div class="tbd">'+r.tbd+'</div>':'';
+ const mine=myGroup(r); let list=r.groups.map((g,i)=>({g,i}));
+ if(mineOnly&&mine>-1) list=[list[mine]];
+ if(list.length===1) return '<div class="pwrap"><div class="lab">Playing with</div><div class="plist">'
+  +list[0].g.map(n=>chip(r,n)).join('')+'</div></div>';
+ return '<div class="pwrap">'+list.map(it=>'<div class="gsep'+(it.i===mine?' mine':'')+'">Group '+(it.i+1)
+  +(it.i===mine?' · yours':'')+'</div><div class="plist">'+it.g.map(n=>chip(r,n)).join('')+'</div>').join('')+'</div>';
+}
+function cardHTML(r,isNext){
+ const c=cd(r);
+ let h='<article class="card'+(isNext?' next':'')+'" data-card="'+r.id+'">';
+ if(isNext) h+='<div class="flag">Next round</div>';
+ h+='<div class="chead"><div><div class="eyebrow">'+r.dayLabel+'</div><h3>'+r.title
+  +(r.assumed?'<span class="tag">assumed</span>':'')+'</h3><div class="cmeta">'
+  +[r.venue,r.fmt].filter(Boolean).join(' · ')+'</div>'
+  +(c?'<div class="count" data-count="'+r.id+'">'+c+'</div>':'')
+  +'</div><div class="timepill">'+(r.time||'TBD')+(r.optional?'<small>optional</small>':'')+'</div></div>';
+ h+=hbar(r);
+ h+=players(r);
+ h+='<div class="btnrow"><button class="btn" data-sc="'+r.course+'" data-alt="'+(r.alt||'')+'" data-rid="'+r.id+'">Scorecard</button></div>';
+ h+='<div class="btnrow"><a class="btn" href="'+r.maps+'">Open in Apple Maps <span>↗</span></a></div>';
+ h+='<div class="addr">'+r.addr+'</div>';
+ if(r.note) h+='<div class="note">'+r.note+'</div>';
+ return h+'</article>';
+}
+
+/* ---------- betting ---------- */
+function renderMoney(){
+ const owed=golfRounds*BUYIN;
+ let won=0; rounds.forEach(r=>{won+=Number(bets[r.id]||0)});
+ const net=won-owed, up=net>=0;
+ let h='<div class="card money">';
+ h+='<div class="net'+(up?' up':'')+'">'+(net>=0?'+':'−')+'$'+Math.abs(net).toFixed(0)+'</div>';
+ h+='<div class="lbl">'+(net===0?'Dead even.':up?'Up on the trip.':'$'+Math.abs(net).toFixed(0)+' to break even.')+'</div>';
+ h+='<div class="row" style="margin-top:12px"><span>Buy-in · '+golfRounds+' rounds × $'+BUYIN+'</span><b>−$'+owed+'</b></div>';
+ h+='<div class="row"><span>Winnings entered</span><b>+$'+won.toFixed(0)+'</b></div>';
+ h+='<div class="lbl" style="margin-top:14px">Winnings by round</div>';
+ rounds.forEach(r=>{
+  h+='<div class="row"><span>'+r.day+' · '+r.title+'</span>'
+   +'<input type="number" inputmode="numeric" step="1" placeholder="0" data-bet="'+r.id+'" '
+   +'value="'+(bets[r.id]!==undefined?bets[r.id]:'')+'" aria-label="Winnings '+r.day+' '+r.title+'"></div>';
+ });
+ h+='<div class="btnrow"><button class="btn" id="clearBets">Clear all</button></div></div>';
+ document.getElementById('money').innerHTML=h;
+}
+
+/* ---------- scorecard sheet ---------- */
+let scState={course:null,alt:null,tee:0,rid:null,which:0};
+function openSheet(course,alt,rid){
+ scState={course,alt:alt||null,tee:0,rid,which:0};
+ const c=DATA.sc[course];
+ const idx=c.tees.findIndex(t=>t.y); scState.tee=idx<0?0:idx;
+ document.getElementById('sheet').classList.add('on');
+ drawSheet();
+}
+function closeSheet(){document.getElementById('sheet').classList.remove('on')}
+function drawSheet(){
+ const name=scState.which===1?scState.alt:scState.course;
+ const c=DATA.sc[name], n=c.par.length;
+ const r=rounds.find(x=>x.id===scState.rid);
+ const nick=r?selFor(r):ME;
+ const tee=c.tees[scState.tee];
+ const ch=tee.sheet?chFor(nick,name,tee.sheet):null;
+ let h='<div class="sheethead"><div><div class="eyebrow">Scorecard</div><h3>'+name.charAt(0)+name.slice(1).toLowerCase()+'</h3></div>'
+  +'<button class="xbtn" id="closeSheet" aria-label="Close">×</button></div>';
+ if(scState.alt) h+='<div class="teesel">'
+   +'<button class="'+(scState.which===0?'on':'')+'" data-which="0">'+scState.course.toLowerCase()+'</button>'
+   +'<button class="'+(scState.which===1?'on':'')+'" data-which="1">'+scState.alt.toLowerCase()+'</button></div>';
+ h+='<div class="teesel">'+c.tees.map((t,i)=>'<button class="'+(i===scState.tee?'on':'')
+  +'" data-tee="'+i+'">'+t.label+(t.y?'':' ·')+'</button>').join('')+'</div>';
+ if(ch!==null&&ch!==undefined){
+  h+='<div class="strokebox"><div class="hlabel" style="font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist)">'
+   +esc(fullName(nick))+' · '+tee.label+' tees</div><div class="big">'+ch+' strokes</div>'
+   +'<div class="hnote">Marked holes below are where they fall.</div></div>';
+ } else {
+  h+='<div class="strokebox"><div class="hnote" style="margin-top:0">No course handicap for this tee in the pairings sheet.</div></div>';
+ }
+ const halves = n===18?[[0,9,'Out'],[9,18,'In']]:[[0,9,'Out']];
+ halves.forEach(([a,b,lab])=>{
+  const holes=[];for(let i=a;i<b;i++)holes.push(i);
+  h+='<div style="overflow-x:auto;margin-top:12px"><table class="sctable"><thead><tr><th class="rh">Hole</th>'
+   +holes.map(i=>'<th>'+(i+1)+'</th>').join('')+'<th>'+lab+'</th></tr></thead><tbody>';
+  h+='<tr><td class="rh">Par</td>'+holes.map(i=>'<td>'+c.par[i]+'</td>').join('')
+   +'<td class="tot">'+holes.reduce((s,i)=>s+c.par[i],0)+'</td></tr>';
+  h+='<tr><td class="rh">Hcp</td>'+holes.map(i=>'<td>'+c.hcp[i]+'</td>').join('')+'<td class="tot">—</td></tr>';
+  if(tee.y){
+   h+='<tr><td class="rh">Yds</td>'+holes.map(i=>{
+    let cls='';
+    if(ch!==null&&ch!==undefined){
+     if(c.hcp[i]<=ch) cls='stroke';
+     if(ch>n&&c.hcp[i]<=ch-n) cls='stroke stroke2';
+    }
+    return '<td class="'+cls+'">'+tee.y[i]+'</td>';
+   }).join('')+'<td class="tot">'+holes.reduce((s,i)=>s+tee.y[i],0)+'</td></tr>';
+  }
+  h+='</tbody></table></div>';
+ });
+ if(!tee.y) h+='<div class="legend">Yardages for this tee weren\'t on the published card — par, hole handicap and your strokes still apply.</div>';
+ else if(ch!==null&&ch!==undefined) h+='<div class="legend">A dot marks a hole where '+(nick===ME?'you get':'they get')+' a stroke.</div>';
+ h+='<div class="legend">Tees marked · have no published yardages.</div>';
+ document.getElementById('sheetbox').innerHTML=h;
+}
+
+/* ---------- renders ---------- */
+function renderTrip(){
+ const nx=nextRound();
+ document.getElementById('next').innerHTML=cardHTML(nx,true);
+ document.getElementById('rounds').innerHTML=rounds.filter(r=>r.id!==nx.id).map(r=>cardHTML(r,false)).join('');
+}
+function renderSched(){
+ const days=[];
+ rounds.forEach(r=>{let d=days.find(x=>x.day===r.day);if(!d){d={day:r.day,label:r.dayLabel,rows:[]};days.push(d)}d.rows.push(r)});
+ document.getElementById('sched').innerHTML=days.map(d=>'<div class="daycard"><h3>'+d.label+'</h3>'
+  +d.rows.map(r=>'<a class="srow" href="'+r.maps+'"><div class="t">'+(r.time||'TBD')+'</div><div class="b">'
+  +'<div class="n">'+r.title+'</div><div class="a">'+r.addr+'</div></div><div class="arw">↗</div></a>').join('')
+  +'</div>').join('')
+  +'<div class="daycard"><h3>Friday · Aug 7</h3><div class="srow" style="color:var(--muted)">Not playing.</div></div>';
+ document.getElementById('venues').innerHTML=DATA.venues.map(v=>'<a class="venue" href="'+v.m+'">'
+  +'<div class="b"><div class="eyebrow">'+v.k+'</div><div class="n">'+v.n+'</div><div class="a">'+v.a+'</div></div>'
+  +'<div class="arw">↗</div></a>').join('');
+}
+function tc(s){return s.toLowerCase().split(' ').map(w=>w==='jt'?'JT':w.charAt(0).toUpperCase()+w.slice(1)).join(' ')}
+function renderTables(){
+ const ps=DATA.hcp.players.slice().sort((a,b)=>a.index-b.index);
+ document.getElementById('tables').innerHTML=DATA.hcp.courses.map(c=>{
+  let t='<div class="tblock"><h3>'+tc(c.name)+'</h3><div class="scroll"><table><thead><tr><th class="nm">Player</th>'
+   +c.tees.map(x=>'<th>'+x.tee+'</th>').join('')+'</tr></thead><tbody>';
+  t+='<tr class="meta"><th class="nm">Slope / Rating</th>'+c.tees.map(x=>'<td>'+x.slope+'<br>'+Number(x.rating).toFixed(1)+'</td>').join('')+'</tr>';
+  t+='<tr class="meta"><th class="nm">Par</th>'+c.tees.map(x=>'<td>'+x.par+'</td>').join('')+'</tr>';
+  t+=ps.map(p=>'<tr data-name="'+p.name.toLowerCase()+'"'+(p.name===ME_FULL?' class="chad"':'')+'>'
+   +'<th class="nm">'+tc(p.name)+'<span class="idx">'+p.index.toFixed(1)+'</span></th>'
+   +p.h[c.name].map(v=>'<td>'+(v===null?'—':v)+'</td>').join('')+'</tr>').join('');
+  return t+'</tbody></table></div></div>';
+ }).join('');
+}
+function renderHotel(){
+ document.getElementById('lodging').innerHTML=DATA.lodging.map(l=>'<div class="lodge"><b>'+l[0]+'</b><span>'+l[1]+'</span></div>').join('');
+ var img=new Image();
+ img.className='mapimg'; img.alt='Treetops Resort property map'; img.src='treetops-map.webp';
+ img.onerror=function(){
+  document.getElementById('mapslot').innerHTML='';
+  document.getElementById('mapnote').textContent =
+   'Map image not found next to this file. The button below always works.';
+ };
+ document.getElementById('mapslot').appendChild(img);
+}
+
+/* ---------- nav ---------- */
+const TABS=[
+ ['trip','Trip','<svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.8-4.4 4.3 1 6-5.3-2.9L6.7 19.7l1-6L3.3 9.4l6.1-.8z"/></svg>'],
+ ['sched','Schedule','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>'],
+ ['money','Money','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 6.5v11M14.6 9.4a2.7 2.7 0 0 0-2.6-1.5c-1.5 0-2.5.8-2.5 2s1 1.8 2.5 2.1 2.6.8 2.6 2.1-1.1 2-2.6 2a2.8 2.8 0 0 1-2.7-1.6"/></svg>'],
+ ['hcp','Handicaps','<svg viewBox="0 0 24 24"><path d="M4 18h16M7 18V9m5 9V5m5 13v-6"/></svg>'],
+ ['hotel','Hotel','<svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/></svg>'],
+];
+function renderNav(){
+ document.getElementById('nav').innerHTML=TABS.map(([id,label,svg],i)=>
+  '<button data-tab="'+id+'"'+(i===0?' class="on" aria-current="page"':'')+'>'+svg+'<span>'+label+'</span></button>').join('');
+}
+function go(id){
+ document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='pg-'+id));
+ document.querySelectorAll('#nav button').forEach(b=>{
+  const on=b.dataset.tab===id; b.classList.toggle('on',on);
+  if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+ });
+ window.scrollTo(0,0);
+}
+
+/* ---------- events ---------- */
+document.getElementById('nav').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-tab]'); if(b) go(b.dataset.tab);
+});
+document.getElementById('pg-trip').addEventListener('click',e=>{
+ const scb=e.target.closest('button[data-sc]');
+ if(scb){ openSheet(scb.dataset.sc, scb.dataset.alt||null, scb.dataset.rid); return }
+ const p=e.target.closest('.p'); if(!p) return;
+ const rid=p.dataset.r,n=p.dataset.n;
+ sel[rid]=(sel[rid]===n)?ME:n;
+ const r=rounds.find(x=>x.id===rid), card=document.querySelector('[data-card="'+rid+'"]');
+ card.outerHTML=cardHTML(r,card.classList.contains('next'));
+});
+document.getElementById('money').addEventListener('click',e=>{
+ if(e.target.id==='clearBets'){ bets={}; localStorage.removeItem('msmi-bets'); renderMoney(); }
+});
+document.getElementById('money').addEventListener('input',e=>{
+ const i=e.target.closest('input[data-bet]'); if(!i) return;
+ const id=i.dataset.bet, v=i.value.trim();
+ if(v==='') delete bets[id]; else bets[id]=Number(v);
+ try{localStorage.setItem('msmi-bets',JSON.stringify(bets))}catch(e){}
+ const owed=golfRounds*BUYIN; let won=0; rounds.forEach(r=>{won+=Number(bets[r.id]||0)});
+ const net=won-owed, el=document.querySelector('.money .net');
+ el.textContent=(net>=0?'+':'−')+'$'+Math.abs(net).toFixed(0);
+ el.classList.toggle('up',net>=0);
+ document.querySelector('.money .lbl').textContent =
+  net===0?'Dead even.':net>0?'Up on the trip.':'$'+Math.abs(net).toFixed(0)+' to break even.';
+ document.querySelectorAll('.money .row b')[1].textContent='+$'+won.toFixed(0);
+});
+document.getElementById('sheet').addEventListener('click',e=>{
+ if(e.target.id==='sheet'||e.target.id==='closeSheet'){ closeSheet(); return }
+ const t=e.target.closest('button[data-tee]'); if(t){ scState.tee=Number(t.dataset.tee); drawSheet(); return }
+ const w=e.target.closest('button[data-which]'); if(w){
+  scState.which=Number(w.dataset.which);
+  const c=DATA.sc[scState.which===1?scState.alt:scState.course];
+  const i=c.tees.findIndex(x=>x.y); scState.tee=i<0?0:i; drawSheet();
+ }
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet() });
+document.getElementById('search').addEventListener('input',e=>{
+ const q=e.target.value.trim().toLowerCase();
+ document.querySelectorAll('#tables tbody tr[data-name]').forEach(tr=>{
+  tr.hidden = q && tr.dataset.name.indexOf(q)===-1;
+ });
+});
+const gb=document.getElementById('grpBtn');
+function syncGrp(){gb.textContent=mineOnly?'My group':'All groups';gb.setAttribute('aria-pressed',String(mineOnly))}
+gb.addEventListener('click',()=>{mineOnly=!mineOnly;localStorage.setItem('msmi-group',mineOnly?'mine':'all');syncGrp();renderTrip()});
+const tb=document.getElementById('themeBtn');
+function syncTheme(){const d=document.documentElement.getAttribute('data-theme')==='dark';
+ tb.textContent=d?'☀️':'🌙';tb.setAttribute('aria-label',d?'Switch to light mode':'Switch to dark mode')}
+tb.addEventListener('click',()=>{const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+ document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('msmi-theme',n)}catch(e){}syncTheme()});
+
+setInterval(()=>{document.querySelectorAll('[data-count]').forEach(el=>{
+ const r=rounds.find(x=>x.id===el.dataset.count); if(r) el.textContent=cd(r)})},3e4);
+
+/* cross-check */
+(function(){
+ const exp={'MASTERPIECE':[12,9,7,4,0,10,6],'SIGNATURE':[10,8,6,4,10,5],'PREMIER':[9,6,3,1,-2,7,4],
+  'TRADITION':[7,4,3,-1,8,4],'BLACK LAKE':[10,9,7,4,-1,10,5],'TRIBUTE':[10,8,4,-1,11,4],'CLASSIC':[6,4,2,-4,8,-1]};
+ const me=byFull[ME_FULL];
+ Object.keys(exp).forEach(k=>{if(JSON.stringify(me.h[k])!==JSON.stringify(exp[k]))console.warn('Handicap mismatch: '+k,me.h[k],exp[k])});
+ Object.keys(DATA.sc).forEach(k=>{const c=DATA.sc[k],n=c.par.length;
+  const s=c.hcp.slice().sort((a,b)=>a-b).join(',');
+  if(s!==Array.from({length:n},(_,i)=>i+1).join(','))console.warn('Hole handicap not a clean 1..n on '+k);
+ });
+})();
+
+try{
+ document.getElementById('stRounds').textContent=golfRounds;
+ renderNav(); syncGrp(); syncTheme(); renderMoney(); renderTrip(); renderSched(); renderTables(); renderHotel();
+ var boot=document.getElementById('boot'); if(boot) boot.remove();
+}catch(err){
+ var be=document.getElementById('booterr');
+ if(be) be.textContent=(err&&err.message)?err.message:String(err);
+}
+
+try{
+ if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+   navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+ }
+}catch(e){}
+</script>
+</body>
+</html>
