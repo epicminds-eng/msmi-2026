@@ -180,7 +180,7 @@ tr[hidden]{display:none}
 .xbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--rule);background:var(--card);
  font-size:20px;cursor:pointer;flex:0 0 auto}
 .teesel{display:flex;gap:6px;overflow-x:auto;margin:10px 0 4px;padding-bottom:4px}
-.teesel button{flex:0 0 auto;min-height:40px;padding:0 13px;border-radius:999px;border:1px solid var(--rule);
+.teesel button{flex:0 0 auto;min-height:44px;padding:0 13px;border-radius:999px;border:1px solid var(--rule);
  background:var(--card);font-size:.85rem;font-weight:600;cursor:pointer}
 .teesel button.on{background:var(--deep);color:var(--deep-ink);border-color:var(--deep)}
 .teesel button:disabled{opacity:.45}
@@ -340,6 +340,17 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').repl
 function isL(t){return t.indexOf('(L)')>-1}
 function shortTee(t){const s=t.replace(' (M)','').replace(' (L)','');
  return ({BLACK:'Blk',BLUE:'Blu',WHITE:'Wht',GOLD:'Gld',RED:'Red',SILVER:'Slv',GREEN:'Grn'})[s]||s}
+/* total yardage for one scorecard tee entry; null when not published */
+function totalY(t){return t.y?t.y.reduce((s,v)=>s+v,0):null}
+function yardChips(pairs){
+ return pairs.map(([label,total])=>'<span class="tee">'+label+'<b>'+(total===null?'—':total)+'</b></span>').join('')
+}
+/* moves CHAD to the front of a group without mutating the source array —
+   DATA.rounds[].groups must stay byte-identical, this is display order only */
+function chadFirst(g){
+ const i=g.indexOf(ME); if(i<=0) return g;
+ return [ME,...g.slice(0,i),...g.slice(i+1)];
+}
 
 /* course handicap for nick on course, by sheet tee name */
 function chFor(nick,course,sheetTee){
@@ -371,13 +382,22 @@ function cd(r){
 
 /* ---------- handicap bar ---------- */
 function hbar(r){
- if(r.nohcp) return '<div class="hbar"><div class="hrow"><span class="hlabel">Course handicap</span>'
-  +'<span class="hwho">Par-3 event</span></div><div class="hnote">Not in the pairings sheet — scorecard only.</div></div>';
+ if(r.nohcp){
+  let h='<div class="hbar"><div class="hrow"><span class="hlabel">Course handicap</span>'
+   +'<span class="hwho">Par-3 event</span></div><div class="hnote">Not in the pairings sheet — scorecard only.</div>';
+  const sc=DATA.sc[r.course];
+  if(sc) h+='<div class="hnote" style="margin-top:10px">YARDS</div><div class="tees">'
+   +yardChips(sc.tees.map(t=>[t.label,totalY(t)]))+'</div>';
+  return h+'</div>';
+ }
  const nick=selFor(r),p=playerOf(nick),me=nick===ME;
  let h='<div class="hbar"><div class="hrow"><span class="hlabel">'+(me?'Your course handicap':'Course handicap')
   +'</span><span class="hwho">'+esc(fullName(nick))+' <i>'+(p?p.index.toFixed(1):'')+'</i></span></div>';
  [r.course,r.alt].filter(Boolean).forEach(cn=>{
   const rows=strokesFor(nick,cn); if(!rows.length) return;
+  const sc=DATA.sc[cn];
+  const pairs=rows.map(x=>{const st=sc&&sc.tees.find(t=>t.sheet===x.tee); return [shortTee(x.tee),st?totalY(st):null]});
+  h+='<div class="hnote" style="margin-top:10px">YARDS</div><div class="tees">'+yardChips(pairs)+'</div>';
   h+='<div class="hnote" style="margin-top:10px">'+cn+'</div><div class="tees">'
    +rows.map(x=>'<span class="tee">'+shortTee(x.tee)+'<b>'+x.v+'</b></span>').join('')+'</div>';
  });
@@ -400,14 +420,20 @@ function players(r){
  if(!r.groups.length) return r.tbd?'<div class="tbd">'+r.tbd+'</div>':'';
  const {list,mine}=groupList(r);
  const ra=n=>'data-r="'+r.id+'" data-n="'+esc(n)+'"';
- if(list.length===1) return '<div class="pwrap"><div class="lab">Playing with</div><div class="plist">'
-  +list[0].g.map(n=>chip(n,selFor(r)===n,ra(n))).join('')+'</div></div>';
- return '<div class="pwrap">'+list.map(it=>'<div class="gsep'+(it.i===mine?' mine':'')+'">Group '+(it.i+1)
-  +(it.i===mine?' · yours':'')+'</div><div class="plist">'+it.g.map(n=>chip(n,selFor(r)===n,ra(n))).join('')+'</div>').join('')+'</div>';
+ if(list.length===1){
+  const g=list[0].i===mine?chadFirst(list[0].g):list[0].g;
+  return '<div class="pwrap"><div class="lab">Playing with</div><div class="plist">'
+   +g.map(n=>chip(n,selFor(r)===n,ra(n))).join('')+'</div></div>';
+ }
+ return '<div class="pwrap">'+list.map(it=>{
+  const g=it.i===mine?chadFirst(it.g):it.g;
+  return '<div class="gsep'+(it.i===mine?' mine':'')+'">Group '+(it.i+1)
+   +(it.i===mine?' · yours':'')+'</div><div class="plist">'+g.map(n=>chip(n,selFor(r)===n,ra(n))).join('')+'</div>';
+ }).join('')+'</div>';
 }
 function sheetPlayers(r){
  if(!r.groups.length) return [];
- return groupList(r).list.reduce((out,it)=>out.concat(it.g),[]);
+ return chadFirst(groupList(r).list.reduce((out,it)=>out.concat(it.g),[]));
 }
 function cardHTML(r,isNext){
  const c=cd(r);
@@ -469,8 +495,10 @@ function drawSheet(){
  if(scState.alt) h+='<div class="teesel">'
    +'<button class="'+(scState.which===0?'on':'')+'" data-which="0">'+scState.course.toLowerCase()+'</button>'
    +'<button class="'+(scState.which===1?'on':'')+'" data-which="1">'+scState.alt.toLowerCase()+'</button></div>';
- h+='<div class="teesel">'+c.tees.map((t,i)=>'<button class="'+(i===scState.tee?'on':'')
-  +'" data-tee="'+i+'">'+t.label+(t.y?'':' ·')+'</button>').join('')+'</div>';
+ h+='<div class="teesel">'+c.tees.map((t,i)=>{
+   const total=totalY(t);
+   return '<button class="'+(i===scState.tee?'on':'')+'" data-tee="'+i+'">'+t.label+(total!==null?' '+total:' ·')+'</button>';
+  }).join('')+'</div>';
  const fp=r?sheetPlayers(r):[];
  if(fp.length) h+='<div class="pwrap"><div class="plist">'
   +fp.map(pn=>chip(pn,scState.nick===pn,'data-scn="'+esc(pn)+'"')).join('')+'</div></div>';
