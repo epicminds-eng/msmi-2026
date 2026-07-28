@@ -528,15 +528,23 @@ function prowHTML(opts){
   +'<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>'
   +'</button>';
 }
-/* player row showing a teammate's course handicap at a given tee — shared by round
-   cards, the scorecard sheet's player picker, and (in a lighter form) nowhere else */
-function groupRowHTML(nick,course,teeSheet,on,attrs){
+/* player row showing a teammate's course handicap — shared by round cards and
+   the scorecard sheet's player picker. Tee is a fact about THAT nick, not
+   whoever else is selected, so it's resolved here per-row, independently of
+   any other row on the card — never take a tee/teeSheet as a parameter. */
+function groupRowHTML(nick,course,on,attrs){
  const p=playerOf(nick);
- const ch = teeSheet? chFor(nick,course,teeSheet) : null;
+ const sc=DATA.sc[course];
+ const ti=sc? teeIndexFor(upperFullName(nick),course) : -1;
+ const teeSlot=ti>-1? sc.tees[ti] : null;
+ const ch = teeSlot&&teeSlot.sheet? chFor(nick,course,teeSlot.sheet) : null;
  const has = ch!==null && ch!==undefined;
+ const parts=[];
+ if(p) parts.push(p.index.toFixed(1)+' index');
+ if(teeSlot) parts.push(teeSlot.label);
  return prowHTML({
   name: fullName(nick),
-  sub: p? 'Index '+p.index.toFixed(1) : '',
+  sub: parts.join(' · '),
   value: has? String(ch) : '—',
   label: 'HCP',
   f: has? ch/40 : 0,
@@ -664,15 +672,15 @@ function cardHTML(r,isNext){
    if(mineOnly&&mine>-1) list=[list[mine]];
    const ra=n=>'data-r="'+r.id+'" data-n="'+esc(n)+'"';
    const ti=teeIndexFor(upperFullName(selFor(r)),r.course);
-   const sc=DATA.sc[r.course]; const tee=sc?sc.tees[ti]:null;
+   const sc=DATA.sc[r.course];
    if(list.length===1){
     const g=list[0].i===mine?meFirst(list[0].g):list[0].g;
-    h+=g.map(n=>groupRowHTML(n,r.course,tee?tee.sheet:null,selFor(r)===n,ra(n))).join('');
+    h+=g.map(n=>groupRowHTML(n,r.course,selFor(r)===n,ra(n))).join('');
    } else {
     h+=list.map(it=>{
      const g=it.i===mine?meFirst(it.g):it.g;
      return '<div class="gsep'+(it.i===mine?' mine':'')+'">Group '+(it.i+1)
-      +(it.i===mine?' · yours':'')+'</div>'+g.map(n=>groupRowHTML(n,r.course,tee?tee.sheet:null,selFor(r)===n,ra(n))).join('');
+      +(it.i===mine?' · yours':'')+'</div>'+g.map(n=>groupRowHTML(n,r.course,selFor(r)===n,ra(n))).join('');
     }).join('');
    }
    if(sc){
@@ -744,7 +752,7 @@ function drawSheet(){
   +'<button class="xbtn" id="closeSheet" aria-label="Close">×</button></div>';
  if(scState.alt) h+=segHTML([scState.course,scState.alt].map(tc),scState.which,'which');
  const fp=r?sheetPlayers(r):[];
- if(fp.length) h+=fp.map(pn=>groupRowHTML(pn,name,tee.sheet,scState.nick===pn,'data-scn="'+esc(pn)+'"')).join('');
+ if(fp.length) h+=fp.map(pn=>groupRowHTML(pn,name,scState.nick===pn,'data-scn="'+esc(pn)+'"')).join('');
  h+=sechead(ICON_FLAG,'Tees');
  h+=segHTML(c.tees.map(t=>t.label),scState.tee,'tee');
  h+='<div style="margin-top:8px">'+teeTilesHTML(name,scState.tee,nick)+'</div>';
