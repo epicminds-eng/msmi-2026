@@ -880,7 +880,7 @@ document.getElementById('pg-trip').addEventListener('click',e=>{
   const rid=card.dataset.card;
   const ctBtn=e.target.closest('button[data-cardtee-'+rid+']');
   if(ctBtn){
-   cardTee[rid]=Number(ctBtn.dataset['cardtee'+rid]);
+   cardTee[rid]=Number(ctBtn.getAttribute('data-cardtee-'+rid));
    const r=rounds.find(x=>x.id===rid);
    card.outerHTML=cardHTML(r,card.classList.contains('next'));
    return;

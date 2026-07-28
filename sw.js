@@ -5,7 +5,7 @@
    STANDING RULE: any commit that touches index.html must also bump
    CACHE_VERSION in the same commit, or the cache-first SW keeps serving
    the stale page indefinitely — this bit us once already. */
-const CACHE_VERSION = 'v12';
+const CACHE_VERSION = 'v13';
 const CACHE_NAME = 'msmi-2026-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'msmi-2026-fonts';
 
