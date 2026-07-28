@@ -13,286 +13,299 @@
 <meta name="apple-mobile-web-app-title" content="MSMI 2026">
 <meta name="theme-color" content="#12303D">
 <script>
-(function(){try{var t=localStorage.getItem('msmi-theme')||'light';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}
-try{var who=localStorage.getItem('msmi-who');document.documentElement.setAttribute('data-skin',who==='CHAD SCHURECHT'?'epicminds':'teal')}catch(e){document.documentElement.setAttribute('data-skin','teal')}})();
+(function(){
+ try{
+  var who=localStorage.getItem('msmi-who');
+  if(who==='CHAD SCHURECHT'){ document.documentElement.setAttribute('data-skin','epicminds'); }
+  else{
+   var sk=localStorage.getItem('msmi-skin');
+   document.documentElement.setAttribute('data-skin', sk==='char'?'char':'teal');
+  }
+ }catch(e){ document.documentElement.setAttribute('data-skin','teal'); }
+})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300&family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,500&display=swap" rel="stylesheet">
 <style>
 :root{
  --serif:'Newsreader',Georgia,serif;
  --sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
- --r:16px; --shadow:0 1px 3px rgba(28,60,75,.08);
+ --r:16px;
+ --shadow:0 2px 8px rgba(0,0,0,.35);
  --navh:calc(62px + env(safe-area-inset-bottom,0px));
+ color-scheme: dark;
 }
-html[data-theme="dark"]{--shadow:0 1px 3px rgba(0,0,0,.4)}
-html[data-theme="light"]{color-scheme:light} html[data-theme="dark"]{color-scheme:dark}
-
-/* skin: epicminds — Chad Schurecht's own palette, unchanged from the original app */
-html[data-skin="epicminds"]{
- --bg:#E9F1F3; --card:#FFFFFF; --deep:#12303D; --deep-ink:#E9F1F3;
- --mist:#A6C6D1; --ink:#1C3C4B; --muted:#4A7286; --rule:rgba(166,198,209,.5);
- --accent:#9A741F; --gold-l:#C9A24B; --green:#4F8577;
-}
-html[data-skin="epicminds"][data-theme="dark"]{
- --bg:#0E2833; --card:#12303D; --deep:#1C3C4B; --ink:#E9F1F3; --muted:#A6C6D1;
- --rule:rgba(46,90,110,.75); --accent:#C9A24B;
-}
-/* skin: teal — everyone but Chad, and the picker before anyone is selected */
+/* ---------- skins: teal (default), char (charcoal), epicminds (Chad only) ---------- */
 html[data-skin="teal"]{
- --bg:#DEEAE2; --card:#FFFFFF; --deep:#274F4A; --deep-ink:#DEEAE2;
- --mist:#A4C1AD; --ink:#24413C; --muted:#3F6D60; --rule:rgba(164,193,173,.60);
- --accent:#8A6A1E; --gold-l:#D6B25E; --green:#5E9EA0;
+ --bg:#11302B; --card:#173B35; --raise:#1F4640; --line:rgba(164,193,173,.22);
+ --ink:#DEEAE2; --mute:#A4C1AD; --accent:#D9B665;
+ --good:#6FC49A; --warn:#E0B65C; --hot:#DE8A6E; --onacc:#11302B;
+ --dispfont:var(--serif); --dispweight:500; --dispspace:-.01em;
 }
-html[data-skin="teal"][data-theme="dark"]{
- --bg:#11302B; --card:#173B35; --deep:#24504A; --deep-ink:#DEEAE2;
- --mist:#A4C1AD; --ink:#DEEAE2; --muted:#A4C1AD; --rule:rgba(94,158,160,.40);
- --accent:#D6B25E; --gold-l:#D9B665; --green:#7FC9A6;
+html[data-skin="char"]{
+ --bg:#232327; --card:#2D2D32; --raise:#38383E; --line:rgba(255,255,255,.14);
+ --ink:#FFFFFF; --mute:#A8A8AF; --accent:#4ADE80;
+ --good:#4ADE80; --warn:#FFD84D; --hot:#FF6B5A; --onacc:#1B1B1E;
+ --dispfont:var(--sans); --dispweight:800; --dispspace:-.02em;
 }
-*{box-sizing:border-box} html,body{margin:0;padding:0} html{background:var(--bg)}
+html[data-skin="epicminds"]{
+ --bg:#0E2833; --card:#12303D; --raise:#1C3C4B; --line:rgba(166,198,209,.22);
+ --ink:#E9F1F3; --mute:#A6C6D1; --accent:#C9A24B;
+ --good:#6FB39F; --warn:#C9A24B; --hot:#D98A6E; --onacc:#0E2833;
+ --dispfont:var(--serif); --dispweight:500; --dispspace:-.01em;
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0}
+html{background:var(--bg)}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;
  -webkit-text-size-adjust:100%;padding-bottom:calc(var(--navh) + 18px)}
 a{color:inherit}
 button{font-family:var(--sans);color:inherit}
+.disp{font-family:var(--dispfont);font-weight:var(--dispweight);letter-spacing:var(--dispspace)}
 .wrap{max-width:720px;margin:0 auto;padding:0 14px}
-.eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-h2.sect{font-family:var(--serif);font-weight:500;font-size:2rem;letter-spacing:-.01em;margin:.1em 0 .7em}
+.eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+h2.sect{font-family:var(--dispfont);font-weight:var(--dispweight);letter-spacing:var(--dispspace);
+ font-size:2rem;margin:.1em 0 .7em}
+/* section header with small stroke icon — "Your group" / "Tees" */
+.sechead{display:flex;align-items:center;gap:6px;margin:22px 0 10px;color:var(--mute)}
+.sechead svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;
+ stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto}
+.sechead span{font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+
 .pagehead{display:flex;align-items:center;justify-content:space-between;gap:12px;
- padding:calc(env(safe-area-inset-top,0px) + 20px) 0 16px;border-bottom:1px solid var(--rule);margin-bottom:20px}
-.pagehead .phname{font-family:var(--serif);font-size:1.3rem;font-weight:500;letter-spacing:-.01em}
+ padding:calc(env(safe-area-inset-top,0px) + 20px) 0 16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.pagehead .phname{font-family:var(--dispfont);font-weight:var(--dispweight);font-size:1.3rem;letter-spacing:-.01em}
 .pagehead .pageactions{display:flex;align-items:center;gap:2px}
 .pagehead .gchange{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 4px;
- border:0;background:none;color:var(--muted);font-family:var(--sans);font-size:.88rem;font-weight:600;cursor:pointer}
+ border:0;background:none;color:var(--mute);font-family:var(--sans);font-size:.88rem;font-weight:600;cursor:pointer}
 .pagehead .gchange:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .page{display:none} .page.on{display:block}
-#app{display:none} #app.on{display:block}
+#app{display:none;background:var(--bg);min-height:100vh}
+#app.on{display:block}
 
-.themebtn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:0 0 auto;
- border:0;background:none;color:inherit;cursor:pointer;padding:0}
-.themebtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.themebtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* skin toggle — hero only, hidden entirely for epicminds skin */
+.skinbtn{width:56px;height:44px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+ border:0;background:none;padding:0;cursor:pointer}
+.skinpill{position:relative;width:56px;height:30px;border-radius:99px;border:1px solid var(--line);overflow:hidden;
+ background:linear-gradient(90deg,#173B35 0 50%,#2D2D32 50% 100%)}
+.skinpill::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;
+ background:var(--ink);transition:transform .18s}
+html[data-skin="char"] .skinpill::after{transform:translateX(26px)}
+.skinbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+html[data-skin="epicminds"] .skinbtn{display:none}
 
-.hero{background:var(--deep);color:var(--deep-ink);border-radius:20px;padding:26px 20px 22px;
- margin:calc(env(safe-area-inset-top,0px) + 14px) 0 18px}
-.hero .top{display:flex;justify-content:space-between;align-items:flex-start}
-.hero .kick{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
-.hero .topright{display:flex;align-items:flex-start;gap:8px}
-.hero .titlewrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.hero .mark{font-family:'Archivo',sans-serif;font-weight:300;font-size:.68rem;letter-spacing:.1em;color:var(--mist)}
-.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.3rem,10.5vw,3.2rem);line-height:1.05;
- letter-spacing:-.015em;margin:.3em 0 .2em;overflow-wrap:break-word}
-.changebtn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;
- border:1px solid color-mix(in srgb, var(--mist) 45%, transparent);border-radius:999px;background:none;
- color:var(--deep-ink);font-family:var(--sans);font-size:.88rem;font-weight:600;cursor:pointer;margin:2px 0 16px}
-.changebtn:focus-visible{outline:2px solid var(--gold-l);outline-offset:2px}
-.hero p{color:var(--mist);font-size:1rem;margin:0 0 18px;max-width:34ch}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stat{border:1px solid rgba(166,198,209,.28);border-radius:12px;padding:11px 10px}
-.stat b{display:block;font-family:var(--serif);font-size:1.3rem;font-weight:500;line-height:1.15}
-.stat span{font-size:.76rem;color:var(--mist)}
+/* ---------- hero ---------- */
+.hero{background:var(--card);border-radius:20px;padding:26px 20px 22px;
+ margin:calc(env(safe-area-inset-top,0px) + 14px) 0 18px;box-shadow:var(--shadow)}
+.hero .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.hero .kick{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.hero h1{font-size:2.15rem;line-height:1.08;margin:.32em 0 .18em;overflow-wrap:normal;
+ white-space:nowrap;color:var(--accent)}
+.changebtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;
+ border:1px solid transparent;border-radius:12px;background:var(--raise);color:var(--ink);
+ font-family:var(--sans);font-size:.88rem;font-weight:700;cursor:pointer;margin:2px 0 16px}
+.changebtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.changebtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hero .sub{color:var(--mute);font-size:.86rem;font-weight:600;margin:0 0 18px}
+
+/* ---------- component B: stat tile ---------- */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tiles.of3{grid-template-columns:repeat(3,1fr)}
+.tile{background:var(--raise);border-radius:12px;padding:13px 6px 0;text-align:center;overflow:hidden}
+.tile .tval{font-size:1.32rem;font-weight:800;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .tlabel{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin:3px 0 11px}
+.tile .tbar{height:4px;margin:0 -6px;border-radius:0}
+
+/* ---------- component A: player row ---------- */
+.prow{display:block;width:100%;text-align:left;background:var(--raise);border-radius:12px;
+ padding:12px 14px 11px;margin-bottom:8px;border:2px solid transparent;cursor:pointer;
+ font-family:var(--sans);color:inherit}
+.prow.on{border-color:var(--accent)}
+.prow .pr1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.prow .prname{font-size:1rem;font-weight:700}
+.prow .prsub{display:block;font-size:.78rem;font-weight:600;color:var(--mute);margin-top:2px}
+.prow .prval{font-size:1.46rem;font-weight:800;line-height:1;text-align:right;white-space:nowrap}
+.prow .prlabel{display:block;font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+ color:var(--mute);text-align:right;margin-top:3px}
+.prow .prbar{height:5px;border-radius:99px;background:var(--line);margin-top:9px;overflow:hidden}
+.prow .prbar i{display:block;height:100%;border-radius:99px}
+.gsep{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
+.gsep.mine{color:var(--ink)}
+
+/* ---------- component C: segmented control ---------- */
+.seg{display:flex;gap:4px;background:var(--raise);border-radius:12px;padding:4px;flex-wrap:wrap}
+.seg button{flex:1 1 auto;min-width:64px;min-height:42px;border-radius:9px;border:0;background:transparent;
+ color:var(--mute);font-family:var(--sans);font-size:.85rem;font-weight:700;cursor:pointer}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.3)}
 
 .ctrls{display:flex;gap:8px;margin:0 0 16px}
-.ctrls button,.ctrls a{flex:1;min-height:46px;border-radius:999px;border:1px solid var(--rule);
+.ctrls button,.ctrls a{flex:1;min-height:46px;border-radius:999px;border:1px solid var(--line);
  background:var(--card);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;
  align-items:center;justify-content:center;text-decoration:none}
 .ctrls button:focus-visible,.ctrls a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
+/* ---------- cards / round card ---------- */
 .card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
 .card.next{box-shadow:0 0 0 2px var(--accent),var(--shadow)}
 .card.notmine{opacity:.55}
 .chead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.timepill{flex:0 0 auto;background:var(--bg);border-radius:12px;padding:8px 12px;font-weight:700;
- font-size:.95rem;text-align:center;line-height:1.2}
-.timepill small{display:block;font-weight:500;font-size:.68rem;color:var(--muted)}
-.card h3{font-family:var(--serif);font-weight:500;font-size:1.8rem;letter-spacing:-.015em;margin:.08em 0 .05em;line-height:1.06}
-.cmeta{color:var(--muted);font-size:.92rem}
-.count{font-size:.9rem;color:var(--muted);margin-top:6px;font-weight:600}
-.card.next .count{color:var(--ink);font-size:1rem}
+.chead h3{font-size:1.9rem;letter-spacing:-.015em;margin:.08em 0 .05em;line-height:1.06}
+.cmeta{color:var(--mute);font-size:.92rem}
+.ctime{flex:0 0 auto;text-align:right}
+.ctime b{display:block;font-size:1.15rem;font-weight:800;white-space:nowrap}
+.ctime small{display:block;font-size:.7rem;font-weight:600;color:var(--mute);margin-top:3px;white-space:nowrap}
 .flag{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
 .tag{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
- border:1px solid var(--rule);border-radius:999px;padding:2px 8px;color:var(--muted);margin-left:6px;vertical-align:middle}
+ border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--mute);margin-left:6px;vertical-align:middle}
 
-.hbar{background:var(--deep);color:var(--deep-ink);border-radius:12px;padding:13px 14px;margin-top:14px}
-.hbar .hrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.hbar .hlabel{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist)}
-.hbar .hwho{font-weight:700;color:var(--gold-l);font-size:.95rem}
-.hbar .hwho i{font-style:normal;color:var(--mist);font-weight:500}
-.tees{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.tee{border:1px solid rgba(166,198,209,.3);border-radius:8px;padding:5px 9px;font-size:.78rem;color:var(--mist);white-space:nowrap}
-.tee b{font-size:.98rem;color:var(--deep-ink);margin-left:5px}
-.hnote{margin-top:9px;font-size:.78rem;color:var(--mist)}
-
-.pwrap{margin-top:14px}
-.pwrap .lab{font-size:.85rem;color:var(--muted);margin-bottom:7px}
-.plist{display:flex;flex-wrap:wrap;gap:7px}
-.p{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:999px;
- background:var(--bg);border:2px solid transparent;font-size:.9rem;font-weight:600;cursor:pointer}
-.p i{font-style:normal;font-weight:500;color:var(--muted);font-size:.8rem}
-.p.me{background:var(--deep);color:var(--deep-ink)} .p.me i{color:var(--mist)}
-.p.on{border-color:var(--accent)}
-.p:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.gsep{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
-.gsep.mine{color:var(--ink)}
-
+.actrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .btnrow{display:flex;gap:8px;margin-top:14px}
 .btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;
- border:1px solid var(--rule);border-radius:12px;text-decoration:none;font-weight:700;font-size:.92rem;
- background:var(--card);cursor:pointer}
+ border:1px solid var(--line);border-radius:12px;text-decoration:none;font-weight:700;font-size:.92rem;
+ background:var(--card);cursor:pointer;color:var(--ink);font-family:var(--sans)}
+.btn.fill{background:var(--accent);color:var(--onacc);border-color:transparent}
 .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.mapschoice.on{background:var(--deep);color:var(--deep-ink);border-color:var(--deep)}
-.addr{font-size:.82rem;color:var(--muted);margin-top:9px}
-.note{margin-top:10px;font-size:.83rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:10px}
+.seg.mapsseg{margin-top:0}
+.addr{font-size:.8rem;color:var(--mute);margin-top:10px;text-align:center}
+.note{margin-top:10px;font-size:.83rem;color:var(--mute);border-left:2px solid var(--line);padding-left:10px}
 
-/* betting */
-.money .row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-top:1px solid var(--rule);font-size:.92rem}
+/* ---------- betting ---------- */
+.money .row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-top:1px solid var(--line);font-size:.92rem}
 .money .row:first-of-type{border-top:0}
-.money .net{font-family:var(--serif);font-size:2.4rem;font-weight:500;line-height:1;margin:.1em 0 .1em}
-.money .net.up{color:var(--green)} .money input{width:96px;min-height:40px;text-align:right;
- border:1px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink);
+.money .net{font-size:2.4rem;line-height:1;margin:.1em 0 .1em}
+.money .net.up{color:var(--good)}
+.money input{width:96px;min-height:40px;text-align:right;
+ border:1px solid var(--line);border-radius:8px;background:var(--raise);color:var(--ink);
  font-family:var(--sans);font-size:1rem;padding:0 9px}
 .money input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-.money .lbl{color:var(--muted);font-size:.8rem}
+.money .lbl{color:var(--mute);font-size:.8rem}
 
-/* schedule */
+/* ---------- schedule ---------- */
 .daycard{background:var(--card);border-radius:var(--r);padding:16px 18px;margin-bottom:12px;box-shadow:var(--shadow)}
-.daycard h3{font-family:var(--serif);font-weight:500;font-size:1.45rem;margin:0 0 4px}
-.srow{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--rule);text-decoration:none}
+.daycard h3{font-family:var(--dispfont);font-weight:var(--dispweight);font-size:1.45rem;margin:0 0 4px}
+.srow{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--line);text-decoration:none}
 .srow .t{flex:0 0 74px;font-weight:700;font-size:.9rem;padding-top:11px}
 .srow .b{flex:1 1 auto;min-width:0}
 .srow .b .n{font-weight:700;font-size:1.05rem}
-.srow .b .a{font-size:.8rem;color:var(--muted)}
+.srow .b .a{font-size:.8rem;color:var(--mute)}
 .srow .arw{flex:0 0 34px;height:34px;border-radius:50%;background:var(--bg);display:flex;
  align-items:center;justify-content:center;margin-top:8px}
 .venue{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--r);
  padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow);text-decoration:none}
 .venue .b{flex:1 1 auto;min-width:0}
 .venue .n{font-weight:700;font-size:1.05rem}
-.venue .a{font-size:.8rem;color:var(--muted)}
-.venue .arw{color:var(--muted);font-size:1.1rem}
+.venue .a{font-size:.8rem;color:var(--mute)}
+.venue .arw{color:var(--mute);font-size:1.1rem}
 
-/* tables */
-#search{width:100%;min-height:46px;border:1px solid var(--rule);border-radius:12px;background:var(--card);
+/* ---------- handicap tables — the one permitted horizontal scroll ---------- */
+#search{width:100%;min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--raise);
  color:var(--ink);font-family:var(--sans);font-size:1rem;padding:0 14px;margin-bottom:14px}
 #search:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tblock{margin-bottom:20px}
-.tblock h3{font-family:var(--serif);font-weight:500;font-size:1.25rem;margin:0 0 7px}
+.tblock h3{font-family:var(--dispfont);font-weight:var(--dispweight);font-size:1.25rem;margin:0 0 7px}
 .scroll{overflow-x:auto;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);-webkit-overflow-scrolling:touch}
 table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:.92rem}
-th,td{padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--rule)}
+th,td{padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--line)}
 thead th{position:sticky;top:0;background:var(--bg);z-index:2;font-size:.66rem;letter-spacing:.08em;
- text-transform:uppercase;color:var(--muted);font-weight:700}
+ text-transform:uppercase;color:var(--mute);font-weight:700}
 th.nm,td.nm{position:sticky;left:0;background:var(--card);z-index:1;text-align:left;min-width:142px;
- font-weight:600;box-shadow:1px 0 0 var(--rule)}
+ font-weight:600;box-shadow:1px 0 0 var(--line)}
 thead th.nm{background:var(--bg);z-index:3}
-tr.meta td,tr.meta th.nm{color:var(--muted);font-size:.76rem;background:var(--bg)}
-tr.me td,tr.me th.nm{background:var(--bg);font-weight:700}
+tr.meta td,tr.meta th.nm{color:var(--mute);font-size:.76rem;background:var(--bg)}
+tr.me td,tr.me th.nm{background:var(--raise);font-weight:700}
 tr[hidden]{display:none}
-.idx{font-size:.78rem;color:var(--muted);font-weight:500;margin-left:6px}
+.idx{font-size:.78rem;color:var(--mute);font-weight:500;margin-left:6px}
 
-/* hotel */
+/* ---------- hotel ---------- */
 .mapimg{width:100%;border-radius:var(--r);display:block;box-shadow:var(--shadow)}
-.frame{width:100%;height:70vh;border:0;border-radius:var(--r);background:var(--card);display:block}
 .lodge{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:var(--r);
  padding:15px 17px;margin-bottom:10px;box-shadow:var(--shadow);text-decoration:none;min-height:44px}
 .lodge .b{flex:1 1 auto;min-width:0}
 .lodge b{display:block;font-size:1.02rem}
-.lodge span{font-size:.86rem;color:var(--muted)}
+.lodge span{font-size:.86rem;color:var(--mute)}
 .lodge .loc{display:block;margin-top:3px}
-.lodge .arw{flex:0 0 auto;color:var(--muted);font-size:1.1rem}
+.lodge .arw{flex:0 0 auto;color:var(--mute);font-size:1.1rem}
 
-/* scorecard sheet */
-.sheet{position:fixed;inset:0;z-index:90;background:rgba(18,48,61,.55);display:none;
+/* ---------- scorecard sheet ---------- */
+.sheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:none;
  align-items:flex-end;justify-content:center}
 .sheet.on{display:flex}
 .sheetbox{background:var(--bg);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;
  border-radius:20px 20px 0 0;padding:16px 14px calc(20px + env(safe-area-inset-bottom,0px))}
 .sheethead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
-.sheethead h3{font-family:var(--serif);font-weight:500;font-size:1.7rem;margin:0}
-.xbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--rule);background:var(--card);
- font-size:20px;cursor:pointer;flex:0 0 auto}
-.teesel{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
-.teesel button{flex:0 0 auto;min-height:44px;padding:0 13px;border-radius:999px;border:1px solid var(--rule);
- background:var(--card);font-size:.85rem;font-weight:600;cursor:pointer}
-.teesel button.on{background:var(--deep);color:var(--deep-ink);border-color:var(--deep)}
-.teesel button:disabled{opacity:.45}
-.strokebox{background:var(--deep);color:var(--deep-ink);border-radius:12px;padding:12px 14px;margin:10px 0}
-.strokebox .big{font-family:var(--serif);font-size:1.9rem;font-weight:500;line-height:1;color:var(--gold-l)}
-.scwrap{overflow-x:auto;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);
- -webkit-overflow-scrolling:touch;margin-top:12px}
-.sctable{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:15px}
-.sctable th,.sctable td{padding:7px 9px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--rule)}
-.sctable th.rh,.sctable td.rh{position:sticky;left:0;z-index:1;background:var(--card);text-align:left;
- padding-left:11px;font-size:15px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);
- font-weight:700;box-shadow:1px 0 0 var(--rule)}
-.sctable thead th{background:var(--bg);font-size:15px}
-.sctable thead th.rh{z-index:2}
-.sctable td.tot{background:var(--bg);font-weight:700}
-.sctable td.shot{background:color-mix(in srgb, var(--accent) 16%, transparent);font-weight:700}
-.legend{font-size:.8rem;color:var(--muted);margin-top:10px}
+.sheethead h3{font-size:1.7rem;margin:0}
+.xbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);
+ color:var(--ink);font-size:20px;cursor:pointer;flex:0 0 auto}
+.strokebox{background:var(--raise);border-radius:12px;padding:12px 14px;margin:10px 0}
+.strokebox .big{font-size:1.9rem;line-height:1;color:var(--accent)}
+.hnote{margin-top:9px;font-size:.78rem;color:var(--mute)}
+.hlabel{font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 
-/* name picker */
-.picker{position:fixed;inset:0;z-index:95;background:var(--bg);overflow-y:auto;
+/* hole-by-hole: one row per hole, no horizontal scroll */
+.holewrap{background:var(--raise);border-radius:12px;overflow:hidden;margin-top:12px}
+.holetable{width:100%;border-collapse:collapse;font-size:.92rem}
+.holetable th{padding:8px 4px;text-align:center;font-size:.6rem;font-weight:800;letter-spacing:.06em;
+ text-transform:uppercase;color:var(--mute)}
+.holetable td{padding:9px 4px;text-align:center;border-top:1px solid var(--line)}
+.holetable tbody tr:first-child td{border-top:0}
+.holetable th:first-child,.holetable td:first-child{text-align:left;padding-left:12px}
+.holetable tr.tot td{background:var(--card);font-weight:800;border-top:1px solid var(--line)}
+.shotbadge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;
+ font-weight:800;font-size:.85rem;color:var(--onacc)}
+.shotbadge.s1{background:var(--warn)}
+.shotbadge.s2{background:var(--hot)}
+.shotbadge.s0{background:none;color:var(--mute);font-weight:600}
+.legend{font-size:.8rem;color:var(--mute);margin-top:10px}
+
+/* ---------- name picker ---------- */
+.picker{position:fixed;inset:0;z-index:95;background:var(--bg);min-height:100vh;overflow-y:auto;
  padding:calc(env(safe-area-inset-top,0px) + 26px) 14px calc(env(safe-area-inset-bottom,0px) + 26px)}
 .picker[hidden]{display:none}
 .pickwrap{max-width:560px;margin:0 auto}
 .pickhead{margin:0 0 22px}
-.picktitle{font-family:var(--serif);font-weight:500;font-size:2.1rem;letter-spacing:-.01em;margin:.2em 0 .25em}
-.picksub{color:var(--muted);font-size:.95rem;margin:0;max-width:38ch}
+.picktitle{font-size:2.05rem;letter-spacing:-.01em;margin:.2em 0 .25em}
+.picksub{color:var(--mute);font-size:.95rem;margin:0;max-width:38ch}
 .picklist{display:flex;flex-direction:column}
 .picklist[hidden],.pickconfirm[hidden]{display:none}
-.pickrow{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:56px;width:100%;
- padding:12px 6px;border:0;border-top:1px solid var(--rule);background:none;text-align:left;cursor:pointer;
- font-family:var(--sans);color:inherit}
-.picklist .pickrow:first-child{border-top:0}
-.pickrow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.pickrow .pn{font-size:1.08rem;font-weight:600}
-.pickrow .pi{color:var(--muted);font-size:.85rem;flex:0 0 auto}
-.pickcard{text-align:center;padding:34px 22px 26px}
-.pickname{font-family:var(--serif);font-weight:500;font-size:2.1rem;letter-spacing:-.01em;
- margin:0 0 26px;line-height:1.1;white-space:nowrap;overflow:hidden}
-.pickstats{display:flex;margin:0 0 28px}
-.pickstat{flex:1;padding:0 6px;position:relative}
-.pickstat+.pickstat::before{content:"";position:absolute;left:0;top:12%;bottom:12%;width:1px;background:var(--rule)}
-.pickstat b{display:block;font-family:var(--serif);font-size:1.55rem;font-weight:700;line-height:1.1;margin-bottom:6px}
-.pickstat span{display:block;font-size:.64rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.pickcard{text-align:center;padding:26px 18px 20px;background:var(--card);border-radius:18px;border:1px solid var(--line)}
+.pickname{font-size:2.15rem;letter-spacing:-.01em;margin:0 0 8px;line-height:1.1;white-space:nowrap;overflow:hidden}
+.picktag{color:var(--mute);font-size:.9rem;font-weight:600;margin:0 0 22px}
 .pickconfirmbtn{display:flex;width:100%;align-items:center;justify-content:center;min-height:56px;border:0;
- border-radius:14px;background:var(--deep);color:var(--deep-ink);font-weight:700;font-size:1.05rem;
- cursor:pointer;margin-bottom:8px;font-family:var(--sans)}
-.pickconfirmbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.pickback{display:flex;width:100%;align-items:center;justify-content:center;min-height:44px;border:0;
- background:none;color:var(--muted);font-size:.9rem;cursor:pointer;font-family:var(--sans)}
+ border-radius:14px;background:var(--accent);color:var(--onacc);font-weight:800;font-size:1.02rem;
+ cursor:pointer;margin:18px 0 8px;font-family:var(--sans)}
+.pickconfirmbtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.pickback{display:flex;width:100%;align-items:center;justify-content:center;min-height:46px;border:0;
+ background:none;color:var(--mute);font-size:.9rem;cursor:pointer;font-family:var(--sans)}
 .pickback:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-/* bottom nav */
-#nav{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--deep);
- display:flex;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -1px 12px rgba(18,48,61,.18)}
-#nav button{flex:1;min-width:0;background:none;border:0;padding:9px 1px 8px;cursor:pointer;color:var(--mist);
+/* ---------- bottom nav ---------- */
+#nav{position:fixed;left:0;right:0;bottom:0;z-index:80;background:var(--card);border-top:1px solid var(--line);
+ display:flex;padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -1px 12px rgba(0,0,0,.3)}
+#nav button{flex:1;min-width:0;background:none;border:0;padding:9px 1px 8px;cursor:pointer;color:var(--mute);
  display:flex;flex-direction:column;align-items:center;gap:3px;min-height:62px;font-size:.64rem;
- font-weight:700;letter-spacing:.01em;white-space:nowrap}
+ font-weight:700;letter-spacing:.01em;white-space:nowrap;font-family:var(--sans)}
 #nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;
  stroke-linecap:round;stroke-linejoin:round}
-#nav button.on{color:var(--deep-ink)}
-#nav button:focus-visible{outline:2px solid var(--gold-l);outline-offset:-3px}
+#nav button.on{color:var(--accent)}
+#nav button:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
 
-footer{padding:26px 0 8px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);margin-top:26px}
+footer{padding:26px 0 8px;color:var(--mute);font-size:.85rem;border-top:1px solid var(--line);margin-top:26px}
 footer p{margin:.45em 0}
-.credit{margin-top:26px;padding:20px 0 8px;border-top:1px solid var(--rule);text-align:center}
-.credit .kick{display:block;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+.credit{margin-top:26px;padding:20px 0 8px;border-top:1px solid var(--line);text-align:center}
+.credit .kick{display:block;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:9px}
 .credit a{display:inline-block;line-height:0}
 .credit img{width:120px;height:auto}
-html[data-theme="light"] .credit img.dark{display:none}
-html[data-theme="dark"] .credit img.light{display:none}
+.credit img.light{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 
 <div id="boot" style="margin:60px 16px;padding:16px;border:2px solid #9A741F;border-radius:12px;
- font-family:system-ui,sans-serif;font-size:15px;line-height:1.5;color:#1C3C4B;background:#fff">
+ font-family:system-ui,sans-serif;font-size:15px;line-height:1.5;color:#E9F1F3;background:#12303D">
  <b>The script didn't run.</b><br>If you're seeing this, the page loaded but its JavaScript never
  finished. Screenshot this box — the reason will appear below if there was one.
- <div id="booterr" style="margin-top:10px;font-family:ui-monospace,monospace;font-size:13px;color:#8A2F2F"></div>
+ <div id="booterr" style="margin-top:10px;font-family:ui-monospace,monospace;font-size:13px;color:#E0956F"></div>
 </div>
 
 <!-- ============ NAME PICKER ============ -->
@@ -300,8 +313,8 @@ html[data-theme="dark"] .credit img.light{display:none}
  <div class="pickwrap">
   <div class="pickhead">
    <div class="eyebrow">MSMI · Michigan</div>
-   <h1 class="picktitle">Who's this?</h1>
-   <p class="picksub">Pick your name to see your tee times, groups and handicaps.</p>
+   <h1 class="picktitle disp">Who are you?</h1>
+   <p class="picksub">Pick your name once. The app becomes yours — your groups, your strokes, your buy-in.</p>
   </div>
   <div class="picklist" id="pickList"></div>
   <div class="pickconfirm" id="pickConfirm" hidden></div>
@@ -313,20 +326,17 @@ html[data-theme="dark"] .credit img.light{display:none}
 <section class="page on" id="pg-trip">
  <div class="wrap">
   <div class="hero">
-   <div class="top"><span class="kick">MSMI · Michigan</span>
-    <div class="topright">
-     <span class="titlewrap"><span class="kick">Golf Trip 2026</span><span class="mark" id="heroMark">epicminds</span></span>
-     <button class="themebtn" id="themeBtnHero" aria-label="Switch theme"></button>
-    </div>
+   <div class="top">
+    <span class="kick">MSMI · Michigan · Golf Trip 2026</span>
+    <button class="skinbtn" id="skinBtn" aria-label="Switch appearance"><span class="skinpill"></span></button>
    </div>
-   <h1 id="heroName">Chad Schurecht</h1>
-   <button class="changebtn gchange">Change golfer</button>
-   <p>Tee times, partners, handicaps, scorecards and directions — built for the phone.</p>
-   <div class="stats">
-    <div class="stat"><b>Aug 2–6</b><span>Trip dates</span></div>
-    <div class="stat"><b id="stRounds">–</b><span>Your rounds</span></div>
-    <div class="stat"><b id="stIndex">–</b><span>Index</span></div>
-   </div>
+   <h1 class="disp" id="heroName">Chad Schurecht</h1>
+   <button class="changebtn gchange">
+    <svg viewBox="0 0 24 24"><path d="M4 8h13l-3.5-3.5M20 16H7l3.5 3.5"/></svg>
+    Change golfer
+   </button>
+   <p class="sub">Aug 2–6 · Treetops Resort, Gaylord MI</p>
+   <div class="tiles" id="heroTiles"></div>
   </div>
   <div class="ctrls">
    <button id="grpBtn" aria-pressed="true">My group</button>
@@ -342,10 +352,10 @@ html[data-theme="dark"] .credit img.light{display:none}
  <div class="wrap">
   <div class="pagehead" id="head-sched"></div>
   <div class="eyebrow">At a glance</div>
-  <h2 class="sect">Full Schedule</h2>
+  <h2 class="sect disp">Full Schedule</h2>
   <div id="sched"></div>
   <div class="eyebrow" style="margin-top:30px">Tap for directions</div>
-  <h2 class="sect">Courses</h2>
+  <h2 class="sect disp">Courses</h2>
   <div id="venues"></div>
  </div>
 </section>
@@ -355,7 +365,7 @@ html[data-theme="dark"] .credit img.light{display:none}
  <div class="wrap">
   <div class="pagehead" id="head-money"></div>
   <div class="eyebrow">Break even is the goal</div>
-  <h2 class="sect">Betting</h2>
+  <h2 class="sect disp">Betting</h2>
   <div id="money"></div>
  </div>
 </section>
@@ -365,7 +375,7 @@ html[data-theme="dark"] .credit img.light{display:none}
  <div class="wrap">
   <div class="pagehead" id="head-hcp"></div>
   <div class="eyebrow">Every player, every tee</div>
-  <h2 class="sect">Handicaps</h2>
+  <h2 class="sect disp">Handicaps</h2>
   <input id="search" type="search" placeholder="Search a name…" autocomplete="off">
   <div id="tables"></div>
  </div>
@@ -376,7 +386,7 @@ html[data-theme="dark"] .credit img.light{display:none}
  <div class="wrap">
   <div class="pagehead" id="head-hotel"></div>
   <div class="eyebrow">Home base</div>
-  <h2 class="sect">Treetops Resort</h2>
+  <h2 class="sect disp">Treetops Resort</h2>
   <div class="card">
    <div class="cmeta">3962 Wilkinson Rd, Gaylord, MI 49735</div>
    <div class="btnrow">
@@ -390,16 +400,16 @@ html[data-theme="dark"] .credit img.light{display:none}
   </div>
 
   <div class="eyebrow" style="margin-top:26px">Your preference</div>
-  <h2 class="sect" style="font-size:1.5rem">Directions open in</h2>
+  <h2 class="sect disp" style="font-size:1.5rem">Directions open in</h2>
   <div class="card">
-   <div class="btnrow">
-    <button class="btn mapschoice" data-provider="apple">Apple Maps</button>
-    <button class="btn mapschoice" data-provider="google">Google Maps</button>
+   <div class="seg mapsseg">
+    <button class="mapschoice" data-provider="apple">Apple Maps</button>
+    <button class="mapschoice" data-provider="google">Google Maps</button>
    </div>
   </div>
 
   <div class="eyebrow" style="margin-top:26px">Property map</div>
-  <h2 class="sect" style="font-size:1.5rem">Getting around</h2>
+  <h2 class="sect disp" style="font-size:1.5rem">Getting around</h2>
   <div class="card" id="mapcard">
    <div id="mapslot"></div>
    <div class="btnrow">
@@ -409,7 +419,7 @@ html[data-theme="dark"] .credit img.light{display:none}
   </div>
 
   <div class="eyebrow" style="margin-top:26px">Where you might be</div>
-  <h2 class="sect" style="font-size:1.5rem">Lodging</h2>
+  <h2 class="sect disp" style="font-size:1.5rem">Lodging</h2>
   <div id="lodging"></div>
   <div class="note">Only North Condominiums is a separate drive. The other four are all on the main property at the same address — the landmark is more useful than the pin. The North Condominiums pin is approximate; Treetops publishes no street address for it.</div>
 
@@ -459,9 +469,6 @@ function shortTee(t){const s=baseTee(t);
  return ({BLACK:'Blk',BLUE:'Blu',WHITE:'Wht',GOLD:'Gld',RED:'Red',SILVER:'Slv',GREEN:'Grn'})[s]||s}
 /* total yardage for one scorecard tee entry; null when not published */
 function totalY(t){return t.y?t.y.reduce((s,v)=>s+v,0):null}
-function yardChips(pairs){
- return pairs.map(([label,total])=>'<span class="tee">'+label+'<b>'+(total===null?'—':total)+'</b></span>').join('')
-}
 /* is this round-group token the currently selected identity — checked by full name so
    aliases for the same person (e.g. "LOU" vs "LOU P") both match */
 function isMe(n){const f=DATA.names[n];return f?f.toUpperCase()===ME_FULL:false}
@@ -497,9 +504,57 @@ function strokesFor(nick,course){
  return c.tees.map((t,i)=>({tee:t.tee,v:p.h[course][i]})).filter(x=>female?!isM(x.tee):!isL(x.tee));
 }
 
+/* ---------- shared colour ramp — every bar and tile underline uses it ---------- */
+function ramp(f){ return f>.75?'var(--hot)':f>.45?'var(--warn)':'var(--good)'; }
+function clamp01(f){ return Math.max(0,Math.min(1,f)); }
+
+/* ---------- component B: stat tile ---------- */
+function tileHTML(val,label,f){
+ const ff=clamp01(f);
+ return '<div class="tile"><div class="tval">'+val+'</div><div class="tlabel">'+label+'</div>'
+  +'<div class="tbar" style="background:'+ramp(ff)+';opacity:'+(0.35+ff*0.65).toFixed(2)+'"></div></div>';
+}
+
+/* ---------- component A: player row ---------- */
+function prowHTML(opts){
+ const f=clamp01(opts.f);
+ return '<button class="prow'+(opts.on?' on':'')+'"'+(opts.attrs?' '+opts.attrs:'')+' aria-pressed="'+(!!opts.on)+'">'
+  +'<div class="pr1"><div><span class="prname">'+esc(opts.name)+'</span>'
+  +(opts.sub?'<span class="prsub">'+esc(opts.sub)+'</span>':'')+'</div>'
+  +'<div><span class="prval">'+opts.value+'</span><span class="prlabel">'+opts.label+'</span></div></div>'
+  +'<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>'
+  +'</button>';
+}
+/* player row showing a teammate's course handicap at a given tee — shared by round
+   cards, the scorecard sheet's player picker, and (in a lighter form) nowhere else */
+function groupRowHTML(nick,course,teeSheet,on,attrs){
+ const p=playerOf(nick);
+ const ch = teeSheet? chFor(nick,course,teeSheet) : null;
+ const has = ch!==null && ch!==undefined;
+ return prowHTML({
+  name: fullName(nick),
+  sub: p? 'Index '+p.index.toFixed(1) : '',
+  value: has? String(ch) : '—',
+  label: 'HCP',
+  f: has? ch/40 : 0,
+  on, attrs
+ });
+}
+
+/* ---------- component C: segmented control ---------- */
+function segHTML(items,activeIdx,attrName){
+ return '<div class="seg">'+items.map((label,i)=>
+  '<button class="'+(i===activeIdx?'on':'')+'" data-'+attrName+'="'+i+'">'+label+'</button>').join('')+'</div>';
+}
+
+const ICON_GROUP='<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.6 12.7c2.6.5 4.4 2.2 4.4 4.3"/></svg>';
+const ICON_FLAG='<svg viewBox="0 0 24 24"><path d="M6 21V4M6 4l12 3.4L6 11"/></svg>';
+function sechead(icon,label){ return '<div class="sechead">'+icon+'<span>'+label+'</span></div>'; }
+
 /* ---------- state ---------- */
 let mineOnly=(localStorage.getItem('msmi-group')||'mine')==='mine';
 let sel={};
+let cardTee={};
 let bets={};
 function loadBets(){try{bets=JSON.parse(localStorage.getItem('msmi-bets:'+ME_FULL)||'{}')}catch(e){bets={}}}
 function selFor(r){return sel[r.id]||ME}
@@ -520,77 +575,97 @@ function cd(r){
  const s=dy>=1?dy+' day'+(dy>1?'s':'')+' '+(h%24)+' hr':h>=1?h+' hr '+(m%60)+' min':m+' min';
  return d>0?'Tee off in '+s:'Teed off '+s+' ago';
 }
+function netAmount(){
+ const owed=byFull[ME_FULL].rounds.length*BUYIN;
+ let won=0; rounds.forEach(r=>{won+=Number(bets[r.id]||0)});
+ return won-owed;
+}
+function defaultTeeIdx(course){
+ const c=DATA.sc[course]; if(!c) return 0;
+ const idx=c.tees.findIndex(t=>t.y);
+ return idx<0?0:idx;
+}
 
-/* ---------- handicap bar ---------- */
-function hbar(r){
- if(r.nohcp){
-  let h='<div class="hbar"><div class="hrow"><span class="hlabel">Course handicap</span>'
-   +'<span class="hwho">Par-3 event</span></div><div class="hnote">Not in the pairings sheet — scorecard only.</div>';
-  const sc=DATA.sc[r.course];
-  if(sc) h+='<div class="hnote" style="margin-top:10px">YARDS</div><div class="tees">'
-   +yardChips(sc.tees.map(t=>[t.label,totalY(t)]))+'</div>';
-  return h+'</div>';
- }
- const nick=selFor(r),p=playerOf(nick),me=isMe(nick);
- let h='<div class="hbar"><div class="hrow"><span class="hlabel">'+(me?'Your course handicap':'Course handicap')
-  +'</span><span class="hwho">'+esc(fullName(nick))+' <i>'+(p?p.index.toFixed(1):'')+'</i></span></div>';
- [r.course,r.alt].filter(Boolean).forEach(cn=>{
-  const rows=strokesFor(nick,cn); if(!rows.length) return;
-  const sc=DATA.sc[cn];
-  const pairs=rows.map(x=>{const st=sc&&sc.tees.find(t=>t.sheet&&baseTee(t.sheet)===baseTee(x.tee)); return [shortTee(x.tee),st?totalY(st):null]});
-  h+='<div class="hnote" style="margin-top:10px">YARDS</div><div class="tees">'+yardChips(pairs)+'</div>';
-  h+='<div class="hnote" style="margin-top:10px">'+cn+'</div><div class="tees">'
-   +rows.map(x=>'<span class="tee">'+shortTee(x.tee)+'<b>'+x.v+'</b></span>').join('')+'</div>';
- });
- if(!me) h+='<div class="hnote">Tap your own name to switch back.</div>';
- return h+'</div>';
+/* ---------- "Tees" section: segmented tee control + 4 stat tiles, shared by
+   the round card and the scorecard sheet ---------- */
+function teeTilesHTML(course,teeIdx,nick){
+ const c=DATA.sc[course]; if(!c) return '';
+ const p=playerOf(nick);
+ const tee=c.tees[teeIdx];
+ const female=p&&p.gender==='F';
+ const ch = tee.sheet? chFor(nick,course,tee.sheet) : null;
+ const hasCh = ch!==null && ch!==undefined;
+ const yards = totalY(tee);
+ const teeCourse=cx[course];
+ const idx = (teeCourse&&tee.sheet)? courseTeeIndex(course,baseTee(tee.sheet),female) : -1;
+ const meta = idx>-1? teeCourse.tees[idx] : null;
+ let h='<div class="tiles">';
+ h+=tileHTML(hasCh?ch:'—','Strokes',hasCh?ch/40:0);
+ h+=tileHTML(yards!==null?yards:'—','Yards',yards!==null?yards/7600:0);
+ h+=tileHTML(meta?meta.slope:'—','Slope',meta?meta.slope/155:0);
+ h+=tileHTML(meta?Number(meta.rating).toFixed(1):'—','Rating',meta?meta.rating/80:0);
+ h+='</div>';
+ return h;
 }
-function chip(n,on,attrs){
- const p=playerOf(n);
- return '<button class="p'+(isMe(n)?' me':'')+(on?' on':'')+'"'+(attrs?' '+attrs:'')
-  +' aria-pressed="'+on+'">'+esc(fullName(n))+'<i>'+(p?p.index.toFixed(1):'?')+'</i></button>';
-}
-/* shared by the round card and the sheet's player-picker chip row, so the
-   My group / All groups toggle behaves identically in both places */
-function groupList(r){
- const mine=myGroup(r); let list=r.groups.map((g,i)=>({g,i}));
- if(mineOnly&&mine>-1) list=[list[mine]];
- return {list,mine};
-}
-function players(r){
- if(!r.groups.length) return r.tbd?'<div class="note">'+r.tbd+'</div>':'';
- const {list,mine}=groupList(r);
- const ra=n=>'data-r="'+r.id+'" data-n="'+esc(n)+'"';
- if(list.length===1){
-  const g=list[0].i===mine?meFirst(list[0].g):list[0].g;
-  return '<div class="pwrap"><div class="lab">Playing with</div><div class="plist">'
-   +g.map(n=>chip(n,selFor(r)===n,ra(n))).join('')+'</div></div>';
- }
- return '<div class="pwrap">'+list.map(it=>{
-  const g=it.i===mine?meFirst(it.g):it.g;
-  return '<div class="gsep'+(it.i===mine?' mine':'')+'">Group '+(it.i+1)
-   +(it.i===mine?' · yours':'')+'</div><div class="plist">'+g.map(n=>chip(n,selFor(r)===n,ra(n))).join('')+'</div>';
- }).join('')+'</div>';
-}
-function sheetPlayers(r){
- if(!r.groups.length) return [];
- return meFirst(groupList(r).list.reduce((out,it)=>out.concat(it.g),[]));
-}
+
+/* ---------- round card ---------- */
 function cardHTML(r,isNext){
  const playing=byFull[ME_FULL].rounds.indexOf(r.id)>-1;
  const c=cd(r);
  let h='<article class="card'+(isNext?' next':'')+(playing?'':' notmine')+'" data-card="'+r.id+'">';
  if(isNext) h+='<div class="flag">Next round</div>';
- h+='<div class="chead"><div><div class="eyebrow">'+r.dayLabel+'</div><h3>'+r.title
+ const subParts=[]; if(r.optional) subParts.push('Optional'); if(c) subParts.push(c);
+ h+='<div class="chead"><div><div class="eyebrow">'+r.dayLabel+'</div><h3 class="disp">'+r.title
   +(r.assumed?'<span class="tag">assumed</span>':'')
   +(playing?'':'<span class="tag">Not in this round</span>')+'</h3><div class="cmeta">'
-  +[r.venue,r.fmt].filter(Boolean).join(' · ')+'</div>'
-  +(c?'<div class="count" data-count="'+r.id+'">'+c+'</div>':'')
-  +'</div><div class="timepill">'+(r.time||'TBD')+(r.optional?'<small>optional</small>':'')+'</div></div>';
- if(playing){ h+=hbar(r); h+=players(r); }
- h+='<div class="btnrow"><button class="btn" data-sc="'+r.course+'" data-alt="'+(r.alt||'')+'" data-rid="'+r.id+'">Scorecard</button></div>';
- h+='<div class="btnrow"><a class="btn" href="'+mapsHref(r.maps)+'">Open in '+mapsLabel()+' <span>↗</span></a></div>';
- h+='<div class="addr">'+r.addr+'</div>';
+  +[r.venue,r.fmt].filter(Boolean).join(' · ')+'</div></div>'
+  +'<div class="ctime"><b>'+(r.time||'Time TBD')+'</b>'
+  +(subParts.length?'<small data-count="'+r.id+'">'+subParts.join(' · ')+'</small>':'')
+  +'</div></div>';
+ if(playing){
+  if(r.nohcp){
+   h+=sechead(ICON_FLAG,'Tees');
+   const sc=DATA.sc[r.course];
+   if(sc){
+    const ti=cardTee[r.id]!==undefined?cardTee[r.id]:defaultTeeIdx(r.course);
+    h+=segHTML(sc.tees.map(t=>t.label),ti,'cardtee-'+r.id);
+    const y=totalY(sc.tees[ti]);
+    h+='<div class="tiles of3" style="margin-top:8px">'
+     +tileHTML(y!==null?y:'—','Yards',y!==null?y/1500:0)
+     +tileHTML(sc.par.length,'Holes',sc.par.length/9)
+     +tileHTML(sc.par.reduce((s,v)=>s+v,0),'Par',sc.par.reduce((s,v)=>s+v,0)/27)
+     +'</div>';
+   }
+   h+='<div class="note">Par-3 course — not in the pairings sheet, so no course handicap. Scorecard is here.</div>';
+  } else if(!r.groups.length){
+   if(r.tbd) h+='<div class="note">'+r.tbd+'</div>';
+  } else {
+   h+=sechead(ICON_GROUP,'Your group');
+   const mine=myGroup(r); let list=r.groups.map((g,i)=>({g,i}));
+   if(mineOnly&&mine>-1) list=[list[mine]];
+   const ra=n=>'data-r="'+r.id+'" data-n="'+esc(n)+'"';
+   const ti=cardTee[r.id]!==undefined?cardTee[r.id]:defaultTeeIdx(r.course);
+   const sc=DATA.sc[r.course]; const tee=sc?sc.tees[ti]:null;
+   if(list.length===1){
+    const g=list[0].i===mine?meFirst(list[0].g):list[0].g;
+    h+=g.map(n=>groupRowHTML(n,r.course,tee?tee.sheet:null,selFor(r)===n,ra(n))).join('');
+   } else {
+    h+=list.map(it=>{
+     const g=it.i===mine?meFirst(it.g):it.g;
+     return '<div class="gsep'+(it.i===mine?' mine':'')+'">Group '+(it.i+1)
+      +(it.i===mine?' · yours':'')+'</div>'+g.map(n=>groupRowHTML(n,r.course,tee?tee.sheet:null,selFor(r)===n,ra(n))).join('');
+    }).join('');
+   }
+   if(sc){
+    h+=sechead(ICON_FLAG,'Tees');
+    h+=segHTML(sc.tees.map(t=>t.label),ti,'cardtee-'+r.id);
+    h+='<div style="margin-top:8px">'+teeTilesHTML(r.course,ti,selFor(r))+'</div>';
+   }
+  }
+ }
+ h+='<div class="actrow"><button class="btn fill" data-sc="'+r.course+'" data-alt="'+(r.alt||'')+'" data-rid="'+r.id+'">Scorecard</button>'
+  +'<a class="btn" href="'+mapsHref(r.maps)+'">Directions <span>↗</span></a></div>';
+ h+='<div class="addr">'+r.addr+' · '+mapsLabel()+'</div>';
  if(r.note) h+='<div class="note">'+r.note+'</div>';
  return h+'</article>';
 }
@@ -602,7 +677,7 @@ function renderMoney(){
  let won=0; rounds.forEach(r=>{won+=Number(bets[r.id]||0)});
  const net=won-owed, up=net>=0;
  let h='<div class="card money">';
- h+='<div class="net'+(up?' up':'')+'">'+(net>=0?'+':'−')+'$'+Math.abs(net).toFixed(0)+'</div>';
+ h+='<div class="net disp'+(up?' up':'')+'">'+(net>=0?'+':'−')+'$'+Math.abs(net).toFixed(0)+'</div>';
  h+='<div class="lbl">'+(net===0?'Dead even.':up?'Up on the trip.':'$'+Math.abs(net).toFixed(0)+' to break even.')+'</div>';
  h+='<div class="row" style="margin-top:12px"><span>Buy-in · '+myRounds+' rounds × $'+BUYIN+'</span><b>−$'+owed+'</b></div>';
  h+='<div class="row"><span>Winnings entered</span><b>+$'+won.toFixed(0)+'</b></div>';
@@ -617,15 +692,26 @@ function renderMoney(){
 }
 
 /* ---------- scorecard sheet ---------- */
+/* who to list in the sheet's player-picker row — the selected identity's own
+   group (self first), mirroring the "Your group" section on the round card */
+function sheetPlayers(r){
+ if(!r.groups||!r.groups.length) return [];
+ const mine=myGroup(r);
+ return mine>-1 ? meFirst(r.groups[mine]) : r.groups[0];
+}
 let scState={course:null,alt:null,tee:0,rid:null,which:0,nick:ME};
 function openSheet(course,alt,rid){
- scState={course,alt:alt||null,tee:0,rid,which:0,nick:ME};
- const c=DATA.sc[course];
- const idx=c.tees.findIndex(t=>t.y); scState.tee=idx<0?0:idx;
+ scState={course,alt:alt||null,tee:defaultTeeIdx(course),rid,which:0,nick:ME};
  document.getElementById('sheet').classList.add('on');
  drawSheet();
 }
 function closeSheet(){document.getElementById('sheet').classList.remove('on')}
+function shotsLegend(shots){
+ const ones=shots.filter(s=>s===1).length, twos=shots.filter(s=>s===2).length;
+ if(twos>0) return 'Two shots on '+twos+' hole'+(twos===1?'':'s')+', one on '+ones+'.';
+ if(ones>0) return 'One shot on '+ones+' hole'+(ones===1?'':'s')+'.';
+ return '';
+}
 function drawSheet(){
  const name=scState.which===1?scState.alt:scState.course;
  const c=DATA.sc[name], n=c.par.length;
@@ -633,51 +719,41 @@ function drawSheet(){
  const nick=scState.nick;
  const tee=c.tees[scState.tee];
  const ch=tee.sheet?chFor(nick,name,tee.sheet):null;
- let h='<div class="sheethead"><div><div class="eyebrow">Scorecard</div><h3>'+tc(name)+'</h3></div>'
+ const hasCh=ch!==null&&ch!==undefined;
+ let h='<div class="sheethead"><div><div class="eyebrow">Scorecard</div><h3 class="disp">'+tc(name)+'</h3></div>'
   +'<button class="xbtn" id="closeSheet" aria-label="Close">×</button></div>';
- if(scState.alt) h+='<div class="teesel">'
-   +'<button class="'+(scState.which===0?'on':'')+'" data-which="0">'+scState.course.toLowerCase()+'</button>'
-   +'<button class="'+(scState.which===1?'on':'')+'" data-which="1">'+scState.alt.toLowerCase()+'</button></div>';
- h+='<div class="teesel">'+c.tees.map((t,i)=>{
-   const total=totalY(t);
-   return '<button class="'+(i===scState.tee?'on':'')+'" data-tee="'+i+'">'+t.label+(total!==null?' '+total:' ·')+'</button>';
-  }).join('')+'</div>';
+ if(scState.alt) h+=segHTML([scState.course,scState.alt].map(tc),scState.which,'which');
  const fp=r?sheetPlayers(r):[];
- if(fp.length) h+='<div class="pwrap"><div class="plist">'
-  +fp.map(pn=>chip(pn,scState.nick===pn,'data-scn="'+esc(pn)+'"')).join('')+'</div></div>';
- if(ch!==null&&ch!==undefined){
-  h+='<div class="strokebox"><div class="hlabel" style="font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mist)">'
-   +esc(fullName(nick))+' · '+tee.label+' tees</div><div class="big">'+ch+' strokes</div>'
-   +'<div class="hnote">Marked holes below are where they fall.</div></div>';
- } else {
-  h+='<div class="strokebox"><div class="hnote" style="margin-top:0">No course handicap for this tee in the pairings sheet.</div></div>';
- }
+ if(fp.length) h+=fp.map(pn=>groupRowHTML(pn,name,tee.sheet,scState.nick===pn,'data-scn="'+esc(pn)+'"')).join('');
+ h+=sechead(ICON_FLAG,'Tees');
+ h+=segHTML(c.tees.map(t=>t.label),scState.tee,'tee');
+ h+='<div style="margin-top:8px">'+teeTilesHTML(name,scState.tee,nick)+'</div>';
  function shotsAt(i){
-  if(ch===null||ch===undefined) return 0;
+  if(!hasCh) return 0;
   let s=c.hcp[i]<=ch?1:0;
   if(ch>n&&c.hcp[i]<=ch-n) s+=1;
   return s;
  }
+ const allShots=[]; for(let i=0;i<n;i++) allShots.push(shotsAt(i));
  const halves = n===18?[[0,9,'Out'],[9,18,'In']]:[[0,9,'Out']];
  halves.forEach(([a,b,lab])=>{
   const holes=[];for(let i=a;i<b;i++)holes.push(i);
-  h+='<div class="scwrap"><table class="sctable"><thead><tr><th class="rh">Hole</th>'
-   +holes.map(i=>'<th>'+(i+1)+'</th>').join('')+'<th>'+lab+'</th></tr></thead><tbody>';
-  h+='<tr><td class="rh">Par</td>'+holes.map(i=>'<td>'+c.par[i]+'</td>').join('')
-   +'<td class="tot">'+holes.reduce((s,i)=>s+c.par[i],0)+'</td></tr>';
-  h+='<tr><td class="rh">Hcp</td>'+holes.map(i=>'<td>'+c.hcp[i]+'</td>').join('')+'<td class="tot">—</td></tr>';
-  h+='<tr><td class="rh">Shots</td>'+holes.map(i=>{
-   const s=shotsAt(i);
-   return '<td'+(s>0?' class="shot"':'')+'>'+(s>0?s:'')+'</td>';
-  }).join('')+'<td class="tot">—</td></tr>';
-  if(tee.y){
-   h+='<tr><td class="rh">Yds</td>'+holes.map(i=>'<td>'+tee.y[i]+'</td>').join('')
-    +'<td class="tot">'+holes.reduce((s,i)=>s+tee.y[i],0)+'</td></tr>';
-  }
+  h+='<div class="holewrap"><table class="holetable"><thead><tr><th>Hole</th><th>Par</th><th>Hcp</th><th>Shots</th><th>Yds</th></tr></thead><tbody>';
+  holes.forEach(i=>{
+   const s=allShots[i];
+   const badge = s===2?'<span class="shotbadge s2">2</span>':s===1?'<span class="shotbadge s1">1</span>':'<span class="shotbadge s0">–</span>';
+   h+='<tr><td>'+(i+1)+'</td><td>'+c.par[i]+'</td><td>'+c.hcp[i]+'</td><td>'+badge+'</td>'
+    +'<td>'+(tee.y?tee.y[i]:'—')+'</td></tr>';
+  });
+  const parTot=holes.reduce((s,i)=>s+c.par[i],0);
+  const ydsTot=tee.y?holes.reduce((s,i)=>s+tee.y[i],0):null;
+  h+='<tr class="tot"><td>'+lab+'</td><td>'+parTot+'</td><td>—</td><td>—</td><td>'+(ydsTot!==null?ydsTot:'—')+'</td></tr>';
   h+='</tbody></table></div>';
  });
  if(!tee.y) h+='<div class="legend">Yardages for this tee weren\'t on the published card — par, hole handicap and your strokes still apply.</div>';
- h+='<div class="legend">Tees marked · have no published yardages.</div>';
+ const legend=hasCh?shotsLegend(allShots):'';
+ if(legend) h+='<div class="legend">'+legend+'</div>';
+ else if(!hasCh) h+='<div class="legend">No course handicap for this tee in the pairings sheet.</div>';
  document.getElementById('sheetbox').innerHTML=h;
 }
 
@@ -712,7 +788,20 @@ document.getElementById('app').addEventListener('click',e=>{
 });
 
 /* ---------- renders ---------- */
+function heroTilesHTML(){
+ const me=byFull[ME_FULL];
+ const net=netAmount();
+ const owed=me.rounds.length*BUYIN;
+ const netF = net>=0 ? 0.2 : Math.min(1, Math.abs(net)/(owed||1));
+ let h='';
+ h+=tileHTML(me.rounds.length,'Rounds',me.rounds.length/9);
+ h+=tileHTML(me.index.toFixed(1),'Index',Math.min(1,me.index/27));
+ h+=tileHTML('$'+owed,'Buy-in',owed/180);
+ h+=tileHTML((net>=0?'+':'−')+'$'+Math.abs(net).toFixed(0),'Net',netF);
+ return h;
+}
 function renderTrip(){
+ document.getElementById('heroTiles').innerHTML=heroTilesHTML();
  const nx=nextRound();
  document.getElementById('next').innerHTML=cardHTML(nx,true);
  document.getElementById('rounds').innerHTML=rounds.filter(r=>r.id!==nx.id).map(r=>cardHTML(r,false)).join('');
@@ -724,7 +813,7 @@ function renderSched(){
   +d.rows.map(r=>'<a class="srow" href="'+mapsHref(r.maps)+'"><div class="t">'+(r.time||'TBD')+'</div><div class="b">'
   +'<div class="n">'+r.title+'</div><div class="a">'+r.addr+'</div></div><div class="arw">↗</div></a>').join('')
   +'</div>').join('')
-  +'<div class="daycard"><h3>Friday · Aug 7</h3><div class="srow" style="color:var(--muted)">Not playing.</div></div>';
+  +'<div class="daycard"><h3>Friday · Aug 7</h3><div class="srow" style="color:var(--mute)">Not playing.</div></div>';
  document.getElementById('venues').innerHTML=DATA.venues.map(v=>'<a class="venue" href="'+mapsHref(v.m)+'">'
   +'<div class="b"><div class="eyebrow">'+v.k+'</div><div class="n">'+v.n+'</div><div class="a">'+v.a+'</div></div>'
   +'<div class="arw">↗</div></a>').join('');
@@ -786,11 +875,25 @@ document.getElementById('nav').addEventListener('click',e=>{
 document.getElementById('pg-trip').addEventListener('click',e=>{
  const scb=e.target.closest('button[data-sc]');
  if(scb){ openSheet(scb.dataset.sc, scb.dataset.alt||null, scb.dataset.rid); return }
- const p=e.target.closest('.p'); if(!p) return;
- const rid=p.dataset.r,n=p.dataset.n;
- sel[rid]=(sel[rid]===n)?ME:n;
- const r=rounds.find(x=>x.id===rid), card=document.querySelector('[data-card="'+rid+'"]');
- card.outerHTML=cardHTML(r,card.classList.contains('next'));
+ const card=e.target.closest('[data-card]');
+ if(card){
+  const rid=card.dataset.card;
+  const ctBtn=e.target.closest('button[data-cardtee-'+rid+']');
+  if(ctBtn){
+   cardTee[rid]=Number(ctBtn.dataset['cardtee'+rid]);
+   const r=rounds.find(x=>x.id===rid);
+   card.outerHTML=cardHTML(r,card.classList.contains('next'));
+   return;
+  }
+  const p=e.target.closest('.prow');
+  if(p && p.dataset.n){
+   const n=p.dataset.n;
+   sel[rid]=(sel[rid]===n)?ME:n;
+   const r=rounds.find(x=>x.id===rid);
+   card.outerHTML=cardHTML(r,card.classList.contains('next'));
+   return;
+  }
+ }
 });
 document.getElementById('money').addEventListener('click',e=>{
  if(e.target.id==='clearBets'){ bets={}; localStorage.removeItem('msmi-bets:'+ME_FULL); renderMoney(); }
@@ -807,14 +910,23 @@ document.getElementById('money').addEventListener('input',e=>{
  document.querySelector('.money .lbl').textContent =
   net===0?'Dead even.':net>0?'Up on the trip.':'$'+Math.abs(net).toFixed(0)+' to break even.';
  document.querySelectorAll('.money .row b')[1].textContent='+$'+won.toFixed(0);
+ const heroNet=document.querySelector('#heroTiles .tile:last-child');
+ if(heroNet){
+  const owed2=byFull[ME_FULL].rounds.length*BUYIN;
+  const netF=net>=0?0.2:Math.min(1,Math.abs(net)/(owed2||1));
+  heroNet.querySelector('.tval').textContent=(net>=0?'+':'−')+'$'+Math.abs(net).toFixed(0);
+  const bar=heroNet.querySelector('.tbar');
+  bar.style.background=ramp(clamp01(netF));
+  bar.style.opacity=(0.35+clamp01(netF)*0.65).toFixed(2);
+ }
 });
 document.getElementById('sheet').addEventListener('click',e=>{
  if(e.target.id==='sheet'||e.target.id==='closeSheet'){ closeSheet(); return }
  const t=e.target.closest('button[data-tee]'); if(t){ scState.tee=Number(t.dataset.tee); drawSheet(); return }
  const w=e.target.closest('button[data-which]'); if(w){
   scState.which=Number(w.dataset.which);
-  const c=DATA.sc[scState.which===1?scState.alt:scState.course];
-  const i=c.tees.findIndex(x=>x.y); scState.tee=i<0?0:i; drawSheet(); return
+  scState.tee=defaultTeeIdx(scState.which===1?scState.alt:scState.course);
+  drawSheet(); return
  }
  const sc=e.target.closest('button[data-scn]'); if(sc){ scState.nick=sc.dataset.scn; drawSheet(); return }
 });
@@ -828,23 +940,17 @@ document.getElementById('search').addEventListener('input',e=>{
 const gb=document.getElementById('grpBtn');
 function syncGrp(){gb.textContent=mineOnly?'My group':'All groups';gb.setAttribute('aria-pressed',String(mineOnly))}
 gb.addEventListener('click',()=>{mineOnly=!mineOnly;localStorage.setItem('msmi-group',mineOnly?'mine':'all');syncGrp();renderTrip()});
-const MOON_SVG='<svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>';
-const SUN_SVG='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>';
-function themeBtnHTML(){
- const d=document.documentElement.getAttribute('data-theme')==='dark';
- return '<button class="themebtn" aria-label="Switch to '+(d?'light':'dark')+' mode">'+(d?SUN_SVG:MOON_SVG)+'</button>';
+
+/* ---------- skin ---------- */
+function currentSkin(){ return document.documentElement.getAttribute('data-skin'); }
+function applySkin(skin,persist){
+ document.documentElement.setAttribute('data-skin',skin);
+ if(persist){ try{localStorage.setItem('msmi-skin',skin)}catch(e){} }
 }
-function syncTheme(){
- const d=document.documentElement.getAttribute('data-theme')==='dark';
- document.querySelectorAll('.themebtn').forEach(btn=>{
-  btn.innerHTML=d?SUN_SVG:MOON_SVG;
-  btn.setAttribute('aria-label','Switch to '+(d?'light':'dark')+' mode');
- });
-}
-document.getElementById('app').addEventListener('click',e=>{
- if(!e.target.closest('.themebtn')) return;
- const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
- document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('msmi-theme',n)}catch(e){}syncTheme();
+document.getElementById('skinBtn').addEventListener('click',()=>{
+ if(ME_FULL==='CHAD SCHURECHT') return;
+ const n=currentSkin()==='char'?'teal':'char';
+ applySkin(n,true);
 });
 
 setInterval(()=>{document.querySelectorAll('[data-count]').forEach(el=>{
@@ -885,9 +991,17 @@ function sortedPlayersByLast(){
 }
 let pendingPick=null;
 function renderPickerList(){
- document.getElementById('pickList').innerHTML=sortedPlayersByLast().map(p=>
-  '<button class="pickrow" data-pick="'+esc(p.name)+'"><span class="pn">'+tc(p.name)+'</span><span class="pi">'+p.index.toFixed(1)+'</span></button>'
- ).join('');
+ document.getElementById('pickList').innerHTML=sortedPlayersByLast().map(p=>{
+  const n=p.rounds.length, buyin=n*BUYIN;
+  return prowHTML({
+   name: tc(p.name),
+   sub: n+' round'+(n===1?'':'s')+' · $'+buyin,
+   value: p.index.toFixed(1),
+   label: 'Index',
+   f: p.index/27,
+   attrs: 'data-pick="'+esc(p.name)+'"'
+  });
+ }).join('');
  document.getElementById('pickList').hidden=false;
  document.getElementById('pickConfirm').hidden=true;
  document.getElementById('pickConfirm').innerHTML='';
@@ -901,12 +1015,13 @@ function fitTextWidth(el,minPx){
 function renderPickerConfirm(p){
  pendingPick=p.name;
  const n=p.rounds.length, buyin=n*BUYIN;
- document.getElementById('pickConfirm').innerHTML='<div class="card pickcard">'
-  +'<h2 class="pickname" id="pickName">'+esc(tc(p.name))+'</h2>'
-  +'<div class="pickstats">'
-  +'<div class="pickstat"><b>'+p.index.toFixed(1)+'</b><span>Index</span></div>'
-  +'<div class="pickstat"><b>'+n+'</b><span>Rounds</span></div>'
-  +'<div class="pickstat"><b>$'+buyin+'</b><span>Buy-in</span></div>'
+ document.getElementById('pickConfirm').innerHTML='<div class="pickcard">'
+  +'<h2 class="pickname disp" id="pickName">'+esc(tc(p.name))+'</h2>'
+  +'<p class="picktag">Playing the MSMI 2026 trip</p>'
+  +'<div class="tiles of3">'
+  +tileHTML(p.index.toFixed(1),'Index',p.index/27)
+  +tileHTML(n,'Rounds',n/9)
+  +tileHTML('$'+buyin,'Buy-in',buyin/180)
   +'</div>'
   +'<button class="pickconfirmbtn" id="pickConfirmBtn">That\'s me</button>'
   +'<button class="pickback" id="pickBack">Not me — go back</button>'
@@ -915,28 +1030,31 @@ function renderPickerConfirm(p){
  document.getElementById('pickConfirm').hidden=false;
  fitTextWidth(document.getElementById('pickName'),15);
 }
-function showPicker(){ document.getElementById('picker').hidden=false; renderPickerList(); }
+function showPicker(){
+ if(ME_FULL!==null) applySkin(currentSkin(),false);
+ document.getElementById('picker').hidden=false; renderPickerList();
+}
 function hidePicker(){ document.getElementById('picker').hidden=true; }
 function setIdentity(fullUpper){
  ME_FULL=fullUpper; ME=shortKeyFor(fullUpper);
- sel={}; scState.nick=ME;
+ sel={}; cardTee={}; scState.nick=ME;
  loadBets();
- document.documentElement.setAttribute('data-skin',fullUpper==='CHAD SCHURECHT'?'epicminds':'teal');
+ if(fullUpper==='CHAD SCHURECHT'){ applySkin('epicminds',false); }
+ else{
+  try{ applySkin(localStorage.getItem('msmi-skin')==='char'?'char':'teal',false); }
+  catch(e){ applySkin('teal',false); }
+ }
 }
 /* shared name+Change row on every page but Trip (which carries the name in its hero) */
 function renderPageHead(){
- const h='<span class="phname">'+esc(tc(byFull[ME_FULL].name))+'</span>'
-  +'<div class="pageactions"><button class="gchange">Change</button>'+themeBtnHTML()+'</div>';
+ const h='<span class="phname disp">'+esc(tc(byFull[ME_FULL].name))+'</span>'
+  +'<div class="pageactions"><button class="gchange">Change</button></div>';
  ['head-sched','head-money','head-hcp','head-hotel'].forEach(id=>{ document.getElementById(id).innerHTML=h; });
 }
 function bootApp(){
- const me=byFull[ME_FULL];
- document.getElementById('stRounds').textContent=me.rounds.length;
- document.getElementById('stIndex').textContent=me.index.toFixed(1);
  document.getElementById('heroName').textContent=tc(ME_FULL);
- document.getElementById('heroMark').style.display=(ME_FULL==='CHAD SCHURECHT')?'':'none';
  fitTextWidth(document.getElementById('heroName'),24);
- renderNav(); syncGrp(); syncTheme(); renderMapsPref(); renderMoney(); renderTrip(); renderSched(); renderTables(); renderHotel(); renderPageHead();
+ renderNav(); syncGrp(); renderMapsPref(); renderMoney(); renderTrip(); renderSched(); renderTables(); renderHotel(); renderPageHead();
  document.getElementById('app').classList.add('on');
 }
 function commitIdentity(fullUpper){

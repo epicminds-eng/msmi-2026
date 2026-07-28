@@ -5,7 +5,7 @@
    STANDING RULE: any commit that touches index.html must also bump
    CACHE_VERSION in the same commit, or the cache-first SW keeps serving
    the stale page indefinitely — this bit us once already. */
-const CACHE_VERSION = 'v11';
+const CACHE_VERSION = 'v12';
 const CACHE_NAME = 'msmi-2026-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'msmi-2026-fonts';
 
@@ -34,7 +34,7 @@ const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
    the runtime handler still keeps them fresh on every later visit. The font
    file URLs aren't hardcoded — they're parsed out of the stylesheet itself
    so this keeps working if Google rotates the file hashes. */
-const FONT_STYLESHEET_URL = 'https://fonts.googleapis.com/css2?family=Archivo:wght@300&family=Hanken+Grotesk:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap';
+const FONT_STYLESHEET_URL = 'https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,500&display=swap';
 
 function precacheFonts() {
   return caches.open(FONT_CACHE_NAME).then(cache =>
