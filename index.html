@@ -460,6 +460,9 @@ const cx={}; DATA.hcp.courses.forEach(c=>cx[c.name]=c);
 const rounds=DATA.rounds;
 
 function fullName(n){return DATA.names[n]||n}
+/* uppercase full name — the storage-key form used by msmi-who/msmi-bets/msmi-tee,
+   as opposed to fullName()'s display casing */
+function upperFullName(n){return fullName(n).toUpperCase()}
 function playerOf(n){const f=DATA.names[n];return f?(byFull[f.toUpperCase()]||null):null}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
 function isL(t){return t.indexOf('(L)')>-1}
@@ -554,7 +557,6 @@ function sechead(icon,label){ return '<div class="sechead">'+icon+'<span>'+label
 /* ---------- state ---------- */
 let mineOnly=(localStorage.getItem('msmi-group')||'mine')==='mine';
 let sel={};
-let cardTee={};
 let bets={};
 function loadBets(){try{bets=JSON.parse(localStorage.getItem('msmi-bets:'+ME_FULL)||'{}')}catch(e){bets={}}}
 function selFor(r){return sel[r.id]||ME}
@@ -584,6 +586,23 @@ function defaultTeeIdx(course){
  const c=DATA.sc[course]; if(!c) return 0;
  const idx=c.tees.findIndex(t=>t.y);
  return idx<0?0:idx;
+}
+/* per-player remembered tee, index into DATA.sc[course].tees (0 = longest) — a
+   fact about the person, not the card or sheet showing them. Clamped to the
+   course's own tee count so a player's index carried over from a course with
+   more tees (e.g. Masterpiece's 5) never overruns a shorter one (e.g. Classic's 4). */
+function teeIndexFor(fullNameKey,course){
+ const c=DATA.sc[course]; const n=c?c.tees.length:0;
+ if(n<=0) return 0;
+ let stored=null;
+ try{ stored=localStorage.getItem('msmi-tee:'+fullNameKey); }catch(e){}
+ if(stored===null||stored==='') return defaultTeeIdx(course);
+ const idx=parseInt(stored,10);
+ if(!Number.isFinite(idx)) return defaultTeeIdx(course);
+ return Math.max(0,Math.min(n-1,idx));
+}
+function setTeeIndexFor(fullNameKey,idx){
+ try{ localStorage.setItem('msmi-tee:'+fullNameKey,String(idx)); }catch(e){}
 }
 
 /* ---------- "Tees" section: segmented tee control + 4 stat tiles, shared by
@@ -627,7 +646,7 @@ function cardHTML(r,isNext){
    h+=sechead(ICON_FLAG,'Tees');
    const sc=DATA.sc[r.course];
    if(sc){
-    const ti=cardTee[r.id]!==undefined?cardTee[r.id]:defaultTeeIdx(r.course);
+    const ti=teeIndexFor(ME_FULL,r.course);
     h+=segHTML(sc.tees.map(t=>t.label),ti,'cardtee-'+r.id);
     const y=totalY(sc.tees[ti]);
     h+='<div class="tiles of3" style="margin-top:8px">'
@@ -644,7 +663,7 @@ function cardHTML(r,isNext){
    const mine=myGroup(r); let list=r.groups.map((g,i)=>({g,i}));
    if(mineOnly&&mine>-1) list=[list[mine]];
    const ra=n=>'data-r="'+r.id+'" data-n="'+esc(n)+'"';
-   const ti=cardTee[r.id]!==undefined?cardTee[r.id]:defaultTeeIdx(r.course);
+   const ti=teeIndexFor(upperFullName(selFor(r)),r.course);
    const sc=DATA.sc[r.course]; const tee=sc?sc.tees[ti]:null;
    if(list.length===1){
     const g=list[0].i===mine?meFirst(list[0].g):list[0].g;
@@ -701,7 +720,7 @@ function sheetPlayers(r){
 }
 let scState={course:null,alt:null,tee:0,rid:null,which:0,nick:ME};
 function openSheet(course,alt,rid){
- scState={course,alt:alt||null,tee:defaultTeeIdx(course),rid,which:0,nick:ME};
+ scState={course,alt:alt||null,tee:0,rid,which:0,nick:ME};
  document.getElementById('sheet').classList.add('on');
  drawSheet();
 }
@@ -717,6 +736,7 @@ function drawSheet(){
  const c=DATA.sc[name], n=c.par.length;
  const r=rounds.find(x=>x.id===scState.rid);
  const nick=scState.nick;
+ scState.tee=teeIndexFor(upperFullName(nick),name);
  const tee=c.tees[scState.tee];
  const ch=tee.sheet?chFor(nick,name,tee.sheet):null;
  const hasCh=ch!==null&&ch!==undefined;
@@ -880,9 +900,12 @@ document.getElementById('pg-trip').addEventListener('click',e=>{
   const rid=card.dataset.card;
   const ctBtn=e.target.closest('button[data-cardtee-'+rid+']');
   if(ctBtn){
-   cardTee[rid]=Number(ctBtn.getAttribute('data-cardtee-'+rid));
    const r=rounds.find(x=>x.id===rid);
-   card.outerHTML=cardHTML(r,card.classList.contains('next'));
+   const idx=Number(ctBtn.getAttribute('data-cardtee-'+rid));
+   setTeeIndexFor(r.nohcp?ME_FULL:upperFullName(selFor(r)),idx);
+   /* a player's tee is now a global fact, not a per-card one — re-render every
+      round card so any other card showing the same person stays in sync */
+   renderTrip();
    return;
   }
   const p=e.target.closest('.prow');
@@ -922,10 +945,12 @@ document.getElementById('money').addEventListener('input',e=>{
 });
 document.getElementById('sheet').addEventListener('click',e=>{
  if(e.target.id==='sheet'||e.target.id==='closeSheet'){ closeSheet(); return }
- const t=e.target.closest('button[data-tee]'); if(t){ scState.tee=Number(t.dataset.tee); drawSheet(); return }
+ const t=e.target.closest('button[data-tee]'); if(t){
+  setTeeIndexFor(upperFullName(scState.nick),Number(t.dataset.tee));
+  drawSheet(); renderTrip(); return
+ }
  const w=e.target.closest('button[data-which]'); if(w){
   scState.which=Number(w.dataset.which);
-  scState.tee=defaultTeeIdx(scState.which===1?scState.alt:scState.course);
   drawSheet(); return
  }
  const sc=e.target.closest('button[data-scn]'); if(sc){ scState.nick=sc.dataset.scn; drawSheet(); return }
@@ -1037,7 +1062,7 @@ function showPicker(){
 function hidePicker(){ document.getElementById('picker').hidden=true; }
 function setIdentity(fullUpper){
  ME_FULL=fullUpper; ME=shortKeyFor(fullUpper);
- sel={}; cardTee={}; scState.nick=ME;
+ sel={}; scState.nick=ME;
  loadBets();
  if(fullUpper==='CHAD SCHURECHT'){ applySkin('epicminds',false); }
  else{
