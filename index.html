@@ -59,23 +59,25 @@ button{font-family:var(--sans);color:inherit}
 .eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 h2.sect{font-family:var(--serif);font-weight:500;font-size:2rem;letter-spacing:-.01em;margin:.1em 0 .7em}
 .pagehead{display:flex;align-items:center;justify-content:space-between;gap:12px;
- padding:calc(env(safe-area-inset-top,0px) + 20px) 48px 16px 0;border-bottom:1px solid var(--rule);margin-bottom:20px}
+ padding:calc(env(safe-area-inset-top,0px) + 20px) 0 16px;border-bottom:1px solid var(--rule);margin-bottom:20px}
 .pagehead .phname{font-family:var(--serif);font-size:1.3rem;font-weight:500;letter-spacing:-.01em}
+.pagehead .pageactions{display:flex;align-items:center;gap:2px}
 .pagehead .gchange{display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 4px;
  border:0;background:none;color:var(--muted);font-family:var(--sans);font-size:.88rem;font-weight:600;cursor:pointer}
 .pagehead .gchange:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .page{display:none} .page.on{display:block}
 #app{display:none} #app.on{display:block}
 
-#themeBtn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;z-index:70;
- width:44px;height:44px;border-radius:50%;border:1px solid var(--rule);background:var(--card);
- display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);font-size:18px}
-#themeBtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.themebtn{display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:0 0 auto;
+ border:0;background:none;color:inherit;cursor:pointer;padding:0}
+.themebtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.themebtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 .hero{background:var(--deep);color:var(--deep-ink);border-radius:20px;padding:26px 20px 22px;
  margin:calc(env(safe-area-inset-top,0px) + 14px) 0 18px}
-.hero .top{display:flex;justify-content:space-between;align-items:flex-start;padding-right:48px}
+.hero .top{display:flex;justify-content:space-between;align-items:flex-start}
 .hero .kick{font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+.hero .topright{display:flex;align-items:flex-start;gap:8px}
 .hero .titlewrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .hero .mark{font-family:'Archivo',sans-serif;font-weight:300;font-size:.68rem;letter-spacing:.1em;color:var(--mist)}
 .hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.3rem,10.5vw,3.2rem);line-height:1.05;
@@ -138,6 +140,7 @@ h2.sect{font-family:var(--serif);font-weight:500;font-size:2rem;letter-spacing:-
  border:1px solid var(--rule);border-radius:12px;text-decoration:none;font-weight:700;font-size:.92rem;
  background:var(--card);cursor:pointer}
 .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mapschoice.on{background:var(--deep);color:var(--deep-ink);border-color:var(--deep)}
 .addr{font-size:.82rem;color:var(--muted);margin-top:9px}
 .note{margin-top:10px;font-size:.83rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:10px}
 
@@ -215,17 +218,17 @@ tr[hidden]{display:none}
 .teesel button:disabled{opacity:.45}
 .strokebox{background:var(--deep);color:var(--deep-ink);border-radius:12px;padding:12px 14px;margin:10px 0}
 .strokebox .big{font-family:var(--serif);font-size:1.9rem;font-weight:500;line-height:1;color:var(--gold-l)}
-.sctable{width:100%;border-collapse:separate;border-spacing:0;font-size:.9rem;background:var(--card);
- border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);table-layout:fixed}
-.sctable th,.sctable td{padding:7px 2px;text-align:center;border-bottom:1px solid var(--rule)}
-.sctable th.rh,.sctable td.rh{text-align:left;padding-left:11px;font-size:.7rem;letter-spacing:.06em;
- text-transform:uppercase;color:var(--muted);font-weight:700;width:56px}
-.sctable thead th{background:var(--bg);font-size:.78rem}
+.scwrap{overflow-x:auto;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);
+ -webkit-overflow-scrolling:touch;margin-top:12px}
+.sctable{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:15px}
+.sctable th,.sctable td{padding:7px 9px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--rule)}
+.sctable th.rh,.sctable td.rh{position:sticky;left:0;z-index:1;background:var(--card);text-align:left;
+ padding-left:11px;font-size:15px;letter-spacing:.02em;text-transform:uppercase;color:var(--muted);
+ font-weight:700;box-shadow:1px 0 0 var(--rule)}
+.sctable thead th{background:var(--bg);font-size:15px}
+.sctable thead th.rh{z-index:2}
 .sctable td.tot{background:var(--bg);font-weight:700}
-.sctable td.stroke{position:relative;font-weight:700}
-.sctable td.stroke::after{content:"";position:absolute;top:4px;left:50%;transform:translateX(-50%);
- width:5px;height:5px;border-radius:50%;background:var(--accent)}
-.sctable td.stroke2::after{width:13px;border-radius:3px}
+.sctable td.shot{background:color-mix(in srgb, var(--accent) 16%, transparent);font-weight:700}
 .legend{font-size:.8rem;color:var(--muted);margin-top:10px}
 
 /* name picker */
@@ -291,7 +294,6 @@ html[data-theme="dark"] .credit img.light{display:none}
  finished. Screenshot this box — the reason will appear below if there was one.
  <div id="booterr" style="margin-top:10px;font-family:ui-monospace,monospace;font-size:13px;color:#8A2F2F"></div>
 </div>
-<button id="themeBtn" aria-label="Switch theme">🌙</button>
 
 <!-- ============ NAME PICKER ============ -->
 <div class="picker" id="picker" hidden>
@@ -312,7 +314,10 @@ html[data-theme="dark"] .credit img.light{display:none}
  <div class="wrap">
   <div class="hero">
    <div class="top"><span class="kick">MSMI · Michigan</span>
-    <span class="titlewrap"><span class="kick">Golf Trip 2026</span><span class="mark" id="heroMark">epicminds</span></span>
+    <div class="topright">
+     <span class="titlewrap"><span class="kick">Golf Trip 2026</span><span class="mark" id="heroMark">epicminds</span></span>
+     <button class="themebtn" id="themeBtnHero" aria-label="Switch theme"></button>
+    </div>
    </div>
    <h1 id="heroName">Chad Schurecht</h1>
    <button class="changebtn gchange">Change golfer</button>
@@ -378,10 +383,19 @@ html[data-theme="dark"] .credit img.light{display:none}
     <a class="btn" href="tel:+18663485249">Call front desk</a>
    </div>
    <div class="btnrow">
-    <a class="btn" href="https://maps.apple.com/?q=Treetops%20Resort&amp;address=3962%20Wilkinson%20Rd,%20Gaylord,%20MI%2049735">Open in Apple Maps <span>↗</span></a>
+    <a class="btn" id="hotelFrontDeskMaps" data-apple="https://maps.apple.com/?q=Treetops%20Resort&amp;address=3962%20Wilkinson%20Rd,%20Gaylord,%20MI%2049735" href="https://maps.apple.com/?q=Treetops%20Resort&amp;address=3962%20Wilkinson%20Rd,%20Gaylord,%20MI%2049735">Open in Apple Maps <span>↗</span></a>
    </div>
    <div class="note">Check-in is at the Lodge — front desk and lobby. Five separate lodging clusters on
     the property, so ask there which building you're in.</div>
+  </div>
+
+  <div class="eyebrow" style="margin-top:26px">Your preference</div>
+  <h2 class="sect" style="font-size:1.5rem">Directions open in</h2>
+  <div class="card">
+   <div class="btnrow">
+    <button class="btn mapschoice" data-provider="apple">Apple Maps</button>
+    <button class="btn mapschoice" data-provider="google">Google Maps</button>
+   </div>
   </div>
 
   <div class="eyebrow" style="margin-top:26px">Property map</div>
@@ -575,7 +589,7 @@ function cardHTML(r,isNext){
   +'</div><div class="timepill">'+(r.time||'TBD')+(r.optional?'<small>optional</small>':'')+'</div></div>';
  if(playing){ h+=hbar(r); h+=players(r); }
  h+='<div class="btnrow"><button class="btn" data-sc="'+r.course+'" data-alt="'+(r.alt||'')+'" data-rid="'+r.id+'">Scorecard</button></div>';
- h+='<div class="btnrow"><a class="btn" href="'+r.maps+'">Open in Apple Maps <span>↗</span></a></div>';
+ h+='<div class="btnrow"><a class="btn" href="'+mapsHref(r.maps)+'">Open in '+mapsLabel()+' <span>↗</span></a></div>';
  h+='<div class="addr">'+r.addr+'</div>';
  if(r.note) h+='<div class="note">'+r.note+'</div>';
  return h+'</article>';
@@ -638,31 +652,64 @@ function drawSheet(){
  } else {
   h+='<div class="strokebox"><div class="hnote" style="margin-top:0">No course handicap for this tee in the pairings sheet.</div></div>';
  }
+ function shotsAt(i){
+  if(ch===null||ch===undefined) return 0;
+  let s=c.hcp[i]<=ch?1:0;
+  if(ch>n&&c.hcp[i]<=ch-n) s+=1;
+  return s;
+ }
  const halves = n===18?[[0,9,'Out'],[9,18,'In']]:[[0,9,'Out']];
  halves.forEach(([a,b,lab])=>{
   const holes=[];for(let i=a;i<b;i++)holes.push(i);
-  h+='<div style="overflow-x:auto;margin-top:12px"><table class="sctable"><thead><tr><th class="rh">Hole</th>'
+  h+='<div class="scwrap"><table class="sctable"><thead><tr><th class="rh">Hole</th>'
    +holes.map(i=>'<th>'+(i+1)+'</th>').join('')+'<th>'+lab+'</th></tr></thead><tbody>';
   h+='<tr><td class="rh">Par</td>'+holes.map(i=>'<td>'+c.par[i]+'</td>').join('')
    +'<td class="tot">'+holes.reduce((s,i)=>s+c.par[i],0)+'</td></tr>';
   h+='<tr><td class="rh">Hcp</td>'+holes.map(i=>'<td>'+c.hcp[i]+'</td>').join('')+'<td class="tot">—</td></tr>';
+  h+='<tr><td class="rh">Shots</td>'+holes.map(i=>{
+   const s=shotsAt(i);
+   return '<td'+(s>0?' class="shot"':'')+'>'+(s>0?s:'')+'</td>';
+  }).join('')+'<td class="tot">—</td></tr>';
   if(tee.y){
-   h+='<tr><td class="rh">Yds</td>'+holes.map(i=>{
-    let cls='';
-    if(ch!==null&&ch!==undefined){
-     if(c.hcp[i]<=ch) cls='stroke';
-     if(ch>n&&c.hcp[i]<=ch-n) cls='stroke stroke2';
-    }
-    return '<td class="'+cls+'">'+tee.y[i]+'</td>';
-   }).join('')+'<td class="tot">'+holes.reduce((s,i)=>s+tee.y[i],0)+'</td></tr>';
+   h+='<tr><td class="rh">Yds</td>'+holes.map(i=>'<td>'+tee.y[i]+'</td>').join('')
+    +'<td class="tot">'+holes.reduce((s,i)=>s+tee.y[i],0)+'</td></tr>';
   }
   h+='</tbody></table></div>';
  });
  if(!tee.y) h+='<div class="legend">Yardages for this tee weren\'t on the published card — par, hole handicap and your strokes still apply.</div>';
- else if(ch!==null&&ch!==undefined) h+='<div class="legend">A dot marks a hole where '+(isMe(nick)?'you get':'they get')+' a stroke.</div>';
  h+='<div class="legend">Tees marked · have no published yardages.</div>';
  document.getElementById('sheetbox').innerHTML=h;
 }
+
+/* ---------- maps preference ---------- */
+function mapsProvider(){ try{return localStorage.getItem('msmi-maps')||'google'}catch(e){return 'google'} }
+function mapsLabel(){ return mapsProvider()==='apple'?'Apple Maps':'Google Maps' }
+/* Apple URLs already carry the full address in their own address= param —
+   reuse that instead of duplicating address strings for a second provider. */
+function mapsHref(appleUrl){
+ if(mapsProvider()==='apple') return appleUrl;
+ const m=appleUrl.match(/[?&]address=([^&]+)/);
+ const addr=m?decodeURIComponent(m[1]):'';
+ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(addr);
+}
+function updateHotelFrontDeskMaps(){
+ const el=document.getElementById('hotelFrontDeskMaps'); if(!el) return;
+ el.href=mapsHref(el.dataset.apple);
+ el.innerHTML='Open in '+mapsLabel()+' <span>↗</span>';
+}
+function renderMapsPref(){
+ const p=mapsProvider();
+ document.querySelectorAll('.mapschoice').forEach(b=>{
+  const on=b.dataset.provider===p;
+  b.classList.toggle('on',on);
+  b.setAttribute('aria-pressed',String(on));
+ });
+}
+document.getElementById('app').addEventListener('click',e=>{
+ const b=e.target.closest('.mapschoice'); if(!b) return;
+ try{localStorage.setItem('msmi-maps',b.dataset.provider)}catch(e){}
+ renderMapsPref(); updateHotelFrontDeskMaps(); renderTrip(); renderSched(); renderHotel();
+});
 
 /* ---------- renders ---------- */
 function renderTrip(){
@@ -674,11 +721,11 @@ function renderSched(){
  const days=[];
  rounds.forEach(r=>{let d=days.find(x=>x.day===r.day);if(!d){d={day:r.day,label:r.dayLabel,rows:[]};days.push(d)}d.rows.push(r)});
  document.getElementById('sched').innerHTML=days.map(d=>'<div class="daycard"><h3>'+d.label+'</h3>'
-  +d.rows.map(r=>'<a class="srow" href="'+r.maps+'"><div class="t">'+(r.time||'TBD')+'</div><div class="b">'
+  +d.rows.map(r=>'<a class="srow" href="'+mapsHref(r.maps)+'"><div class="t">'+(r.time||'TBD')+'</div><div class="b">'
   +'<div class="n">'+r.title+'</div><div class="a">'+r.addr+'</div></div><div class="arw">↗</div></a>').join('')
   +'</div>').join('')
   +'<div class="daycard"><h3>Friday · Aug 7</h3><div class="srow" style="color:var(--muted)">Not playing.</div></div>';
- document.getElementById('venues').innerHTML=DATA.venues.map(v=>'<a class="venue" href="'+v.m+'">'
+ document.getElementById('venues').innerHTML=DATA.venues.map(v=>'<a class="venue" href="'+mapsHref(v.m)+'">'
   +'<div class="b"><div class="eyebrow">'+v.k+'</div><div class="n">'+v.n+'</div><div class="a">'+v.a+'</div></div>'
   +'<div class="arw">↗</div></a>').join('');
 }
@@ -697,7 +744,7 @@ function renderTables(){
  }).join('');
 }
 function renderHotel(){
- document.getElementById('lodging').innerHTML=DATA.lodging.map(l=>'<a class="lodge" href="'+l[2]+'">'
+ document.getElementById('lodging').innerHTML=DATA.lodging.map(l=>'<a class="lodge" href="'+mapsHref(l[2])+'">'
   +'<div class="b"><b>'+l[0]+'</b><span>'+l[1]+'</span><span class="loc">'+l[3]+'</span></div>'
   +'<div class="arw">↗</div></a>').join('');
  var img=new Image();
@@ -708,6 +755,7 @@ function renderHotel(){
    'Map image not found next to this file. The button below always works.';
  };
  document.getElementById('mapslot').appendChild(img);
+ updateHotelFrontDeskMaps();
 }
 
 /* ---------- nav ---------- */
@@ -780,11 +828,24 @@ document.getElementById('search').addEventListener('input',e=>{
 const gb=document.getElementById('grpBtn');
 function syncGrp(){gb.textContent=mineOnly?'My group':'All groups';gb.setAttribute('aria-pressed',String(mineOnly))}
 gb.addEventListener('click',()=>{mineOnly=!mineOnly;localStorage.setItem('msmi-group',mineOnly?'mine':'all');syncGrp();renderTrip()});
-const tb=document.getElementById('themeBtn');
-function syncTheme(){const d=document.documentElement.getAttribute('data-theme')==='dark';
- tb.textContent=d?'☀️':'🌙';tb.setAttribute('aria-label',d?'Switch to light mode':'Switch to dark mode')}
-tb.addEventListener('click',()=>{const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
- document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('msmi-theme',n)}catch(e){}syncTheme()});
+const MOON_SVG='<svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>';
+const SUN_SVG='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>';
+function themeBtnHTML(){
+ const d=document.documentElement.getAttribute('data-theme')==='dark';
+ return '<button class="themebtn" aria-label="Switch to '+(d?'light':'dark')+' mode">'+(d?SUN_SVG:MOON_SVG)+'</button>';
+}
+function syncTheme(){
+ const d=document.documentElement.getAttribute('data-theme')==='dark';
+ document.querySelectorAll('.themebtn').forEach(btn=>{
+  btn.innerHTML=d?SUN_SVG:MOON_SVG;
+  btn.setAttribute('aria-label','Switch to '+(d?'light':'dark')+' mode');
+ });
+}
+document.getElementById('app').addEventListener('click',e=>{
+ if(!e.target.closest('.themebtn')) return;
+ const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+ document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('msmi-theme',n)}catch(e){}syncTheme();
+});
 
 setInterval(()=>{document.querySelectorAll('[data-count]').forEach(el=>{
  const r=rounds.find(x=>x.id===el.dataset.count); if(r) el.textContent=cd(r)})},3e4);
@@ -864,7 +925,8 @@ function setIdentity(fullUpper){
 }
 /* shared name+Change row on every page but Trip (which carries the name in its hero) */
 function renderPageHead(){
- const h='<span class="phname">'+esc(tc(byFull[ME_FULL].name))+'</span><button class="gchange">Change</button>';
+ const h='<span class="phname">'+esc(tc(byFull[ME_FULL].name))+'</span>'
+  +'<div class="pageactions"><button class="gchange">Change</button>'+themeBtnHTML()+'</div>';
  ['head-sched','head-money','head-hcp','head-hotel'].forEach(id=>{ document.getElementById(id).innerHTML=h; });
 }
 function bootApp(){
@@ -874,7 +936,7 @@ function bootApp(){
  document.getElementById('heroName').textContent=tc(ME_FULL);
  document.getElementById('heroMark').style.display=(ME_FULL==='CHAD SCHURECHT')?'':'none';
  fitTextWidth(document.getElementById('heroName'),24);
- renderNav(); syncGrp(); syncTheme(); renderMoney(); renderTrip(); renderSched(); renderTables(); renderHotel(); renderPageHead();
+ renderNav(); syncGrp(); syncTheme(); renderMapsPref(); renderMoney(); renderTrip(); renderSched(); renderTables(); renderHotel(); renderPageHead();
  document.getElementById('app').classList.add('on');
 }
 function commitIdentity(fullUpper){
