@@ -478,14 +478,10 @@ function totalY(t){return t.y?t.y.reduce((s,v)=>s+v,0):null}
    aliases for the same person (e.g. "LOU" vs "LOU P") both match */
 function isMe(n){const f=DATA.names[n];return f?f.toUpperCase()===ME_FULL:false}
 /* moves the selected identity to the front of a group without mutating the source array —
-   DATA.rounds[].groups must stay byte-identical, this is display order only. Swaps the
-   selected player with whoever was first — everyone else keeps their exact seat, unlike a
-   remove-and-unshift which would also ripple everyone between position 0 and the selected
-   player's old slot forward by one. */
+   DATA.rounds[].groups must stay byte-identical, this is display order only */
 function meFirst(g){
  const i=g.findIndex(isMe); if(i<=0) return g;
- const g2=g.slice(); const tmp=g2[0]; g2[0]=g2[i]; g2[i]=tmp;
- return g2;
+ return [g[i],...g.slice(0,i),...g.slice(i+1)];
 }
 /* any short key that maps back to a full name — used as the default "self" token */
 function shortKeyFor(fullUpper){
