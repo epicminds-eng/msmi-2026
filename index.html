@@ -142,9 +142,10 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 
 /* ---------- component C: segmented control ---------- */
 .seg{display:flex;gap:4px;background:var(--raise);border-radius:12px;padding:4px;flex-wrap:wrap}
-.seg button{flex:1 1 auto;min-width:64px;min-height:42px;border-radius:9px;border:0;background:transparent;
+.seg button{flex:1 1 auto;min-width:64px;min-height:42px;border-radius:9px;border:2px solid transparent;background:transparent;
  color:var(--mute);font-family:var(--sans);font-size:.85rem;font-weight:700;cursor:pointer}
-.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+/* same selection language as .prow.on — raised fill kept, accent border added */
+.seg button.on{background:var(--card);color:var(--ink);border-color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.3)}
 
 .ctrls{display:flex;gap:8px;margin:0 0 16px}
 .ctrls button,.ctrls a{flex:1;min-height:46px;border-radius:999px;border:1px solid var(--line);
@@ -562,7 +563,7 @@ function groupRowHTML(nick,course,on,attrs){
   name: fullName(nick),
   sub: parts.join(' · '),
   value: has? String(ch) : '—',
-  label: 'HCP',
+  label: 'STROKES',
   f: has? ch/40 : 0,
   on, attrs
  });
