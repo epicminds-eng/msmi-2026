@@ -154,6 +154,18 @@ html[data-skin="epicminds"] .skinbtn{display:none}
  color:var(--mute);text-align:right;margin-top:3px;overflow-wrap:anywhere}
 .prow .prbar{height:5px;border-radius:99px;background:var(--line);margin-top:9px;overflow:hidden}
 .prow .prbar i{display:block;height:100%;border-radius:99px}
+/* picker-only: avatar to the left of name+value, ring coloured by ramp(index).
+   Picker rows are the only prowHTML consumer that passes opts.avatar. */
+.prowtop{display:flex;align-items:center;gap:12px}
+.prowtop .pr1{flex:1 1 auto;min-width:0}
+.pravatar{position:relative;flex:0 0 auto;width:44px;height:44px;border-radius:50%;
+ border:2px solid var(--mute);display:flex;align-items:center;justify-content:center;
+ overflow:hidden;background:var(--raise)}
+.pravatar svg{width:20px;height:20px;stroke:var(--mute);fill:none;stroke-width:1.8;
+ stroke-linecap:round;stroke-linejoin:round}
+.pravatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatarremove{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;
+ background:var(--hot);color:#fff;font-size:.7rem;line-height:18px;text-align:center;font-weight:800}
 .gsep{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
 .gsep.mine{color:var(--ink)}
 /* two-column player grid — round card and scorecard sheet only. Row-first flow
@@ -347,6 +359,7 @@ footer p{margin:.45em 0}
   </div>
   <div class="picklist" id="pickList"></div>
   <div class="pickconfirm" id="pickConfirm" hidden></div>
+  <input type="file" id="avatarFileInput" accept="image/*" hidden>
  </div>
 </div>
 
@@ -570,10 +583,12 @@ function tileHTML(val,label,f,neutral){
 function prowHTML(opts){
  const f=clamp01(opts.f);
  const pill=opts.pillStyle? '<span class="teepill" style="'+opts.pillStyle+'"></span>' : '';
- return '<button class="prow'+(opts.on?' on':'')+'"'+(opts.attrs?' '+opts.attrs:'')+' aria-pressed="'+(!!opts.on)+'">'
-  +'<div class="pr1"><div><span class="prname">'+esc(opts.name)+'</span>'
+ const pr1='<div class="pr1"><div><span class="prname">'+esc(opts.name)+'</span>'
   +(opts.sub?'<span class="prsub">'+esc(opts.sub)+'</span>':'')+'</div>'
-  +'<div><div class="prvalrow"><span class="prval">'+opts.value+'</span>'+pill+'</div><span class="prlabel">'+opts.label+'</span></div></div>'
+  +'<div><div class="prvalrow"><span class="prval">'+opts.value+'</span>'+pill+'</div><span class="prlabel">'+opts.label+'</span></div></div>';
+ const top = opts.avatar? '<div class="prowtop">'+opts.avatar+pr1+'</div>' : pr1;
+ return '<button class="prow'+(opts.on?' on':'')+'"'+(opts.attrs?' '+opts.attrs:'')+' aria-pressed="'+(!!opts.on)+'">'
+  +top
   +'<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>'
   +'</button>';
 }
@@ -638,6 +653,59 @@ function segHTML(items,activeIdx,attrName){
 const ICON_GROUP='<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.6 12.7c2.6.5 4.4 2.2 4.4 4.3"/></svg>';
 const ICON_FLAG='<svg viewBox="0 0 24 24"><path d="M6 21V4M6 4l12 3.4L6 11"/></svg>';
 function sechead(icon,label){ return '<div class="sechead">'+icon+'<span>'+label+'</span></div>'; }
+
+/* ---------- picker avatars: local-only photo, never shared, never precached ----------
+   msmi-photo:<UPPER FULL NAME> is the one new localStorage key this feature adds.
+   Every other key (msmi-who, msmi-bets:*, msmi-tee:*, msmi-skin, msmi-group,
+   msmi-maps) is untouched by any function below. */
+function photoFor(fullUpper){
+ try{ return localStorage.getItem('msmi-photo:'+fullUpper); }catch(e){ return null; }
+}
+function removePhotoFor(fullUpper){
+ try{ localStorage.removeItem('msmi-photo:'+fullUpper); }catch(e){}
+}
+/* default glyph is the same inline ICON_FLAG used elsewhere — no image file,
+   nothing added to the service worker precache list. */
+function avatarHTML(p){
+ const full=p.name;
+ const photo=photoFor(full);
+ const ring=ramp(clamp01(p.index/27));
+ const inner=photo? '<img src="'+photo+'" alt="">' : ICON_FLAG;
+ const removeBtn=photo? '<span class="avatarremove" data-removephoto="'+esc(full)+'" role="button" aria-label="Remove photo">×</span>' : '';
+ return '<span class="pravatar" style="border-color:'+ring+'" data-avatarfor="'+esc(full)+'">'+inner+removeBtn+'</span>';
+}
+let pendingPhotoTarget=null;
+/* downscale to ~200x200, centre-cropped square, JPEG at moderate quality —
+   a raw phone photo is several MB and localStorage has ~5MB for the whole
+   origin. setItem is a single atomic call: it either fully succeeds or
+   throws, so there is no half-written key to clean up on failure, and no
+   other key is ever touched to make room. */
+function storePhotoFile(file,fullUpper){
+ const reader=new FileReader();
+ reader.onload=function(ev){
+  const img=new Image();
+  img.onload=function(){
+   const SIZE=200;
+   const srcSize=Math.min(img.naturalWidth,img.naturalHeight);
+   const sx=(img.naturalWidth-srcSize)/2, sy=(img.naturalHeight-srcSize)/2;
+   const canvas=document.createElement('canvas');
+   canvas.width=SIZE; canvas.height=SIZE;
+   const ctx=canvas.getContext('2d');
+   ctx.drawImage(img,sx,sy,srcSize,srcSize,0,0,SIZE,SIZE);
+   const dataUrl=canvas.toDataURL('image/jpeg',0.72);
+   try{
+    localStorage.setItem('msmi-photo:'+fullUpper,dataUrl);
+    renderPickerList();
+   }catch(err){
+    alert("Couldn't save that photo — not enough storage space on this device. Try a smaller image.");
+   }
+  };
+  img.onerror=function(){ alert("Couldn't read that image."); };
+  img.src=ev.target.result;
+ };
+ reader.onerror=function(){ alert("Couldn't read that file."); };
+ reader.readAsDataURL(file);
+}
 
 /* ---------- state ---------- */
 let mineOnly=(localStorage.getItem('msmi-group')||'mine')==='mine';
@@ -1136,7 +1204,8 @@ function renderPickerList(){
    value: p.index.toFixed(1),
    label: 'Index',
    f: p.index/27,
-   attrs: 'data-pick="'+esc(p.name)+'"'
+   attrs: 'data-pick="'+esc(p.name)+'"',
+   avatar: avatarHTML(p)
   });
  }).join('');
  document.getElementById('pickList').hidden=false;
@@ -1201,8 +1270,19 @@ function commitIdentity(fullUpper){
  bootApp();
 }
 document.getElementById('pickList').addEventListener('click',e=>{
+ const rm=e.target.closest('.avatarremove');
+ if(rm){ e.stopPropagation(); removePhotoFor(rm.dataset.removephoto); renderPickerList(); return; }
+ const av=e.target.closest('.pravatar');
+ if(av){ e.stopPropagation(); pendingPhotoTarget=av.dataset.avatarfor; document.getElementById('avatarFileInput').click(); return; }
  const b=e.target.closest('button[data-pick]'); if(!b) return;
  renderPickerConfirm(byFull[b.dataset.pick]);
+});
+document.getElementById('avatarFileInput').addEventListener('change',e=>{
+ const file=e.target.files&&e.target.files[0];
+ e.target.value='';
+ if(!file||!pendingPhotoTarget) return;
+ const target=pendingPhotoTarget; pendingPhotoTarget=null;
+ storePhotoFile(file,target);
 });
 document.getElementById('pickConfirm').addEventListener('click',e=>{
  if(e.target.id==='pickBack'){ renderPickerList(); return }
