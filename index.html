@@ -206,24 +206,17 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .venue .a{font-size:.8rem;color:var(--mute)}
 .venue .arw{color:var(--mute);font-size:1.1rem}
 
-/* ---------- handicap tables — the one permitted horizontal scroll ---------- */
+/* ---------- handicaps — one card per course, segmented tee control + stacked
+   player rows. No table, no transposition, nothing scrolls horizontally. ---------- */
 #search{width:100%;min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--raise);
  color:var(--ink);font-family:var(--sans);font-size:1rem;padding:0 14px;margin-bottom:14px}
 #search:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tblock{margin-bottom:20px}
-.tblock h3{font-family:var(--dispfont);font-weight:var(--dispweight);font-size:1.25rem;margin:0 0 7px}
-.scroll{overflow-x:auto;border-radius:var(--r);background:var(--card);box-shadow:var(--shadow);-webkit-overflow-scrolling:touch}
-table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:.92rem}
-th,td{padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--line)}
-thead th{position:sticky;top:0;background:var(--bg);z-index:2;font-size:.66rem;letter-spacing:.08em;
- text-transform:uppercase;color:var(--mute);font-weight:700}
-th.nm,td.nm{position:sticky;left:0;background:var(--card);z-index:1;text-align:left;min-width:142px;
- font-weight:600;box-shadow:1px 0 0 var(--line)}
-thead th.nm{background:var(--bg);z-index:3}
-tr.meta td,tr.meta th.nm{color:var(--mute);font-size:.76rem;background:var(--bg)}
-tr.me td,tr.me th.nm{background:var(--raise);font-weight:700}
-tr[hidden]{display:none}
-.idx{font-size:.78rem;color:var(--mute);font-weight:500;margin-left:6px}
+.tblock h3{font-family:var(--dispfont);font-weight:var(--dispweight);font-size:1.25rem;margin:0 0 12px}
+/* the [hidden] attribute is how the search filter hides rows — an author rule
+   at equal specificity to the UA default silently wins over it otherwise,
+   which bit the picker once already, so this stays explicit */
+.prow[hidden]{display:none}
 
 /* ---------- hotel ---------- */
 .mapimg{width:100%;border-radius:var(--r);display:block;box-shadow:var(--shadow)}
@@ -872,17 +865,38 @@ function renderSched(){
   +'<div class="arw">↗</div></a>').join('');
 }
 function tc(s){return s.toLowerCase().split(' ').map(w=>w==='jt'?'JT':w.charAt(0).toUpperCase()+w.slice(1)).join(' ')}
+/* screen-local tee choice per course on the Handicaps screen — deliberately
+   NOT msmi-tee:<NAME>, which is a player's own remembered tee on round cards
+   and must not be overwritten by someone just browsing this screen */
+let hcpTee={};
+/* one player's course handicap at an explicit tee (not that player's own
+   stored preference — this screen shows every player at the SAME tee, picked
+   locally). Gender resolution reuses courseTeeIndex exactly as chFor does,
+   so a woman's row lands on her own (L)-rated slope/rating automatically. */
+function hcpPlayerRowHTML(p,courseName,teeSlot){
+ const idx = teeSlot? courseTeeIndex(courseName,baseTee(teeSlot.sheet),p.gender==='F') : -1;
+ const ch = idx>-1? p.h[courseName][idx] : null;
+ const has = ch!==null && ch!==undefined;
+ return prowHTML({
+  name: tc(p.name),
+  sub: p.index.toFixed(1)+' index'+(teeSlot?' · '+teeSlot.label:''),
+  value: has? String(ch) : '—',
+  label: 'STROKES',
+  f: has? ch/40 : 0,
+  on: p.name===ME_FULL,
+  attrs: 'data-name="'+p.name.toLowerCase()+'"'
+ });
+}
 function renderTables(){
  const ps=DATA.hcp.players.slice().sort((a,b)=>a.index-b.index);
  document.getElementById('tables').innerHTML=DATA.hcp.courses.map(c=>{
-  let t='<div class="tblock"><h3>'+tc(c.name)+'</h3><div class="scroll"><table><thead><tr><th class="nm">Player</th>'
-   +c.tees.map(x=>'<th>'+x.tee+'</th>').join('')+'</tr></thead><tbody>';
-  t+='<tr class="meta"><th class="nm">Slope / Rating</th>'+c.tees.map(x=>'<td>'+x.slope+'<br>'+Number(x.rating).toFixed(1)+'</td>').join('')+'</tr>';
-  t+='<tr class="meta"><th class="nm">Par</th>'+c.tees.map(x=>'<td>'+x.par+'</td>').join('')+'</tr>';
-  t+=ps.map(p=>'<tr data-name="'+p.name.toLowerCase()+'"'+(p.name===ME_FULL?' class="me"':'')+'>'
-   +'<th class="nm">'+tc(p.name)+'<span class="idx">'+p.index.toFixed(1)+'</span></th>'
-   +p.h[c.name].map(v=>'<td>'+(v===null?'—':v)+'</td>').join('')+'</tr>').join('');
-  return t+'</tbody></table></div></div>';
+  const sc=DATA.sc[c.name];
+  const ti=hcpTee[c.name]!==undefined? hcpTee[c.name] : defaultTeeIdx(c.name);
+  const teeSlot=sc? sc.tees[ti] : null;
+  let t='<div class="card tblock" data-hcpcourse="'+esc(c.name)+'"><h3 class="disp">'+tc(c.name)+'</h3>';
+  if(sc) t+=segHTML(sc.tees.map(x=>x.label),ti,'tee');
+  t+='<div style="margin-top:12px">'+ps.map(p=>hcpPlayerRowHTML(p,c.name,teeSlot)).join('')+'</div>';
+  return t+'</div>';
  }).join('');
 }
 function renderHotel(){
@@ -991,9 +1005,15 @@ document.getElementById('sheet').addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet() });
 document.getElementById('search').addEventListener('input',e=>{
  const q=e.target.value.trim().toLowerCase();
- document.querySelectorAll('#tables tbody tr[data-name]').forEach(tr=>{
-  tr.hidden = q && tr.dataset.name.indexOf(q)===-1;
+ document.querySelectorAll('#tables .prow[data-name]').forEach(row=>{
+  row.hidden = q && row.dataset.name.indexOf(q)===-1;
  });
+});
+document.getElementById('tables').addEventListener('click',e=>{
+ const btn=e.target.closest('button[data-tee]'); if(!btn) return;
+ const wrap=btn.closest('[data-hcpcourse]'); if(!wrap) return;
+ hcpTee[wrap.dataset.hcpcourse]=Number(btn.getAttribute('data-tee'));
+ renderTables();
 });
 const gb=document.getElementById('grpBtn');
 function syncGrp(){gb.textContent=mineOnly?'My group':'All groups';gb.setAttribute('aria-pressed',String(mineOnly))}
