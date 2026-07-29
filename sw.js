@@ -5,7 +5,7 @@
    STANDING RULE: any commit that touches index.html must also bump
    CACHE_VERSION in the same commit, or the cache-first SW keeps serving
    the stale page indefinitely — this bit us once already. */
-const CACHE_VERSION = 'v21';
+const CACHE_VERSION = 'v22';
 const CACHE_NAME = 'msmi-2026-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'msmi-2026-fonts';
 
@@ -55,12 +55,21 @@ function precacheFonts() {
 }
 
 self.addEventListener('install', event => {
+  /* No auto skipWaiting() here — a new worker must sit in "waiting" so the
+     page can show the update bar and let the user choose when to activate.
+     skipWaiting() only runs in response to the SKIP_WAITING message below. */
   event.waitUntil(
     Promise.all([
       caches.open(CACHE_NAME).then(cache => cache.addAll(PRECACHE_URLS)),
       precacheFonts()
-    ]).then(() => self.skipWaiting())
+    ])
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', event => {

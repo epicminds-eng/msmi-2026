@@ -82,6 +82,18 @@ h2.sect{font-family:var(--dispfont);font-weight:var(--dispweight);letter-spacing
 .page{display:none} .page.on{display:block}
 #app{display:none;background:var(--bg);min-height:100vh}
 #app.on{display:block}
+/* update bar — in normal flow as #app's first child, pushes content down.
+   Never fixed/absolute: an overlay risks covering the hero's skin toggle. */
+.updatebar{display:flex;align-items:center;justify-content:space-between;gap:12px;
+ background:var(--raise);color:var(--ink);border-bottom:1px solid var(--line);
+ padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px;
+ font-family:var(--sans);font-size:.88rem;font-weight:600}
+.updatebar[hidden]{display:none}
+.updatebar-actions{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+.updatebar button{font-family:var(--sans);cursor:pointer;border:0;background:transparent;color:inherit}
+.updatebar #updateReload{background:var(--accent);color:var(--onacc);font-weight:800;
+ border-radius:9px;padding:0 14px;font-size:.85rem;min-height:36px}
+.updatebar #updateDismiss{color:var(--mute);font-size:1.2rem;line-height:1;min-width:36px;min-height:36px}
 
 /* skin toggle — hero only, hidden entirely for epicminds skin */
 .skinbtn{width:56px;height:44px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
@@ -324,6 +336,13 @@ footer p{margin:.45em 0}
 </div>
 
 <div id="app">
+<div class="updatebar" id="updateBar" hidden>
+ <span>New version available</span>
+ <div class="updatebar-actions">
+  <button type="button" id="updateReload">Reload</button>
+  <button type="button" id="updateDismiss" aria-label="Dismiss">×</button>
+ </div>
+</div>
 <!-- ============ TRIP ============ -->
 <section class="page on" id="pg-trip">
  <div class="wrap">
@@ -512,6 +531,14 @@ function strokesFor(nick,course){
 /* ---------- shared colour ramp — every bar and tile underline uses it ---------- */
 function ramp(f){ return f>.75?'var(--hot)':f>.45?'var(--warn)':'var(--good)'; }
 function clamp01(f){ return Math.max(0,Math.min(1,f)); }
+
+/* ---------- update bar: pure show/hide decision, single call site in renderUpdateBar() ----------
+   hasController=false means first install (no previous SW ever controlled this page) — never show.
+   hasWaiting=false means no update is actually staged — never show. dismissed is in-memory only
+   and resets every launch, per spec: dismissal must never persist across a reload. */
+function shouldShowUpdateBar(state){
+ return !!(state.hasController && state.hasWaiting && !state.dismissed);
+}
 
 /* ---------- component B: stat tile ---------- */
 /* neutral=true renders the bar in --mute instead of running it through ramp() —
@@ -1160,10 +1187,55 @@ try{
  if(be) be.textContent=(err&&err.message)?err.message:String(err);
 }
 
+/* ---------- update bar wiring ---------- */
+let swRegistration=null;
+let swDismissed=false; /* in-memory only — never persisted, resets every launch */
+let swReloadTriggered=false; /* guards controllerchange to at most one reload per page load */
+
+function renderUpdateBar(){
+ const bar=document.getElementById('updateBar');
+ if(!bar) return;
+ const show=shouldShowUpdateBar({
+  hasController: !!navigator.serviceWorker.controller,
+  hasWaiting: !!(swRegistration && swRegistration.waiting),
+  dismissed: swDismissed
+ });
+ bar.hidden=!show;
+}
+
+document.getElementById('updateBar').addEventListener('click', function(e){
+ if(e.target.closest('#updateReload')){
+  if(swRegistration && swRegistration.waiting){
+   swRegistration.waiting.postMessage({type:'SKIP_WAITING'});
+  }
+  return;
+ }
+ if(e.target.closest('#updateDismiss')){
+  swDismissed=true;
+  renderUpdateBar();
+ }
+});
+
 try{
  if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+   if(swReloadTriggered) return;
+   swReloadTriggered=true;
+   window.location.reload();
+  });
   window.addEventListener('load', function(){
-   navigator.serviceWorker.register('./sw.js').catch(function(){});
+   navigator.serviceWorker.register('./sw.js').then(function(reg){
+    swRegistration=reg;
+    renderUpdateBar();
+    reg.addEventListener('updatefound', function(){
+     const installing=reg.installing;
+     if(!installing) return;
+     installing.addEventListener('statechange', function(){
+      if(installing.state==='installed') renderUpdateBar();
+     });
+    });
+    try{ reg.update().catch(function(){}); }catch(e){}
+   }).catch(function(){});
   });
  }
 }catch(e){}
