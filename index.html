@@ -134,11 +134,13 @@ html[data-skin="epicminds"] .skinbtn{display:none}
  font-family:var(--sans);color:inherit}
 .prow.on{border-color:var(--accent)}
 .prow .pr1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.prow .prname{font-size:1rem;font-weight:700}
-.prow .prsub{display:block;font-size:.78rem;font-weight:600;color:var(--mute);margin-top:2px}
+.prow .prname{font-size:1rem;font-weight:700;overflow-wrap:anywhere}
+.prow .prsub{display:block;font-size:.78rem;font-weight:600;color:var(--mute);margin-top:2px;overflow-wrap:anywhere}
 .prow .prval{font-size:1.46rem;font-weight:800;line-height:1;text-align:right;white-space:nowrap}
+.prow .prvalrow{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+.prow .teepill{width:34px;height:20px;border-radius:12px;flex:0 0 auto}
 .prow .prlabel{display:block;font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
- color:var(--mute);text-align:right;margin-top:3px}
+ color:var(--mute);text-align:right;margin-top:3px;overflow-wrap:anywhere}
 .prow .prbar{height:5px;border-radius:99px;background:var(--line);margin-top:9px;overflow:hidden}
 .prow .prbar i{display:block;height:100%;border-radius:99px}
 .gsep{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
@@ -148,7 +150,9 @@ html[data-skin="epicminds"] .skinbtn{display:none}
    markup to land top-left. Odd-sized groups: first card spans both columns. */
 .prowgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .prowgrid.odd .prow:first-child{grid-column:1 / -1}
-.prowgrid .prow{margin-bottom:0;padding:9px 11px 8px}
+.prowgrid .prow{margin-bottom:0;padding:9px 11px 8px;min-width:0}
+.prow .pr1>div:first-child{min-width:0;flex:1 1 auto}
+.prow .pr1>div:last-child{flex:0 0 auto}
 .prowgrid .prow .prsub{margin-top:1px}
 .prowgrid .prow .prbar{margin-top:6px}
 
@@ -554,12 +558,32 @@ function tileHTML(val,label,f,neutral){
 /* ---------- component A: player row ---------- */
 function prowHTML(opts){
  const f=clamp01(opts.f);
+ const pill=opts.pillStyle? '<span class="teepill" style="'+opts.pillStyle+'"></span>' : '';
  return '<button class="prow'+(opts.on?' on':'')+'"'+(opts.attrs?' '+opts.attrs:'')+' aria-pressed="'+(!!opts.on)+'">'
   +'<div class="pr1"><div><span class="prname">'+esc(opts.name)+'</span>'
   +(opts.sub?'<span class="prsub">'+esc(opts.sub)+'</span>':'')+'</div>'
-  +'<div><span class="prval">'+opts.value+'</span><span class="prlabel">'+opts.label+'</span></div></div>'
+  +'<div><div class="prvalrow"><span class="prval">'+opts.value+'</span>'+pill+'</div><span class="prlabel">'+opts.label+'</span></div></div>'
   +'<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>'
   +'</button>';
+}
+/* literal tee colours — not theme tokens, identical in all three skins.
+   Keyed by the base tee name (gender-suffix stripped, e.g. baseTee('GOLD (L)')
+   -> 'GOLD') so the (L)-rated tees Dami Mui sees take the same colour as the
+   (M)/unisex ones — it's the same physical tee. Black needs a visible outline
+   or it's indistinguishable from --card/--raise in every skin. */
+const TEE_PILL_COLORS={
+ BLACK:{bg:'#16161A',border:'#6E6E78'},
+ BLUE:{bg:'#3E7BD6'},
+ WHITE:{bg:'#EDEDF0'},
+ GOLD:{bg:'#D4A24C'},
+ RED:{bg:'#D95C5C'},
+ SILVER:{bg:'#A8AEB8'},
+ GREEN:{bg:'#4E9E68'}
+};
+function teePillStyle(baseTeeName){
+ const c=TEE_PILL_COLORS[baseTeeName];
+ if(!c) return null;
+ return 'background:'+c.bg+(c.border?';border:1px solid '+c.border:'');
 }
 /* player row showing a teammate's course handicap — shared by round cards and
    the scorecard sheet's player picker. Tee is a fact about THAT nick, not
@@ -575,13 +599,14 @@ function groupRowHTML(nick,course,on,attrs){
  const parts=[];
  if(p) parts.push(p.index.toFixed(1)+' index');
  if(teeSlot) parts.push(teeSlot.label);
+ const pillStyle = teeSlot&&teeSlot.sheet? teePillStyle(baseTee(teeSlot.sheet)) : null;
  return prowHTML({
   name: fullName(nick),
   sub: parts.join(' · '),
   value: has? String(ch) : '—',
   label: 'STROKES',
   f: has? ch/40 : 0,
-  on, attrs
+  on, attrs, pillStyle
  });
 }
 /* wraps an array of already-built player-row HTML strings in the two-column
