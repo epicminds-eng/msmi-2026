@@ -131,6 +131,14 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .prow .prbar i{display:block;height:100%;border-radius:99px}
 .gsep{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
 .gsep.mine{color:var(--ink)}
+/* two-column player grid — round card and scorecard sheet only. Row-first flow
+   (the DOM order IS the visual order), so the selected player renders first in
+   markup to land top-left. Odd-sized groups: first card spans both columns. */
+.prowgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.prowgrid.odd .prow:first-child{grid-column:1 / -1}
+.prowgrid .prow{margin-bottom:0;padding:9px 11px 8px}
+.prowgrid .prow .prsub{margin-top:1px}
+.prowgrid .prow .prbar{margin-top:6px}
 
 /* ---------- component C: segmented control ---------- */
 .seg{display:flex;gap:4px;background:var(--raise);border-radius:12px;padding:4px;flex-wrap:wrap}
@@ -476,10 +484,14 @@ function totalY(t){return t.y?t.y.reduce((s,v)=>s+v,0):null}
    aliases for the same person (e.g. "LOU" vs "LOU P") both match */
 function isMe(n){const f=DATA.names[n];return f?f.toUpperCase()===ME_FULL:false}
 /* moves the selected identity to the front of a group without mutating the source array —
-   DATA.rounds[].groups must stay byte-identical, this is display order only */
+   DATA.rounds[].groups must stay byte-identical, this is display order only. Swaps the
+   selected player with whoever was first — everyone else keeps their exact seat, unlike a
+   remove-and-unshift which would also ripple everyone between position 0 and the selected
+   player's old slot forward by one. */
 function meFirst(g){
  const i=g.findIndex(isMe); if(i<=0) return g;
- return [g[i],...g.slice(0,i),...g.slice(i+1)];
+ const g2=g.slice(); const tmp=g2[0]; g2[0]=g2[i]; g2[i]=tmp;
+ return g2;
 }
 /* any short key that maps back to a full name — used as the default "self" token */
 function shortKeyFor(fullUpper){
@@ -550,6 +562,14 @@ function groupRowHTML(nick,course,on,attrs){
   f: has? ch/40 : 0,
   on, attrs
  });
+}
+/* wraps an array of already-built player-row HTML strings in the two-column
+   grid used by the round card and the scorecard sheet. Row-first flow is just
+   normal grid auto-placement — the array order IS the visual order, so the
+   caller puts whoever should land top-left first. Odd-sized groups: the first
+   row spans both columns so it doesn't leave an orphan half-empty cell. */
+function playerGridHTML(rows){
+ return '<div class="prowgrid'+(rows.length%2===1?' odd':'')+'">'+rows.join('')+'</div>';
 }
 
 /* ---------- component C: segmented control ---------- */
@@ -675,12 +695,12 @@ function cardHTML(r,isNext){
    const sc=DATA.sc[r.course];
    if(list.length===1){
     const g=list[0].i===mine?meFirst(list[0].g):list[0].g;
-    h+=g.map(n=>groupRowHTML(n,r.course,selFor(r)===n,ra(n))).join('');
+    h+=playerGridHTML(g.map(n=>groupRowHTML(n,r.course,selFor(r)===n,ra(n))));
    } else {
     h+=list.map(it=>{
      const g=it.i===mine?meFirst(it.g):it.g;
      return '<div class="gsep'+(it.i===mine?' mine':'')+'">Group '+(it.i+1)
-      +(it.i===mine?' · yours':'')+'</div>'+g.map(n=>groupRowHTML(n,r.course,selFor(r)===n,ra(n))).join('');
+      +(it.i===mine?' · yours':'')+'</div>'+playerGridHTML(g.map(n=>groupRowHTML(n,r.course,selFor(r)===n,ra(n))));
     }).join('');
    }
    if(sc){
@@ -752,7 +772,7 @@ function drawSheet(){
   +'<button class="xbtn" id="closeSheet" aria-label="Close">×</button></div>';
  if(scState.alt) h+=segHTML([scState.course,scState.alt].map(tc),scState.which,'which');
  const fp=r?sheetPlayers(r):[];
- if(fp.length) h+=fp.map(pn=>groupRowHTML(pn,name,scState.nick===pn,'data-scn="'+esc(pn)+'"')).join('');
+ if(fp.length) h+=playerGridHTML(fp.map(pn=>groupRowHTML(pn,name,scState.nick===pn,'data-scn="'+esc(pn)+'"')));
  h+=sechead(ICON_FLAG,'Tees');
  h+=segHTML(c.tees.map(t=>t.label),scState.tee,'tee');
  h+='<div style="margin-top:8px">'+teeTilesHTML(name,scState.tee,nick)+'</div>';
