@@ -336,6 +336,8 @@ footer p{margin:.45em 0}
 .credit .kick{display:block;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:9px}
 .credit a{display:inline-block;line-height:0}
 .credit img{width:120px;height:auto}
+.credit .appversion{margin-top:10px;font-size:.66rem;color:var(--mute)}
+.credit .appversion:empty{display:none}
 .credit img.light{display:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -489,6 +491,7 @@ footer p{margin:.45em 0}
    <img class="light" src="epicminds-light.png" alt="EpicMinds" width="120">
    <img class="dark" src="epicminds-dark.png" alt="EpicMinds" width="120">
   </a>
+  <div class="appversion" id="appVersion"></div>
  </div>
 </div>
 
@@ -1318,6 +1321,24 @@ function renderUpdateBar(){
  });
  bar.hidden=!show;
 }
+/* asks the running service worker for its own CACHE_VERSION rather than
+   keeping a second copy of that constant in this file — no controller
+   (first load, or the browser doesn't support service workers at all) means
+   there's nothing to ask, so the version line renders nothing rather than a
+   guess or a placeholder. */
+function requestAppVersion(){
+ const el=document.getElementById('appVersion');
+ if(!el) return;
+ if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+ function onMessage(e){
+  if(e.data && e.data.type==='VERSION'){
+   el.textContent=e.data.version;
+   navigator.serviceWorker.removeEventListener('message', onMessage);
+  }
+ }
+ navigator.serviceWorker.addEventListener('message', onMessage);
+ navigator.serviceWorker.controller.postMessage({type:'GET_VERSION'});
+}
 
 document.getElementById('updateBar').addEventListener('click', function(e){
  if(e.target.closest('#updateReload')){
@@ -1351,6 +1372,7 @@ try{
      });
     });
     try{ reg.update().catch(function(){}); }catch(e){}
+    requestAppVersion();
    }).catch(function(){});
   });
  }

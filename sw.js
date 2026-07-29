@@ -5,7 +5,7 @@
    STANDING RULE: any commit that touches index.html must also bump
    CACHE_VERSION in the same commit, or the cache-first SW keeps serving
    the stale page indefinitely — this bit us once already. */
-const CACHE_VERSION = 'v25';
+const CACHE_VERSION = 'v26';
 const CACHE_NAME = 'msmi-2026-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'msmi-2026-fonts';
 
@@ -69,6 +69,12 @@ self.addEventListener('install', event => {
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+  }
+  /* the page asks for this rather than index.html keeping its own copy of
+     CACHE_VERSION — two constants drift the first time someone bumps one
+     and not the other, which has already happened twice on this project. */
+  if (event.data && event.data.type === 'GET_VERSION' && event.source) {
+    event.source.postMessage({ type: 'VERSION', version: CACHE_VERSION });
   }
 });
 
