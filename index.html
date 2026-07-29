@@ -524,10 +524,14 @@ function ramp(f){ return f>.75?'var(--hot)':f>.45?'var(--warn)':'var(--good)'; }
 function clamp01(f){ return Math.max(0,Math.min(1,f)); }
 
 /* ---------- component B: stat tile ---------- */
-function tileHTML(val,label,f){
+/* neutral=true renders the bar in --mute instead of running it through ramp() —
+   for facts like Yards/Slope/Rating where a bigger number isn't a worse one.
+   Strokes is the one tile that keeps ramp(), unchanged. */
+function tileHTML(val,label,f,neutral){
  const ff=clamp01(f);
+ const barColor=neutral?'var(--mute)':ramp(ff);
  return '<div class="tile"><div class="tval">'+val+'</div><div class="tlabel">'+label+'</div>'
-  +'<div class="tbar" style="background:'+ramp(ff)+';opacity:'+(0.35+ff*0.65).toFixed(2)+'"></div></div>';
+  +'<div class="tbar" style="background:'+barColor+';opacity:'+(0.35+ff*0.65).toFixed(2)+'"></div></div>';
 }
 
 /* ---------- component A: player row ---------- */
@@ -648,9 +652,9 @@ function teeTilesHTML(course,teeIdx,nick){
  const meta = idx>-1? teeCourse.tees[idx] : null;
  let h='<div class="tiles">';
  h+=tileHTML(hasCh?ch:'—','Strokes',hasCh?ch/40:0);
- h+=tileHTML(yards!==null?yards:'—','Yards',yards!==null?yards/7600:0);
- h+=tileHTML(meta?meta.slope:'—','Slope',meta?meta.slope/155:0);
- h+=tileHTML(meta?Number(meta.rating).toFixed(1):'—','Rating',meta?meta.rating/80:0);
+ h+=tileHTML(yards!==null?yards:'—','Yards',yards!==null?yards/7600:0,true);
+ h+=tileHTML(meta?meta.slope:'—','Slope',meta?meta.slope/155:0,true);
+ h+=tileHTML(meta?Number(meta.rating).toFixed(1):'—','Rating',meta?meta.rating/80:0,true);
  h+='</div>';
  return h;
 }
