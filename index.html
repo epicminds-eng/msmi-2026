@@ -55,6 +55,17 @@ html[data-skin="epicminds"]{
  --good:#6FB39F; --warn:#C9A24B; --hot:#D98A6E; --onacc:#0E2833;
  --dispfont:var(--serif); --dispweight:500; --dispspace:-.01em;
 }
+/* the picker is shown before any identity exists — there's no skin to resolve
+   from yet — so it always renders charcoal, for everyone, regardless of
+   data-skin on <html> or msmi-skin in storage. #picker's ID specificity beats
+   the html[data-skin="..."] attribute selector above for anything inside it;
+   nothing outside #picker is affected and no localStorage key is touched. */
+#picker{
+ --bg:#232327; --card:#2D2D32; --raise:#38383E; --line:rgba(255,255,255,.14);
+ --ink:#FFFFFF; --mute:#A8A8AF; --accent:#4ADE80;
+ --good:#4ADE80; --warn:#FFD84D; --hot:#FF6B5A; --onacc:#1B1B1E;
+ --dispfont:var(--sans); --dispweight:800; --dispspace:-.02em;
+}
 *{box-sizing:border-box} html,body{margin:0;padding:0}
 html{background:var(--bg)}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;
