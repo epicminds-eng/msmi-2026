@@ -271,7 +271,19 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .sheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:none;
  align-items:flex-end;justify-content:center}
 .sheet.on{display:flex}
-.sheetbox{background:var(--bg);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;
+/* max-height:92vh then 92dvh: the second declaration overrides the first in
+   engines that understand dvh; an engine that doesn't treats "92dvh" as an
+   invalid value and ignores it, leaving the vh line as the fallback. dvh
+   tracks the real dynamic viewport and is the fix for the iOS rotate-and-
+   return bug where a fixed-position, vh-sized overlay can end up with a
+   stale scrollport height after an orientation round-trip — overflow-y:auto
+   then has nothing to scroll even though the layout looks correct.
+   min-height:0 is defensive: .sheetbox IS a flex item of .sheet, but
+   align-items:flex-end (not stretch) means it was never being force-
+   stretched into the min-height:auto trap in the first place — added anyway
+   since it costs nothing and is what the same class of bug usually needs. */
+.sheetbox{background:var(--bg);width:100%;max-width:720px;overflow-y:auto;min-height:0;
+ max-height:92vh;max-height:92dvh;
  border-radius:20px 20px 0 0;padding:16px 14px calc(20px + env(safe-area-inset-bottom,0px))}
 .sheethead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
 .sheethead h3{font-size:1.7rem;margin:0}
@@ -299,7 +311,20 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .legend{font-size:.8rem;color:var(--mute);margin-top:10px}
 
 /* ---------- name picker ---------- */
-.picker{position:fixed;inset:0;z-index:95;background:var(--bg);min-height:100vh;overflow-y:auto;
+/* No vh anywhere here, on purpose: inset:0 on a position:fixed element already
+   sizes it to exactly fill the viewport (its containing block) on all four
+   sides — top:0 + bottom:0 alone fully determines the height, recomputed by
+   the engine on every layout, nothing cached. min-height:100vh used to sit
+   here too, and was actively harmful: iOS's 100vh is the viewport height
+   WITHOUT browser chrome, so it can resolve larger than what inset:0 alone
+   would give, forcing the box taller than the real viewport. After an
+   orientation round-trip in standalone/installed-PWA mode, WebKit can leave
+   that forced-oversized box (and the overflow-y:auto scrollport measured
+   against it) stale relative to the real, current viewport — overflow:auto
+   then has nothing it recognizes as scrollable, even though the layout looks
+   fine. Removing the vh line entirely removes the mechanism, rather than
+   swapping it for dvh and hoping the new unit recomputes reliably too. */
+.picker{position:fixed;inset:0;z-index:95;background:var(--bg);overflow-y:auto;
  padding:calc(env(safe-area-inset-top,0px) + 26px) 14px calc(env(safe-area-inset-bottom,0px) + 26px)}
 .picker[hidden]{display:none}
 .pickwrap{max-width:560px;margin:0 auto}
