@@ -148,4 +148,4 @@ function writeWorkbook(sheetsByName) {
   return buildZip(files);
 }
 
-module.exports = { writeWorkbook };
+module.exports = { writeWorkbook, buildZip };

@@ -99,18 +99,37 @@ function parseCellRef(ref) {
 
 function parseSheetXml(xml, sharedStrings) {
   const rows = [];
-  const rowRe = /<row[^>]*r="(\d+)"[^>]*>([\s\S]*?)<\/row>/g;
+  // Self-closing rows (<row .../>, entirely blank) exist in real workbooks —
+  // tried as an alternative alongside the open/close form, self-closing
+  // FIRST (see the cell regex comment below for why order matters here).
+  const rowRe = /<row[^>]*r="(\d+)"[^>]*\/>|<row[^>]*r="(\d+)"[^>]*>([\s\S]*?)<\/row>/g;
   let rm;
   while ((rm = rowRe.exec(xml))) {
-    const rowIdx = parseInt(rm[1], 10) - 1;
-    const rowXml = rm[2];
-    const cellRe = /<c r="([A-Z]+\d+)"([^>]*)>([\s\S]*?)<\/c>|<c r="([A-Z]+\d+)"([^>]*)\/>/g;
+    const rowIdx = parseInt(rm[1] || rm[2], 10) - 1;
+    const rowXml = rm[3] || '';
+    if (!rows[rowIdx]) rows[rowIdx] = [];
+    /* Self-closing cells (<c r="A1" s="43"/>, a styled-but-empty cell — very
+       common in real Excel output, e.g. merged-cell spans, never produced by
+       our own synthetic writer) MUST be tried before the open/close
+       alternative. [^>]* stops at the first ">" regardless, so it can never
+       run past its own tag — but if the open/close branch is tried first, it
+       still happily matches a self-closing cell's own "/>" as if it were a
+       plain ">", then keeps scanning for the NEXT "</c>" anywhere ahead,
+       swallowing every real cell in between as bogus "inner content" of the
+       empty one. That's not a hypothetical: it's exactly what corrupted
+       Nick's real sheet on first read (this file is full of self-closing
+       formatted-but-empty cells; the synthetic fixture used to build and
+       test this reader never had any, which is why it went unnoticed).
+       Self-closing tried first is safe both ways: it can only match when a
+       "/" truly precedes the closing ">", so real open/close cells still
+       fall through to the second alternative untouched. */
+    const cellRe = /<c r="([A-Z]+\d+)"([^>]*)\/>|<c r="([A-Z]+\d+)"([^>]*)>([\s\S]*?)<\/c>/g;
     let cm;
-    const row = rows[rowIdx] || [];
+    const row = rows[rowIdx];
     while ((cm = cellRe.exec(rowXml))) {
-      const ref = cm[1] || cm[4];
-      const attrs = cm[2] || cm[5] || '';
-      const inner = cm[3] || '';
+      const ref = cm[1] || cm[3];
+      const attrs = cm[1] ? (cm[2] || '') : (cm[4] || '');
+      const inner = cm[1] ? '' : (cm[5] || '');
       const { col } = parseCellRef(ref);
       const typeMatch = attrs.match(/t="([^"]+)"/);
       const type = typeMatch ? typeMatch[1] : 'n';
@@ -130,13 +149,24 @@ function parseSheetXml(xml, sharedStrings) {
     }
     rows[rowIdx] = row;
   }
-  // normalize: replace holes (sparse rows/cols) with '' so callers can index freely
+  // normalize: replace holes (sparse rows/cols) with '' so callers can index
+  // freely. A manual loop, not Array.prototype.map — map SKIPS holes in a
+  // sparse array entirely (never invokes the callback for an unset index),
+  // which would leave a row that was never captured — a genuinely blank row
+  // Excel omitted from the XML entirely, not just one with blank cells — as
+  // a hole in the OUTPUT too, instead of the padded empty row callers expect.
   const width = rows.reduce((w, r) => Math.max(w, r ? r.length : 0), 0);
-  return rows.map(r => {
-    const out = new Array(width).fill('');
-    (r || []).forEach((v, i) => { out[i] = v === undefined || v === null ? '' : v; });
-    return out;
-  });
+  const out = [];
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i] || [];
+    const outRow = new Array(width).fill('');
+    for (let c = 0; c < r.length; c++) {
+      const v = r[c];
+      outRow[c] = (v === undefined || v === null) ? '' : v;
+    }
+    out.push(outRow);
+  }
+  return out;
 }
 
 function parseWorkbookSheetList(xml) {
