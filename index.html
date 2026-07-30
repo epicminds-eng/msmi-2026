@@ -35,6 +35,22 @@
  --shadow:0 2px 8px rgba(0,0,0,.35);
  --navh:calc(62px + env(safe-area-inset-bottom,0px));
  color-scheme: dark;
+ /* spacing scale — introduced to fix three components (player card, tee
+    segmented control, picker row) whose layouts kept fighting each other
+    across revisions because every value was ad-hoc (padding:12px 14px 11px,
+    margin-bottom:8px, ...). Scoped to those three; the rest of the file's
+    spacing is unmigrated — see the commit message for the count. */
+ --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px;
+ /* radii, tokenised alongside the scale. --r above (16px) is the existing
+    card radius, left as-is (out of scope for this migration) — --r-lg
+    mirrors its value under the new naming for anything migrated going
+    forward, without touching --r's existing call sites. */
+ --r-sm:6px; --r-md:12px; --r-lg:16px;
+ /* not a spacing value — a single type-size RATIO, so the full-width vs
+    half-width difference in the player card (Phase 1) is one multiplier
+    applied to the existing sizes, not two independently-chosen magic
+    numbers. 1.125 = 9/8, a clean step. */
+ --type-scale-step:1.125;
 }
 /* ---------- skins: teal (default), char (charcoal), epicminds (Chad only) ---------- */
 html[data-skin="teal"]{
