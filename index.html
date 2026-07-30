@@ -1523,6 +1523,31 @@ document.getElementById('updateBar').addEventListener('click', function(e){
  }
 });
 
+/* v2.0.0: registration.update() previously only ran once, at launch — coming
+   back from the background never re-checked, so a waiting update sat
+   unnoticed until the next full reload (Chad had to force-quit to see the
+   bar). Checking again on visibilitychange fixes that. Throttled to once
+   per UPDATE_CHECK_THROTTLE_MS so flicking between apps repeatedly doesn't
+   hammer it. Everything here is wrapped in try/catch and update()'s own
+   rejection is swallowed: this app runs offline in Gaylord, and a failed
+   update check must never throw, block render, or surface an error — it
+   also never touches the bar or scroll position directly, only update(),
+   which re-enters the existing updatefound/statechange -> renderUpdateBar()
+   path if (and only if) a new version is actually found. */
+const UPDATE_CHECK_THROTTLE_MS=5*60*1000;
+let lastUpdateCheckAt=0;
+function checkForUpdateOnForeground(){
+ try{
+  if(document.visibilityState!=='visible') return;
+  if(!swRegistration) return;
+  const now=Date.now();
+  if(now-lastUpdateCheckAt<UPDATE_CHECK_THROTTLE_MS) return;
+  lastUpdateCheckAt=now;
+  swRegistration.update().catch(function(){});
+ }catch(e){}
+}
+document.addEventListener('visibilitychange', checkForUpdateOnForeground);
+
 /* orientationchange fires before iOS settles on the new dimensions — resize
    is the one that reflects reality, so both are wired and both just call the
    same debounced relayout nudge. Safe with no overlay open (each target is
