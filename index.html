@@ -211,6 +211,14 @@ html[data-skin="epicminds"] .skinbtn{display:none}
  color:var(--mute);font-family:var(--sans);font-size:.85rem;font-weight:700;cursor:pointer}
 /* same selection language as .prow.on — raised fill kept, accent border added */
 .seg button.on{background:var(--card);color:var(--ink);border-color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+/* v2.0.0: tee-selector segmented controls (round card, scorecard sheet,
+   Handicaps — segHTML(...,true)) stack a small colour swatch above the
+   on-course marker name. Scoped to .teeseg so the course/alt "which" toggle,
+   the only other segHTML caller, is untouched. */
+.seg.teeseg button{display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:4px;min-height:54px}
+.seg.teeseg .segswatch{width:14px;height:14px;border-radius:4px;flex:0 0 auto;box-sizing:border-box}
+.seg.teeseg .segtext{display:block}
 
 .ctrls{display:flex;gap:8px;margin:0 0 16px}
 .ctrls button,.ctrls a{flex:1;min-height:46px;border-radius:999px;border:1px solid var(--line);
@@ -707,6 +715,32 @@ function teePillStyle(baseTeeName){
  if(!c) return null;
  return 'background:'+c.bg+';border:1.5px solid '+c.border;
 }
+/* v2.0.0: tee labels in DATA already carry both colour and on-course marker
+   name, e.g. "Black / Back", "Green / Front" — the left side of the slash is
+   the swatch colour, the right side is the text shown. Courses whose tees
+   ARE the colour (e.g. "Black" at Tradition) carry just the one word, which
+   is both. Presentation only — DATA itself never changes. Labels never carry
+   a (M)/(L) suffix (that's only on the handicap-sheet key, .sheet, resolved
+   separately by teePillStyle/baseTee above) — every player sees the same
+   label/colour for a given physical tee regardless of gender, so there is no
+   separate (L) case to parse here. A label whose colour word isn't in
+   TEE_PILL_COLORS (Threetops' "Back"/"Middle"/"Front" — positional names,
+   not tee colours, on the one course with no course handicap at all) simply
+   renders with no swatch: color comes back null, text falls back to the
+   whole label, so those buttons look exactly as they did before this. */
+function teeMarker(label){
+ const slash=label.indexOf(' / ');
+ if(slash>-1){
+  const colorWord=label.slice(0,slash).toUpperCase();
+  return {color: TEE_PILL_COLORS[colorWord]? colorWord : null, text: label.slice(slash+3)};
+ }
+ const colorWord=label.toUpperCase();
+ return {color: TEE_PILL_COLORS[colorWord]? colorWord : null, text: label};
+}
+function teeSwatchHTML(label){
+ const m=teeMarker(label);
+ return m.color? '<span class="segswatch" style="'+teePillStyle(m.color)+'"></span>' : '';
+}
 /* player row showing a teammate's course handicap — shared by round cards and
    the scorecard sheet's player picker. Tee is a fact about THAT nick, not
    whoever else is selected, so it's resolved here per-row, independently of
@@ -720,7 +754,7 @@ function groupRowHTML(nick,course,on,attrs){
  const pillStyle = teeSlot&&teeSlot.sheet? teePillStyle(baseTee(teeSlot.sheet)) : null;
  return groupProwHTML({
   name: fullName(nick),
-  tee: teeSlot? teeSlot.label : '',
+  tee: teeSlot? teeMarker(teeSlot.label).text : '',
   value: has? String(ch) : '—',
   f: has? ch/40 : 0,
   on, attrs, pillStyle
@@ -736,9 +770,17 @@ function playerGridHTML(rows){
 }
 
 /* ---------- component C: segmented control ---------- */
-function segHTML(items,activeIdx,attrName){
- return '<div class="seg">'+items.map((label,i)=>
-  '<button class="'+(i===activeIdx?'on':'')+'" data-'+attrName+'="'+i+'">'+label+'</button>').join('')+'</div>';
+/* isTee (v2.0.0): the four tee-selector call sites (round card x2, scorecard
+   sheet, Handicaps — all pass the same tee-label strings segHTML always
+   took) opt into a small colour swatch above the on-course marker name via
+   teeSwatchHTML/teeMarker. The one non-tee caller (the course/alt "which"
+   toggle in the scorecard sheet) omits the flag and renders exactly as
+   before — plain text, no swatch, no shared behaviour with the tee case. */
+function segHTML(items,activeIdx,attrName,isTee){
+ return '<div class="seg'+(isTee?' teeseg':'')+'">'+items.map((label,i)=>
+  '<button class="'+(i===activeIdx?'on':'')+'" data-'+attrName+'="'+i+'">'
+   +(isTee?teeSwatchHTML(label)+'<span class="segtext">'+esc(teeMarker(label).text)+'</span>':label)
+   +'</button>').join('')+'</div>';
 }
 
 const ICON_GROUP='<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-5.5 7-5.5s7 2.2 7 5.5"/><circle cx="17" cy="9" r="2.3"/><path d="M15.6 12.7c2.6.5 4.4 2.2 4.4 4.3"/></svg>';
@@ -891,7 +933,7 @@ function cardHTML(r,isNext){
    const sc=DATA.sc[r.course];
    if(sc){
     const ti=teeIndexFor(ME_FULL,r.course);
-    h+=segHTML(sc.tees.map(t=>t.label),ti,'cardtee-'+r.id);
+    h+=segHTML(sc.tees.map(t=>t.label),ti,'cardtee-'+r.id,true);
     const y=totalY(sc.tees[ti]);
     h+='<div class="tiles of3" style="margin-top:8px">'
      +tileHTML(y!==null?y:'—','Yards',y!==null?y/1500:0)
@@ -921,7 +963,7 @@ function cardHTML(r,isNext){
    }
    if(sc){
     h+=sechead(ICON_FLAG,'Tees');
-    h+=segHTML(sc.tees.map(t=>t.label),ti,'cardtee-'+r.id);
+    h+=segHTML(sc.tees.map(t=>t.label),ti,'cardtee-'+r.id,true);
     h+='<div style="margin-top:8px">'+teeTilesHTML(r.course,ti,selFor(r))+'</div>';
    }
   }
@@ -1030,7 +1072,7 @@ function drawSheet(){
  const fp=r?sheetPlayers(r):[];
  if(fp.length) h+=playerGridHTML(fp.map(pn=>groupRowHTML(pn,name,scState.nick===pn,'data-scn="'+esc(pn)+'"')));
  h+=sechead(ICON_FLAG,'Tees');
- h+=segHTML(c.tees.map(t=>t.label),scState.tee,'tee');
+ h+=segHTML(c.tees.map(t=>t.label),scState.tee,'tee',true);
  h+='<div style="margin-top:8px">'+teeTilesHTML(name,scState.tee,nick)+'</div>';
  function shotsAt(i){
   if(!hasCh) return 0;
@@ -1152,7 +1194,7 @@ function renderTables(){
   const ti=hcpTee[c.name]!==undefined? hcpTee[c.name] : defaultTeeIdx(c.name);
   const teeSlot=sc? sc.tees[ti] : null;
   let t='<div class="card tblock" data-hcpcourse="'+esc(c.name)+'"><h3 class="disp">'+tc(c.name)+'</h3>';
-  if(sc) t+=segHTML(sc.tees.map(x=>x.label),ti,'tee');
+  if(sc) t+=segHTML(sc.tees.map(x=>x.label),ti,'tee',true);
   t+='<div style="margin-top:12px">'+ps.map(p=>hcpPlayerRowHTML(p,c.name,teeSlot)).join('')+'</div>';
   return t+'</div>';
  }).join('');
