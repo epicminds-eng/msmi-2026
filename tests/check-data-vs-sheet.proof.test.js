@@ -8,12 +8,13 @@
 // workbook, which is exactly how the checker's actual structural
 // assumptions went unvalidated. This version:
 //
-//   1. runs the real comparison against the REAL file and asserts it
-//      produces EXACTLY the known-answer independently verified with
-//      openpyxl (July 28 vs July 27): zero Handicaps differences, and
-//      exactly 4 Pairings group-composition mismatches across two rounds
-//      (wed-pm groups 1/2, thu-am groups 2/3) — not "some mismatches", the
-//      literal old/new values, nothing else
+//   1. runs the real comparison against the REAL file. The 4 pairing
+//      reshuffles this checker's first run against this file detected (the
+//      known-answer independently verified with openpyxl, July 28 vs July
+//      27) have since been applied to DATA in their own commit, so this
+//      confirms zero Handicaps differences, confirms none of those 4 still
+//      show up, and confirms exactly one mismatch remains: the deliberate
+//      Larry Presta/Captain addition to tue-pm, not reflected in any sheet
 //   2. perturbs one DATA value in memory and reruns against the SAME real
 //      file, asserting the checker catches it and names the exact player/
 //      course/tee, then restores and confirms clean again
@@ -55,32 +56,41 @@ if (!fs.existsSync(REAL_FILE)) {
 
 const DATA = readDATA(path.join(__dirname, '..', 'index.html'));
 
-// ==================== 1. known-answer match against the real file ====================
+// ==================== 1. current state: the July 28 changes are now applied to DATA ====================
+// The 4 pairing reshuffles this checker's earlier run detected have since
+// been applied to DATA as their own, separately-authorized commit -- so
+// comparing DATA against this SAME real file no longer shows any of them as
+// mismatches. Confirmed explicitly below (not just "count went down") so a
+// bug that accidentally reintroduced one wouldn't just look like "one fewer
+// mismatch than expected somewhere else." The one remaining disagreement is
+// deliberate: Larry Presta/Captain was added to tue-pm by direct
+// confirmation from Nick, not through an updated sheet, and is recorded as
+// a known exception (proven separately in section 5).
 const wb = readWorkbook(REAL_FILE);
 const { mismatches, errors } = compareDataToWorkbook(DATA, wb);
 
 console.log(`Real file: ${mismatches.length} mismatch(es), ${errors.length} structural error(s).`);
 report(errors.length === 0, 'real file: zero structural errors');
 
-const EXPECTED = [
-  { category: 'group composition', round: 'wed-pm', old: 'Group 1: LEFTY/EDDIE/CHAD/VINCE', new: 'Group 1: DAMI/JOE L/CHAD/VINCE' },
-  { category: 'group composition', round: 'wed-pm', old: 'Group 2: RANDY/JIM L/DAMI/JOE L', new: 'Group 2: RANDY/JIM L/LEFTY/EDDIE' },
-  { category: 'group composition', round: 'thu-am', old: 'Group 2: EDDIE/VINCE/NICK/JIM H', new: 'Group 2: EDDIE/VINCE/YEE/DAMI' },
-  { category: 'group composition', round: 'thu-am', old: 'Group 3: YEE/DAMI/JIM L/JT', new: 'Group 3: NICK/JIM H/JIM L/JT' },
-];
-
-report(mismatches.length === EXPECTED.length, `exactly ${EXPECTED.length} mismatches, no more, no less -> found ${mismatches.length}`);
-
 const handicapMismatches = mismatches.filter(m => ['index', 'course handicap', 'slope', 'rating', 'par'].includes(m.category));
 report(handicapMismatches.length === 0, `Handicaps tab: zero differences -> found ${handicapMismatches.length}`);
 
-EXPECTED.forEach(exp => {
-  const found = mismatches.find(m => m.category === exp.category && m.round === exp.round && m.old === exp.old && m.new === exp.new);
-  report(!!found, `known-answer cell present exactly: [${exp.category}] ${exp.round}: ${exp.old} -> ${exp.new}`);
+const PREVIOUSLY_APPLIED = [
+  { round: 'wed-pm', old: 'Group 1: LEFTY/EDDIE/CHAD/VINCE', new: 'Group 1: DAMI/JOE L/CHAD/VINCE' },
+  { round: 'wed-pm', old: 'Group 2: RANDY/JIM L/DAMI/JOE L', new: 'Group 2: RANDY/JIM L/LEFTY/EDDIE' },
+  { round: 'thu-am', old: 'Group 2: EDDIE/VINCE/NICK/JIM H', new: 'Group 2: EDDIE/VINCE/YEE/DAMI' },
+  { round: 'thu-am', old: 'Group 3: YEE/DAMI/JIM L/JT', new: 'Group 3: NICK/JIM H/JIM L/JT' },
+];
+PREVIOUSLY_APPLIED.forEach(exp => {
+  const stillPresent = mismatches.some(m => m.round === exp.round && m.old === exp.old && m.new === exp.new);
+  report(!stillPresent, `previously-applied July 28 change no longer shows as a mismatch: ${exp.round} ${exp.old} -> ${exp.new}`);
 });
 
-const unexpected = mismatches.filter(m => !EXPECTED.some(exp => exp.category === m.category && exp.round === m.round && exp.old === m.old && exp.new === m.new));
-report(unexpected.length === 0, `no mismatches beyond the known-answer set -> ${unexpected.length ? JSON.stringify(unexpected) : '(none)'}`);
+const BASELINE_MISMATCH_COUNT = 1;
+const EXPECTED_REMAINING = { category: 'group composition', round: 'tue-pm', old: 'Group 1: JOE D/RON T/JIM H/CAPTAIN', new: 'Group 1: JOE D/RON T/JIM H' };
+report(mismatches.length === BASELINE_MISMATCH_COUNT, `exactly ${BASELINE_MISMATCH_COUNT} mismatch remains (the deliberate Captain deviation) -> found ${mismatches.length}`);
+const foundRemaining = mismatches.find(m => m.category === EXPECTED_REMAINING.category && m.round === EXPECTED_REMAINING.round && m.old === EXPECTED_REMAINING.old && m.new === EXPECTED_REMAINING.new);
+report(!!foundRemaining, `the one remaining mismatch is exactly the Captain deviation -> ${foundRemaining ? `${foundRemaining.old} -> ${foundRemaining.new}` : 'NOT FOUND'}`);
 
 // ==================== 2. perturb DATA in memory against the real file, then restore ====================
 const targetCourse = DATA.hcp.courses.find(c => c.name === 'MASTERPIECE');
@@ -96,7 +106,7 @@ report(!!hit && hit.old === originalValue + 7 && hit.new === originalValue, 'rep
 
 targetPlayer.h[targetCourse.name][targetTeeIdx] = originalValue;
 const restoredResult = compareDataToWorkbook(DATA, wb);
-report(restoredResult.mismatches.length === EXPECTED.length, 'restored DATA -> back to exactly the known-answer set again');
+report(restoredResult.mismatches.length === BASELINE_MISMATCH_COUNT, `restored DATA -> back to exactly the baseline (${BASELINE_MISMATCH_COUNT} mismatch) again`);
 
 // ==================== 3. cannot silently pass: rename the Handicaps tab on the REAL file's own bytes ====================
 const buf = fs.readFileSync(REAL_FILE);
@@ -126,12 +136,12 @@ if (renamedXml === workbookXml) {
   // Capture what the CLI's own report function would print, and confirm the
   // dangerous combination (a success-reading line alongside a structural
   // error) never appears — this is the literal defect being fixed.
-  const { printReport } = require('./check-data-vs-sheet');
+  const { printReport, partitionMismatches: partitionForPrint } = require('./check-data-vs-sheet');
   const printed = [];
   const realLog = console.log;
   console.log = (...args) => { printed.push(args.join(' ')); };
   try {
-    printReport(renamedResult.mismatches, renamedResult.errors, {});
+    printReport(renamedResult.errors, partitionForPrint(renamedResult.mismatches, []), {});
   } finally {
     console.log = realLog;
   }
@@ -160,6 +170,44 @@ if (renamedXml === workbookXml) {
   report(rows[0][0] === '', `self-closing empty cell A1 reads as blank, not a swallowed neighbor's value -> "${rows[0][0]}"`);
   report(rows[0][1] === 'MASTERPIECE', `B1 (immediately after the self-closing cell) reads correctly -> "${rows[0][1]}"`);
   report(rows[0][2] === 'SIGNATURE', `C1 reads correctly, not consumed as A1's bogus inner content -> "${rows[0][2]}"`);
+}
+
+// ==================== 5. exceptions mechanism: recording reality, not suppressing it ====================
+{
+  const { loadExceptions, partitionMismatches, EXCEPTIONS_PATH } = require('./check-data-vs-sheet');
+
+  // DATA (post Larry Presta/Captain addition to tue-pm) now legitimately
+  // disagrees with the sheet on exactly one cell -- re-derive it fresh here
+  // rather than hard-coding, so this proof stays honest if the round-trip
+  // above already changed anything.
+  const freshWb = readWorkbook(REAL_FILE);
+  const freshCompare = compareDataToWorkbook(DATA, freshWb);
+  report(freshCompare.mismatches.length === 1, `DATA vs sheet currently has exactly 1 real disagreement (the Captain addition) -> found ${freshCompare.mismatches.length}`);
+
+  report(fs.existsSync(EXCEPTIONS_PATH), `exceptions file exists at ${path.basename(EXCEPTIONS_PATH)}`);
+  const exceptionsPresent = loadExceptions();
+  const withException = partitionMismatches(freshCompare.mismatches, exceptionsPresent);
+  report(withException.known.length === 1 && withException.unexpected.length === 0,
+    `with the exception recorded: 1 known exception, 0 unexpected -> found ${withException.known.length} known, ${withException.unexpected.length} unexpected`);
+
+  // Temporarily remove the file on disk (not just pass [] in memory) so this
+  // exercises the SAME loadExceptions() the CLI calls, proving the mechanism
+  // reflects what's actually on disk rather than something rigged in memory.
+  const backupPath = EXCEPTIONS_PATH + '.bak';
+  fs.renameSync(EXCEPTIONS_PATH, backupPath);
+  let withoutException;
+  try {
+    const exceptionsAbsent = loadExceptions();
+    report(exceptionsAbsent.length === 0, 'with the file removed, loadExceptions() returns zero exceptions (not an error)');
+    withoutException = partitionMismatches(freshCompare.mismatches, exceptionsAbsent);
+  } finally {
+    fs.renameSync(backupPath, EXCEPTIONS_PATH);
+  }
+  report(fs.existsSync(EXCEPTIONS_PATH), 'exceptions file restored after the test');
+  report(withoutException.known.length === 0 && withoutException.unexpected.length === 1,
+    `with the file removed, the SAME mismatch now counts as unexpected -> found ${withoutException.known.length} known, ${withoutException.unexpected.length} unexpected`);
+  report(withoutException.unexpected[0] && withoutException.unexpected[0].category === 'group composition' && withoutException.unexpected[0].round === 'tue-pm',
+    'the now-unexpected mismatch is the exact same tue-pm group-composition cell, not a different one');
 }
 
 console.log(`\n${failures} failure(s).`);

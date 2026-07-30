@@ -326,9 +326,52 @@ function compareDataToWorkbook(DATA, wb) {
   return { mismatches, errors, bands, pairingsInfo };
 }
 
+// ==================== known exceptions ====================
+//
+// Some DATA-vs-sheet disagreements are deliberate: Nick confirmed the
+// Captain addition by text and no updated sheet is coming for it, so the
+// checker would otherwise report the same mismatch on every single future
+// run — training whoever reads it to skim past a red result, which is how
+// a REAL future regression gets missed. Recorded here, by hand, one entry
+// per accepted deviation: what it is, who authorised it, when, and why.
+// Known exceptions are still PRINTED every run, in full — never hidden —
+// only UNEXPECTED mismatches (and structural errors) fail the run.
+
+const EXCEPTIONS_PATH = path.join(__dirname, 'data-exceptions.json');
+
+function loadExceptions() {
+  if (!fs.existsSync(EXCEPTIONS_PATH)) return [];
+  const parsed = JSON.parse(fs.readFileSync(EXCEPTIONS_PATH, 'utf8'));
+  if (!Array.isArray(parsed)) throw new Error(`${EXCEPTIONS_PATH} must be a JSON array of exception records`);
+  return parsed;
+}
+
+// An exception matches a mismatch when every field named in its own "match"
+// object equals that field on the mismatch — a partial match (only the
+// fields that matter for that exception need be listed), not a full-object
+// equality check, so an exception for a "group composition" mismatch never
+// needs to also spell out player/course/tee fields it doesn't have.
+function exceptionMatches(mismatch, exception) {
+  const match = exception.match || {};
+  return Object.keys(match).every(k => String(mismatch[k]) === String(match[k]));
+}
+
+function partitionMismatches(mismatches, exceptions) {
+  const known = [];
+  const unexpected = [];
+  const usedExceptionIdx = new Set();
+  mismatches.forEach(m => {
+    const idx = exceptions.findIndex(e => exceptionMatches(m, e));
+    if (idx > -1) { known.push({ mismatch: m, exception: exceptions[idx] }); usedExceptionIdx.add(idx); }
+    else unexpected.push(m);
+  });
+  const unused = exceptions.filter((e, i) => !usedExceptionIdx.has(i));
+  return { known, unexpected, unused };
+}
+
 // ==================== reporting ====================
 
-function printReport(mismatches, errors, extra) {
+function printReport(errors, partitioned, extra) {
   console.log('=== YARDAGES ===');
   console.log('Not in Nick\'s sheet — sourced from 18Birdies, not compared here.\n');
 
@@ -346,19 +389,33 @@ function printReport(mismatches, errors, extra) {
     console.log(bar);
     errors.forEach(e => console.log(`  ! ${e}`));
     console.log(bar);
-    console.log(`RESULT: FAIL. ${mismatches.length} value mismatch(es) were ALSO found among the parts that could still be read, but they are NOT reported as a clean result — fix the structural errors above and rerun before trusting anything.`);
+    const totalFound = partitioned.known.length + partitioned.unexpected.length;
+    console.log(`RESULT: FAIL. ${totalFound} value mismatch(es) were ALSO found among the parts that could still be read, but they are NOT reported as a clean result — fix the structural errors above and rerun before trusting anything.`);
     console.log(bar + '\n');
     return;
   }
 
-  console.log(`=== ${mismatches.length} MISMATCH(ES) ===`);
-  if (!mismatches.length) {
-    console.log('PASS — DATA matches the sheet on everything this checker compares.');
-  } else {
-    mismatches.forEach(m => {
-      const where = [m.player, m.course, m.tee, m.round].filter(Boolean).join(' / ');
-      console.log(`  [${m.category}] ${where}: ${m.old} -> ${m.new}`);
+  const { known, unexpected, unused } = partitioned;
+  const fmt = m => `[${m.category}] ${[m.player, m.course, m.tee, m.round].filter(Boolean).join(' / ')}: ${m.old} -> ${m.new}`;
+
+  console.log(`=== ${known.length} KNOWN EXCEPTION(S), ${unexpected.length} UNEXPECTED MISMATCH(ES) ===`);
+  if (known.length) {
+    console.log('Known exceptions (accepted deviations — printed every run, never hidden):');
+    known.forEach(({ mismatch, exception }) => {
+      console.log(`  ${fmt(mismatch)}`);
+      console.log(`      accepted: ${exception.reason}`);
+      console.log(`      authorized by ${exception.authorizedBy} on ${exception.date}`);
     });
+  }
+  if (unexpected.length) {
+    console.log(known.length ? '\nUnexpected mismatches:' : 'Unexpected mismatches:');
+    unexpected.forEach(m => console.log(`  ${fmt(m)}`));
+  } else {
+    console.log(known.length ? '\nPASS — no unexpected mismatches beyond the known exceptions above.' : 'PASS — DATA matches the sheet on everything this checker compares.');
+  }
+  if (unused.length) {
+    console.log(`\n(informational) ${unused.length} known exception(s) in ${path.basename(EXCEPTIONS_PATH)} matched nothing this run — may be stale, worth a look:`);
+    unused.forEach(e => console.log(`  - ${e.reason}`));
   }
 
   if (extra && extra.pairingsInfo && extra.pairingsInfo.unrecognized && extra.pairingsInfo.unrecognized.length) {
@@ -377,16 +434,18 @@ function main() {
   const wb = readWorkbook(sheetPath);
   fingerprint(sheetPath, wb);
   const { mismatches, errors, pairingsInfo } = compareDataToWorkbook(DATA, wb);
-  printReport(mismatches, errors, { pairingsInfo });
-  const failed = mismatches.length > 0 || errors.length > 0;
+  const exceptions = loadExceptions();
+  const partitioned = partitionMismatches(mismatches, exceptions);
+  printReport(errors, partitioned, { pairingsInfo });
+  const failed = partitioned.unexpected.length > 0 || errors.length > 0;
   if (errors.length) {
     console.error(`\nEXIT 1 — structural errors prevented a trustworthy comparison (see above).`);
-  } else if (mismatches.length) {
-    console.error(`\nEXIT 1 — ${mismatches.length} mismatch(es) found (see above).`);
+  } else if (partitioned.unexpected.length) {
+    console.error(`\nEXIT 1 — ${partitioned.unexpected.length} unexpected mismatch(es) found (see above).`);
   }
   process.exit(failed ? 1 : 0);
 }
 
 if (require.main === module) main();
 
-module.exports = { compareDataToWorkbook, fingerprint, readDATA, findCourseBands, findColumnByHeader, findRoundHeaders, parseGroupsBelow, printReport };
+module.exports = { compareDataToWorkbook, fingerprint, readDATA, findCourseBands, findColumnByHeader, findRoundHeaders, parseGroupsBelow, printReport, loadExceptions, partitionMismatches, exceptionMatches, EXCEPTIONS_PATH };
