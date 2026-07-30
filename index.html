@@ -254,14 +254,26 @@ html[data-skin="epicminds"] .skinbtn{display:none}
  color:var(--mute);font-family:var(--sans);font-size:.85rem;font-weight:700;cursor:pointer}
 /* same selection language as .prow.on — raised fill kept, accent border added */
 .seg button.on{background:var(--card);color:var(--ink);border-color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.3)}
-/* v2.0.0: tee-selector segmented controls (round card, scorecard sheet,
-   Handicaps — segHTML(...,true)) stack a small colour swatch above the
-   on-course marker name. Scoped to .teeseg so the course/alt "which" toggle,
-   the only other segHTML caller, is untouched. */
-.seg.teeseg button{display:flex;flex-direction:column;align-items:center;justify-content:center;
- gap:4px;min-height:54px}
-.seg.teeseg .segswatch{width:14px;height:14px;border-radius:4px;flex:0 0 auto;box-sizing:border-box}
-.seg.teeseg .segtext{display:block}
+/* v2.0.0 patch: tee-selector segmented controls (round card, scorecard sheet,
+   Handicaps — segHTML(...,true)) show a large colour BLOCK, not a small
+   floating chip — it spans the segment's own inner width (the button minus
+   its own scale padding) with a height fixed at one scale step, not a ratio
+   of the (highly variable, 3-to-5-tees-wide) segment width, so the block
+   reads the same size whether the control has 3 segments or 5. Scoped to
+   .teeseg so the course/alt "which" toggle, the only other segHTML caller,
+   is untouched.
+   min-width:0 overrides the base .seg button's 64px floor: at 5 segments
+   across (Masterpiece/Signature/Premier/Black Lake) 5x64px plus gaps and the
+   control's own padding is wider than a 326px card, which forced the 5th
+   segment to wrap onto its own full-width row — a pre-existing constraint
+   this patch's "must hold at 5 tees" requirement surfaced. Padding is one
+   scale step (not the base control's two) so the longest marker words,
+   "Forward"/"Middle", still clear the narrower per-segment width at 5 across
+   with room to spare (measured, see report). */
+.seg.teeseg button{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+ gap:var(--sp-1);padding:var(--sp-1);min-width:0;box-sizing:border-box}
+.seg.teeseg .segswatch{width:100%;height:var(--sp-6);border-radius:var(--r-sm);flex:0 0 auto;box-sizing:border-box}
+.seg.teeseg .segtext{display:block;text-align:center}
 
 .ctrls{display:flex;gap:8px;margin:0 0 16px}
 .ctrls button,.ctrls a{flex:1;min-height:46px;border-radius:999px;border:1px solid var(--line);
