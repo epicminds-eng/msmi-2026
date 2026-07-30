@@ -218,10 +218,15 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .prowgrid.odd .prow:first-child .grlast{font-size:calc(1rem * var(--type-scale-step))}
 .prowgrid.odd .prow:first-child .prval{font-size:1.46rem}
 /* picker-only: avatar to the left of name+value, ring coloured by ramp(index).
-   Picker rows are the only prowHTML consumer that passes opts.avatar. */
-.prowtop{display:flex;align-items:center;gap:12px}
-.prowtop .pr1{flex:1 1 auto;min-width:0}
-.pravatar{position:relative;flex:0 0 auto;width:44px;height:44px;border-radius:50%;
+   Picker rows are the only prowHTML consumer that passes opts.avatar.
+   .prowtopcol wraps pr1+the bar together (see prowHTML) so the bar's width
+   comes from this column alone, not the avatar too — its left edge lands
+   under the name, its right edge under the INDEX label, which is the actual
+   point of this patch (previously the bar was a sibling of .prowtop and
+   spanned the avatar's width as well). */
+.prowtop{display:flex;align-items:center;gap:var(--sp-3)}
+.prowtopcol{flex:1 1 auto;min-width:0}
+.pravatar{position:relative;flex:0 0 auto;width:calc(var(--sp-5) + var(--sp-6));height:calc(var(--sp-5) + var(--sp-6));border-radius:50%;
  border:2px solid var(--mute);display:flex;align-items:center;justify-content:center;
  overflow:hidden;background:var(--raise)}
 .pravatar svg{width:20px;height:20px;stroke:var(--mute);fill:none;stroke-width:1.8;
@@ -229,6 +234,14 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .pravatar img{width:100%;height:100%;object-fit:cover;display:block}
 .avatarremove{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;
  background:var(--hot);color:#fff;font-size:.7rem;line-height:18px;text-align:center;font-weight:800}
+/* picker row spacing (v2.0.0 patch — the picker was never restyled when the
+   rest of the app moved to the scale; equal padding on all four sides, one
+   small step between the name and the secondary line, one medium step above
+   the bar). Scoped to #pickList so Handicaps, which renders the exact same
+   prowHTML() markup without an avatar, is untouched. */
+#pickList .prow{padding:var(--sp-4)}
+#pickList .prow .prsub{margin-top:var(--sp-1)}
+#pickList .prow .prbar{margin-top:var(--sp-3)}
 .gsep{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin:12px 0 6px}
 .gsep.mine{color:var(--ink)}
 /* two-column player grid — round card and scorecard sheet only. Row-first flow
@@ -713,10 +726,16 @@ function prowHTML(opts){
  const pr1='<div class="pr1"><div><span class="prname">'+esc(opts.name)+'</span>'
   +(opts.sub?'<span class="prsub">'+esc(opts.sub)+'</span>':'')+'</div>'
   +'<div><div class="prvalrow"><span class="prval">'+opts.value+'</span>'+pill+'</div><span class="prlabel">'+opts.label+'</span></div></div>';
- const top = opts.avatar? '<div class="prowtop">'+opts.avatar+pr1+'</div>' : pr1;
+ const bar='<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>';
+ /* avatar rows (picker only — opts.avatar is never passed elsewhere) put the
+    bar INSIDE .prowtop, in its own column alongside pr1, so its width
+    matches the content column exactly (left edge under the name, right edge
+    under the INDEX label) instead of spanning the avatar's width too. Non-
+    avatar rows (Handicaps) are untouched: bar stays a plain sibling of pr1,
+    spanning the full row as it always has. */
+ const body=opts.avatar? '<div class="prowtop">'+opts.avatar+'<div class="prowtopcol">'+pr1+bar+'</div></div>' : pr1+bar;
  return '<button class="prow'+(opts.on?' on':'')+'"'+(opts.attrs?' '+opts.attrs:'')+' aria-pressed="'+(!!opts.on)+'">'
-  +top
-  +'<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>'
+  +body
   +'</button>';
 }
 /* component A2: round-card / scorecard-sheet player row — no index (the tee
