@@ -149,7 +149,7 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .prow .prsub{display:block;font-size:.78rem;font-weight:600;color:var(--mute);margin-top:2px;overflow-wrap:anywhere}
 .prow .prval{font-size:1.46rem;font-weight:800;line-height:1;text-align:right;white-space:nowrap}
 .prow .prvalrow{display:flex;align-items:center;justify-content:flex-end;gap:6px}
-.prow .teepill{width:34px;height:20px;border-radius:12px;flex:0 0 auto}
+.prow .teepill{width:22px;height:22px;border-radius:6px;flex:0 0 auto;box-sizing:border-box}
 .prow .prlabel{display:block;font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
  color:var(--mute);text-align:right;margin-top:3px;overflow-wrap:anywhere}
 .prow .prbar{height:5px;border-radius:99px;background:var(--line);margin-top:9px;overflow:hidden}
@@ -689,21 +689,25 @@ function groupProwHTML(opts){
 /* literal tee colours — not theme tokens, identical in all three skins.
    Keyed by the base tee name (gender-suffix stripped, e.g. baseTee('GOLD (L)')
    -> 'GOLD') so the (L)-rated tees Dami Mui sees take the same colour as the
-   (M)/unisex ones — it's the same physical tee. Black needs a visible outline
-   or it's indistinguishable from --card/--raise in every skin. */
+   (M)/unisex ones — it's the same physical tee. Every swatch gets a 1.5px
+   bezel so all seven read as the same physical object: black keeps its own
+   visible outline (or it's indistinguishable from --card/--raise in every
+   skin), the other six get a neutral translucent white — a literal color
+   like the fills above, not a theme token, since it has to look identical in
+   all three skins regardless of --mute/--line. */
 const TEE_PILL_COLORS={
  BLACK:{bg:'#16161A',border:'#6E6E78'},
- BLUE:{bg:'#3E7BD6'},
- WHITE:{bg:'#EDEDF0'},
- GOLD:{bg:'#D4A24C'},
- RED:{bg:'#D95C5C'},
- SILVER:{bg:'#A8AEB8'},
- GREEN:{bg:'#4E9E68'}
+ BLUE:{bg:'#3E7BD6',border:'rgba(255,255,255,.22)'},
+ WHITE:{bg:'#EDEDF0',border:'rgba(255,255,255,.22)'},
+ GOLD:{bg:'#D4A24C',border:'rgba(255,255,255,.22)'},
+ RED:{bg:'#D95C5C',border:'rgba(255,255,255,.22)'},
+ SILVER:{bg:'#A8AEB8',border:'rgba(255,255,255,.22)'},
+ GREEN:{bg:'#4E9E68',border:'rgba(255,255,255,.22)'}
 };
 function teePillStyle(baseTeeName){
  const c=TEE_PILL_COLORS[baseTeeName];
  if(!c) return null;
- return 'background:'+c.bg+(c.border?';border:1px solid '+c.border:'');
+ return 'background:'+c.bg+';border:1.5px solid '+c.border;
 }
 /* player row showing a teammate's course handicap — shared by round cards and
    the scorecard sheet's player picker. Tee is a fact about THAT nick, not

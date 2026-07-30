@@ -6,8 +6,12 @@
 // literals, not functions, so there's nothing to regex-extract and eval like
 // the update-bar tests do; the values themselves are read straight out of
 // index.html, never hand-copied) and asserts TEE_PILL_COLORS covers every one
-// with no leftovers and no unused entries. Not loaded by index.html, not in
-// sw.js's PRECACHE_URLS, doesn't affect the app.
+// with no leftovers and no unused entries. Also guards the square-swatch
+// bezel property added when the pill became a 22x22 square: BLACK keeps its
+// own visible outline (#6E6E78, or it's indistinguishable from --card/--raise
+// in every skin), the other six get a neutral translucent white so all seven
+// read as the same physical object. Not loaded by index.html, not in sw.js's
+// PRECACHE_URLS, doesn't affect the app.
 
 const fs = require('fs');
 const path = require('path');
@@ -47,5 +51,16 @@ const noUnused = unused.length === 0;
 console.log(`${noUnused ? 'PASS' : 'FAIL'}  no unused map entries -> ${unused.length ? unused.join(', ') : '(none)'}`);
 if (!noUnused) failures++;
 
-console.log(`\n${2} assertions, ${failures} failure(s).`);
+const NEUTRAL_BORDER = 'rgba(255,255,255,.22)';
+const blackBorderOk = TEE_PILL_COLORS.BLACK && TEE_PILL_COLORS.BLACK.border === '#6E6E78';
+console.log(`${blackBorderOk ? 'PASS' : 'FAIL'}  BLACK keeps its own bezel -> ${TEE_PILL_COLORS.BLACK && TEE_PILL_COLORS.BLACK.border}`);
+if (!blackBorderOk) failures++;
+
+const others = Object.keys(TEE_PILL_COLORS).filter(k => k !== 'BLACK');
+const wrongNeutral = others.filter(k => TEE_PILL_COLORS[k].border !== NEUTRAL_BORDER);
+const neutralOk = wrongNeutral.length === 0;
+console.log(`${neutralOk ? 'PASS' : 'FAIL'}  every non-black swatch uses the neutral translucent-white bezel -> ${wrongNeutral.length ? wrongNeutral.join(', ') : '(none wrong)'}`);
+if (!neutralOk) failures++;
+
+console.log(`\n${4} assertions, ${failures} failure(s).`);
 process.exit(failures ? 1 : 0);
