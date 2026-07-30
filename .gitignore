@@ -1,1 +1,6 @@
 .DS_Store
+.claude/
+
+# Nick's real handicap/pairings spreadsheet(s) — 24 real names and indexes,
+# this repo is public. Point tests/check-data-vs-sheet.js at a file in here.
+nick-sheets/
