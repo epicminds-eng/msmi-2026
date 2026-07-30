@@ -268,23 +268,34 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .lodge .arw{flex:0 0 auto;color:var(--mute);font-size:1.1rem}
 
 /* ---------- scorecard sheet ---------- */
+/* .sheet is the fixed positioner/backdrop only — overflow:hidden, scrolls
+   nothing itself. .sheetbox was already a separate, non-fixed flex child
+   (this pairing predates this fix), so the split this bug needed was already
+   in place here; what wasn't in place was the landscape sizing below. */
 .sheet{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.55);display:none;
- align-items:flex-end;justify-content:center}
+ align-items:flex-end;justify-content:center;overflow:hidden}
 .sheet.on{display:flex}
 /* max-height:92vh then 92dvh: the second declaration overrides the first in
    engines that understand dvh; an engine that doesn't treats "92dvh" as an
-   invalid value and ignores it, leaving the vh line as the fallback. dvh
-   tracks the real dynamic viewport and is the fix for the iOS rotate-and-
-   return bug where a fixed-position, vh-sized overlay can end up with a
-   stale scrollport height after an orientation round-trip — overflow-y:auto
-   then has nothing to scroll even though the layout looks correct.
-   min-height:0 is defensive: .sheetbox IS a flex item of .sheet, but
-   align-items:flex-end (not stretch) means it was never being force-
-   stretched into the min-height:auto trap in the first place — added anyway
-   since it costs nothing and is what the same class of bug usually needs. */
+   invalid value and ignores it, leaving the vh line as the fallback — the
+   vh line MUST come first or a Safari that supports both units would apply
+   dvh, then vh would win instead as the later declaration. min-height:0 is
+   defensive: .sheetbox IS a flex item of .sheet, but align-items:flex-end
+   (not stretch) means it was never being force-stretched into the
+   min-height:auto trap in the first place — added anyway since it costs
+   nothing. */
 .sheetbox{background:var(--bg);width:100%;max-width:720px;overflow-y:auto;min-height:0;
  max-height:92vh;max-height:92dvh;
  border-radius:20px 20px 0 0;padding:16px 14px calc(20px + env(safe-area-inset-bottom,0px))}
+/* landscape is not an edge case here: the scorecard's content (player grid,
+   tee control, four tiles, 18 hole rows, Out/In summaries) is far taller
+   than a ~390px-tall landscape viewport, and 92% of that leaves almost no
+   room. A percentage tuned for portrait doesn't serve landscape at all, so
+   go effectively full-height there instead of trying to preserve a sliver
+   of backdrop peeking above the sheet. */
+@media (orientation:landscape){
+ .sheetbox{max-height:100vh;max-height:100dvh}
+}
 .sheethead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
 .sheethead h3{font-size:1.7rem;margin:0}
 .xbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);
@@ -311,23 +322,22 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .legend{font-size:.8rem;color:var(--mute);margin-top:10px}
 
 /* ---------- name picker ---------- */
-/* No vh anywhere here, on purpose: inset:0 on a position:fixed element already
-   sizes it to exactly fill the viewport (its containing block) on all four
-   sides — top:0 + bottom:0 alone fully determines the height, recomputed by
-   the engine on every layout, nothing cached. min-height:100vh used to sit
-   here too, and was actively harmful: iOS's 100vh is the viewport height
-   WITHOUT browser chrome, so it can resolve larger than what inset:0 alone
-   would give, forcing the box taller than the real viewport. After an
-   orientation round-trip in standalone/installed-PWA mode, WebKit can leave
-   that forced-oversized box (and the overflow-y:auto scrollport measured
-   against it) stale relative to the real, current viewport — overflow:auto
-   then has nothing it recognizes as scrollable, even though the layout looks
-   fine. Removing the vh line entirely removes the mechanism, rather than
-   swapping it for dvh and hoping the new unit recomputes reliably too. */
-.picker{position:fixed;inset:0;z-index:95;background:var(--bg);overflow-y:auto;
- padding:calc(env(safe-area-inset-top,0px) + 26px) 14px calc(env(safe-area-inset-bottom,0px) + 26px)}
+/* .picker is ONLY the fixed positioner now — overflow:hidden, scrolls
+   nothing itself. .pickwrap is a separate, non-fixed flex child that is the
+   actual scroll container (overflow-y:auto + min-height:0 + flex:1 1 auto).
+   Splitting these was the fix that mattered: making one element both the
+   position:fixed box AND the overflow:auto scroller is what let WebKit's
+   scrollport tracking go stale after an orientation-affecting relayout in
+   standalone/installed-PWA mode — a bare vh height was never the real
+   mechanism (removing it changed no measured value, and the bug persisted).
+   No vh/dvh here at all: .picker sizes off inset:0 alone, and .pickwrap sizes
+   off flex:1 1 auto within it — nothing viewport-relative to go stale. */
+.picker{position:fixed;inset:0;z-index:95;background:var(--bg);overflow:hidden;
+ display:flex;flex-direction:column}
 .picker[hidden]{display:none}
-.pickwrap{max-width:560px;margin:0 auto}
+.pickwrap{max-width:560px;margin:0 auto;width:100%;box-sizing:border-box;
+ flex:1 1 auto;min-height:0;overflow-y:auto;
+ padding:calc(env(safe-area-inset-top,0px) + 26px) 14px calc(env(safe-area-inset-bottom,0px) + 26px)}
 .pickhead{margin:0 0 22px}
 .picktitle{font-size:2.05rem;letter-spacing:-.01em;margin:.2em 0 .25em}
 .picksub{color:var(--mute);font-size:.95rem;margin:0;max-width:38ch}
@@ -906,6 +916,46 @@ function openSheet(course,alt,rid){
  drawSheet();
 }
 function closeSheet(){document.getElementById('sheet').classList.remove('on')}
+/* Forces WebKit to recompute a fixed-overlay's scroll container after an
+   orientation-affecting relayout. CSS alone (splitting the fixed positioner
+   from the overflow:auto scroller, removing vh) fixed the deterministic
+   rotate-and-return case, but Chad's phone still shows an intermittent stuck-
+   then-self-recovers picker and a sheet that's dead in landscape outright —
+   that's WebKit failing to recalculate a scroller's scrollable area until
+   some unrelated repaint forces a relayout, not a wrong measured height (a
+   wrong height would be wrong every time, not sometimes). Toggling
+   overflow-y off and back on in the same frame forces that repaint; reading
+   offsetHeight alone is the weaker nudge and wasn't chosen because it can't
+   be verified to force a repaint the way an actual style write can. */
+function forceScrollerRelayout(){
+ try{
+  const picker=document.getElementById('picker');
+  const sheet=document.getElementById('sheet');
+  const targets=[];
+  if(picker && !picker.hidden){
+   const el=picker.querySelector('.pickwrap'); if(el) targets.push(el);
+  }
+  if(sheet && sheet.classList.contains('on')){
+   const el=document.getElementById('sheetbox'); if(el) targets.push(el);
+  }
+  targets.forEach(el=>{
+   const savedScrollTop=el.scrollTop;
+   el.style.overflowY='hidden';
+   void el.offsetHeight; // synchronous reflow — the point of the exercise
+   el.style.overflowY='';
+   el.scrollTop=savedScrollTop;
+  });
+ }catch(e){}
+}
+let relayoutDelayTimer=null;
+function scheduleScrollerRelayout(){
+ forceScrollerRelayout();
+ if(relayoutDelayTimer) clearTimeout(relayoutDelayTimer);
+ /* iOS reports transitional/stale viewport metrics for a short window right
+    after rotation, so one more pass after things settle is deliberate, not
+    redundant. */
+ relayoutDelayTimer=setTimeout(forceScrollerRelayout,350);
+}
 function shotsLegend(shots){
  const ones=shots.filter(s=>s===1).length, twos=shots.filter(s=>s===2).length;
  if(twos>0) return 'Two shots on '+twos+' hole'+(twos===1?'':'s')+', one on '+ones+'.';
@@ -1377,6 +1427,15 @@ document.getElementById('updateBar').addEventListener('click', function(e){
   renderUpdateBar();
  }
 });
+
+/* orientationchange fires before iOS settles on the new dimensions — resize
+   is the one that reflects reality, so both are wired and both just call the
+   same debounced relayout nudge. Safe with no overlay open (each target is
+   only collected when its overlay is actually visible), never throws (the
+   whole nudge is wrapped in try/catch), and never resets scroll position
+   (scrollTop is read before the toggle and restored after). */
+window.addEventListener('orientationchange', scheduleScrollerRelayout);
+window.addEventListener('resize', scheduleScrollerRelayout);
 
 try{
  if('serviceWorker' in navigator){
