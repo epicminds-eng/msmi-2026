@@ -13,17 +13,22 @@
 :root{
  --bg:#DEEAE2; --card:#FFFFFF; --deep:#274F4A; --deep-ink:#DEEAE2;
  --mist:#A4C1AD; --ink:#24413C; --muted:#3F6D60; --rule:rgba(164,193,173,.60);
- --accent:#8A6A1E; --gold-l:#D6B25E; --green:#5E9EA0;
+ --accent:#8A6A1E; --gold-l:#D6B25E; --green:#5E9EA0; --warn:#B0472E; --warn-bg:rgba(176,71,46,.09);
  --serif:'Newsreader',Georgia,serif;
  --sans:'Hanken Grotesk',system-ui,-apple-system,sans-serif;
  --r:16px; --shadow:0 1px 3px rgba(28,60,75,.08);
+ /* spacing scale, matching the one introduced in index.html for the round
+    card / tee segment / picker — a separate stylesheet on a separate page,
+    but the same discipline: spacing values below come from this scale, not
+    ad-hoc pixels. */
+ --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px;
  color-scheme: light;
 }
 @media (prefers-color-scheme: dark){
  :root{
   --bg:#11302B; --card:#173B35; --deep:#24504A; --deep-ink:#DEEAE2;
   --mist:#A4C1AD; --ink:#DEEAE2; --muted:#A4C1AD; --rule:rgba(94,158,160,.40);
-  --accent:#D6B25E; --gold-l:#D6B25E; --green:#7FC9A6;
+  --accent:#D6B25E; --gold-l:#D6B25E; --green:#7FC9A6; --warn:#E08A6E; --warn-bg:rgba(224,138,110,.14);
   --shadow:0 1px 3px rgba(0,0,0,.4);
   color-scheme: dark;
  }
@@ -31,52 +36,46 @@
 *{box-sizing:border-box} html,body{margin:0;padding:0}
 html{background:var(--bg)}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55;
- -webkit-text-size-adjust:100%;padding:0 0 48px}
+ -webkit-text-size-adjust:100%;padding:0 0 var(--sp-6)}
 a{color:inherit}
-.wrap{max-width:640px;margin:0 auto;padding:0 18px}
+.wrap{max-width:640px;margin:0 auto;padding:0 var(--sp-4)}
 .eyebrow{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-h2.sect{font-family:var(--serif);font-weight:500;font-size:1.7rem;letter-spacing:-.01em;margin:.2em 0 .6em}
+h2.sect{font-family:var(--serif);font-weight:500;font-size:1.7rem;letter-spacing:-.01em;margin:.2em 0 var(--sp-3)}
 
-.hero{text-align:center;padding:calc(env(safe-area-inset-top,0px) + 40px) 0 8px}
-.hero img.icon{width:84px;height:84px;border-radius:20px;box-shadow:var(--shadow);display:block;margin:0 auto 18px}
+.hero{text-align:center;padding:calc(env(safe-area-inset-top,0px) + var(--sp-6)) 0 var(--sp-2)}
+.hero img.icon{width:84px;height:84px;border-radius:20px;box-shadow:var(--shadow);display:block;margin:0 auto var(--sp-4)}
 .hero h1{font-family:var(--serif);font-weight:500;font-size:clamp(1.9rem,7vw,2.5rem);line-height:1.08;
  letter-spacing:-.015em;margin:0 0 .45em}
 .hero p{color:var(--muted);font-size:1.02rem;margin:0 auto;max-width:36ch}
 
-.card{background:var(--card);border-radius:var(--r);padding:20px 20px 22px;margin-bottom:14px;box-shadow:var(--shadow)}
-.steps{margin:34px 0}
-.stepcard h3{font-family:var(--serif);font-weight:500;font-size:1.2rem;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.card{background:var(--card);border-radius:var(--r);padding:var(--sp-5) var(--sp-5) calc(var(--sp-5) + var(--sp-1));
+ margin-bottom:var(--sp-3);box-shadow:var(--shadow)}
+.steps{margin:var(--sp-6) 0}
+.stepcard h3{font-family:var(--serif);font-weight:500;font-size:1.2rem;margin:0 0 var(--sp-3);display:flex;align-items:center;gap:var(--sp-2)}
+.stepcard p{margin:0 0 var(--sp-3)}
+.stepcard p:last-child{margin-bottom:0}
 .stepcard ol{margin:0;padding-left:1.3em}
-.stepcard li{margin:0 0 8px;padding-left:.2em}
+.stepcard li{margin:0 0 var(--sp-2)}
 .stepcard li:last-child{margin-bottom:0}
 .stepcard b{font-weight:700}
-.steps .cards{display:flex;flex-direction:column;gap:12px}
-.stepcard .pathlist{list-style:none;margin:8px 0;padding:0}
-.stepcard .pathlist li{padding:4px 0}
-.stepcard .pathlist li:first-child{padding-top:0}
-.stepcard .pathlist li:last-child{padding-bottom:0}
+.steps .cards{display:flex;flex-direction:column;gap:var(--sp-3)}
+.stepcard .warn{background:var(--warn-bg);border-left:3px solid var(--warn);
+ padding:var(--sp-2) var(--sp-3);border-radius:0 8px 8px 0;font-size:.94rem}
 
 .openbtn{display:flex;align-items:center;justify-content:center;min-height:58px;border-radius:14px;
  background:var(--deep);color:var(--deep-ink);text-decoration:none;font-weight:700;font-size:1.08rem;
- margin:28px 0 6px;box-shadow:var(--shadow)}
+ margin:var(--sp-6) 0 var(--sp-1);box-shadow:var(--shadow)}
 .openbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.openhint{text-align:center;color:var(--muted);font-size:.82rem;margin:0 0 34px}
-
-.list{list-style:none;margin:0;padding:0}
-.list li{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--rule)}
-.list li:first-child{border-top:0}
-.list .dot{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--deep);color:var(--deep-ink);
- font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px}
-.note{margin-top:14px;font-size:.85rem;color:var(--muted);border-left:2px solid var(--rule);padding-left:11px}
+.openhint{text-align:center;color:var(--muted);font-size:.82rem;margin:0 0 var(--sp-6)}
 
 .know{list-style:none;margin:0;padding:0}
-.know li{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--rule)}
+.know li{display:flex;gap:var(--sp-3);padding:var(--sp-3) 0;border-top:1px solid var(--rule)}
 .know li:first-child{border-top:0}
 .know .mark{flex:0 0 auto;color:var(--accent);font-weight:700}
 
-footer{padding:34px 0 8px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);margin-top:34px;text-align:center}
-.credit{margin-top:6px}
-.credit .kick{display:block;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+footer{padding:var(--sp-6) 0 var(--sp-2);color:var(--muted);font-size:.85rem;border-top:1px solid var(--rule);margin-top:var(--sp-6);text-align:center}
+.credit{margin-top:var(--sp-2)}
+.credit .kick{display:block;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:var(--sp-2)}
 .credit a{display:inline-block;line-height:0;text-decoration:none}
 .credit img{width:120px;height:auto}
 .credit img.dark{display:none}
@@ -99,59 +98,42 @@ footer{padding:34px 0 8px;color:var(--muted);font-size:.85rem;border-top:1px sol
   <div class="eyebrow">One-time setup</div>
   <h2 class="sect">Add it to your home screen</h2>
   <div class="cards">
+
    <div class="card stepcard">
     <h3>📱 iPhone</h3>
+    <p class="warn">Open this link in <b>Safari</b> — not Chrome, and not straight from a text or email. That's the #1 thing that goes wrong.</p>
     <ol>
-     <li>Open this page in <b>Safari</b>. It won't work from Chrome or from a link inside another app — if you got here from a text or email, tap the address bar, copy the link, and paste it into Safari.</li>
-     <li>Find the menu:
-      <ul class="pathlist">
-       <li><b>Newer iPhones</b> — tap the three dots (⋯) next to the address bar.</li>
-       <li><b>Older iPhones</b> — tap the <b>Share</b> button, the square with an arrow pointing up, in the bar at the bottom.</li>
-      </ul>
-      If you only see one of those, that's yours.
-     </li>
-     <li>Scroll down and tap <b>"Add to Home Screen."</b> You may need to tap <b>"Share"</b> first inside the three-dot menu.</li>
-     <li>Tap <b>Add.</b> The icon appears on your home screen.</li>
+     <li>Tap <b>Share</b> — the square with an arrow pointing up. (On newer iPhones, tap <b>⋯</b> first, then Share. If you don't see either, look for that square-with-an-arrow icon.)</li>
+     <li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
     </ol>
    </div>
+
    <div class="card stepcard">
     <h3>🤖 Android</h3>
     <ol>
-     <li>Open this page in <b>Chrome.</b></li>
-     <li>Tap <b>"Install app"</b> when it appears, or the <b>⋮</b> menu then <b>"Add to Home screen."</b></li>
-     <li>Tap <b>Install.</b></li>
+     <li>Open this link in <b>Chrome.</b></li>
+     <li>Tap the <b>⋮</b> menu, then <b>Install app</b> — or <b>Add to Home screen</b>, depending on your Chrome version.</li>
+     <li>Tap <b>Install</b> (or <b>Add</b>).</li>
     </ol>
    </div>
+
+   <div class="card stepcard">
+    <h3>💻 Older phone, or if that didn't work</h3>
+    <p>No problem — it's just a normal website. Bookmark this link and open it in your browser. Everything works the same, except it won't work without a signal.</p>
+   </div>
+
   </div>
-  <div class="note">Open it from the home screen icon, not from Safari — that's the version that works without a signal.</div>
+ </div>
+
+ <div class="card">
+  <ul class="know">
+   <li><span class="mark">·</span><span>Once it's on your home screen, it works with no signal — that's the whole reason to install it, and it matters at Treetops.</span></li>
+   <li><span class="mark">·</span><span>Tapped the wrong name by mistake? Tap your name at the top of the app to switch.</span></li>
+  </ul>
  </div>
 
  <a class="openbtn" href="../">Open the app</a>
  <p class="openhint">Already added it? This takes you straight there.</p>
-
- <div class="eyebrow">Once it's on your phone</div>
- <h2 class="sect">What it does</h2>
- <div class="card">
-  <ul class="list">
-   <li><span class="dot">1</span><span>Pick your name once, and the whole app becomes yours.</span></li>
-   <li><span class="dot">2</span><span>Your next round is pinned at the top, with a live countdown.</span></li>
-   <li><span class="dot">3</span><span>See who you're playing with, and everyone's course handicap.</span></li>
-   <li><span class="dot">4</span><span>Full scorecards, with the holes where you get a stroke marked.</span></li>
-   <li><span class="dot">5</span><span>Tap any course for directions.</span></li>
-   <li><span class="dot">6</span><span>Track your winnings against your buy-in for the week.</span></li>
-  </ul>
-  <div class="note">Works with no signal once you've opened it — handy at Black Lake.</div>
- </div>
-
- <div class="eyebrow">Two things worth knowing</div>
- <h2 class="sect">Good to know</h2>
- <div class="card">
-  <ul class="know">
-   <li><span class="mark">·</span><span>Tap your name at the top of the app to switch to someone else's schedule.</span></li>
-   <li><span class="mark">·</span><span>Sunday's groups get sorted out when everyone arrives — that one's normal, not a bug.</span></li>
-   <li><span class="mark">·</span><span>Course directions need a signal — they open Maps. Everything else works offline.</span></li>
-  </ul>
- </div>
 
  <footer>
   <div class="credit">
