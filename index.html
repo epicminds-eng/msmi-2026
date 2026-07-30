@@ -156,8 +156,8 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .tile .tbar{height:4px;margin:0 -6px;border-radius:0}
 
 /* ---------- component A: player row ---------- */
-.prow{display:block;width:100%;text-align:left;background:var(--raise);border-radius:12px;
- padding:12px 14px 11px;margin-bottom:8px;border:2px solid transparent;cursor:pointer;
+.prow{display:block;width:100%;text-align:left;background:var(--raise);border-radius:var(--r-md);
+ padding:12px 14px 11px;margin-bottom:var(--sp-2);border:2px solid transparent;cursor:pointer;
  font-family:var(--sans);color:inherit}
 .prow.on{border-color:var(--accent)}
 .prow .pr1{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
@@ -165,7 +165,7 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .prow .prsub{display:block;font-size:.78rem;font-weight:600;color:var(--mute);margin-top:2px;overflow-wrap:anywhere}
 .prow .prval{font-size:1.46rem;font-weight:800;line-height:1;text-align:right;white-space:nowrap}
 .prow .prvalrow{display:flex;align-items:center;justify-content:flex-end;gap:6px}
-.prow .teepill{width:22px;height:22px;border-radius:6px;flex:0 0 auto;box-sizing:border-box}
+.prow .teepill{width:22px;height:22px;border-radius:var(--r-sm);flex:0 0 auto;box-sizing:border-box}
 .prow .prlabel{display:block;font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
  color:var(--mute);text-align:right;margin-top:3px;overflow-wrap:anywhere}
 .prow .prbar{height:5px;border-radius:99px;background:var(--line);margin-top:9px;overflow:hidden}
@@ -174,24 +174,49 @@ html[data-skin="epicminds"] .skinbtn{display:none}
    no STROKES label (the tee marker is the only label these rows carry now),
    a square tee swatch, and ONE arrangement used identically whether the row
    is a full-width span or a half-width cell (v2.0.0 dropped the separate
-   full-width variant — same 2x2 grid either way, just more horizontal room
-   in the full-width case). .pr1/.prname/.prsub above are untouched: they're
+   full-width variant). .pr1/.prname/.prsub above are untouched: they're
    still what the picker and Handicaps screen render, and .gr1 never appears
    outside .prowgrid, so nothing here reaches either of those screens.
-   First/last name are separate grid items (not one wrapping name span) so
-   the name is ALWAYS two lines, even when it would fit on one — a deliberate
-   look, not a width fallback. grid-area on .prvalrow is inert inside the old
-   flex .pr1 — reusing that class here instead of inventing a new one is
-   safe on purpose. */
-.prow .gr1{display:grid;grid-template-columns:1fr 54px;column-gap:8px;row-gap:3px;
- grid-template-areas:"first val" "last tee"}
-.prow .grfirst{font-size:1rem;font-weight:700;grid-area:first;min-width:0;
+   First/last name are separate lines (not one wrapping name span) so the
+   name is ALWAYS two lines, even when it would fit on one — a deliberate
+   look, not a width fallback.
+
+   DIAGNOSIS (loose vertical rhythm, v2.0.0 patch) — two separate causes:
+   1) .grfirst/.grlast never set their own line-height, so it should inherit
+      body's line-height:1.5 — but .prow is a <button>, and the UA stylesheet
+      gives form controls their own line-height:normal that does NOT pass
+      body's inherited value through. That resolves to Hanken Grotesk's own
+      "normal" metric (~1.46x the font size, measured), nowhere near the
+      mockup's ~1.15. Fixed with an explicit line-height on the two lines
+      that actually need it, not a negative margin.
+   2) .gr1 was CSS grid (grid-template-areas "first val" / "last tee"), which
+      put .grfirst and .prval in the SAME row and .grlast/.grtee in the next.
+      A grid row is sized by its tallest participant, and grid items stretch
+      to fill that row height by default — so .grfirst's box was forced to
+      match .prval's taller line-height even after fixing (1), reopening the
+      same visual gap between the name lines via box-stretching instead of
+      row-gap, measured directly: align-items:start left a 2.66px gap that
+      row-gap:0 alone could never close, because the coupling was the SHARED
+      ROW, not the gap between rows. Fixed by switching .gr1 to a two-column
+      flex row (matching the picker/Handicaps .pr1 pattern) — the name lines
+      and the value/tee lines now stack in independent normal block flow, so
+      neither column's internal spacing depends on the other's line-height. */
+.prow .gr1{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-2)}
+.prow .gr1>div:first-child{min-width:0;flex:1 1 auto}
+.prow .gr1>div:last-child{flex:0 0 auto}
+.prow .grfirst,.prow .grlast{display:block;font-size:1rem;font-weight:700;line-height:1.15;
  overflow-wrap:normal;word-break:normal}
-.prow .grlast{display:block;font-size:1rem;font-weight:700;grid-area:last;min-width:0;
- overflow-wrap:normal;word-break:normal}
-.prow .grtee{display:block;font-size:.78rem;font-weight:600;color:var(--mute);grid-area:tee;
- min-width:0;text-align:right}
-.prow .prvalrow{grid-area:val}
+.prow .grtee{display:block;font-size:.78rem;font-weight:600;color:var(--mute);
+ text-align:right;margin-top:var(--sp-1)}
+/* full-width vs half-width: one ratio (--type-scale-step) applied to the
+   SAME two existing type sizes, not two independently-chosen numbers. The
+   name's existing 1rem is the half-width (smaller) case, scaled UP for
+   full-width; the number's existing 1.46rem is the full-width (larger)
+   case, scaled DOWN for half-width — so both directions reuse one step. */
+.prowgrid .prow .prval{font-size:calc(1.46rem / var(--type-scale-step))}
+.prowgrid.odd .prow:first-child .grfirst,
+.prowgrid.odd .prow:first-child .grlast{font-size:calc(1rem * var(--type-scale-step))}
+.prowgrid.odd .prow:first-child .prval{font-size:1.46rem}
 /* picker-only: avatar to the left of name+value, ring coloured by ramp(index).
    Picker rows are the only prowHTML consumer that passes opts.avatar. */
 .prowtop{display:flex;align-items:center;gap:12px}
@@ -209,17 +234,19 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 /* two-column player grid — round card and scorecard sheet only. Row-first flow
    (the DOM order IS the visual order), so the selected player renders first in
    markup to land top-left. Odd-sized groups: first card spans both columns. */
-.prowgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.prowgrid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2);margin-bottom:var(--sp-2)}
 .prowgrid.odd .prow:first-child{grid-column:1 / -1}
-/* padding trimmed further (9/8/8 -> 8/8/7) now that STROKES no longer needs
-   room in these rows — measured to still leave every surname's worst case
-   comfortable, not eyeballed; see the .gr1 comment above. Harmless to the
-   old .pr1 layout too since it's just interior spacing. */
-.prowgrid .prow{margin-bottom:0;padding:8px 8px 7px;min-width:0}
+/* cell padding was an off-scale 8px 8px 7px — the 7px fit no step, so it's
+   rounded into the scale as a uniform --sp-2 (8px), the closest existing
+   value, not a new number. The bar's gap below the name/value block is the
+   actual vertical-rhythm fix Chad flagged (the design hadn't changed, the
+   spacing had drifted): one scale step (--sp-3) under it, not the previous
+   ad-hoc 6px. Harmless to the old .pr1 layout too, just interior spacing. */
+.prowgrid .prow{margin-bottom:0;padding:var(--sp-2);min-width:0}
 .prow .pr1>div:first-child{min-width:0;flex:1 1 auto}
 .prow .pr1>div:last-child{flex:0 0 auto}
 .prowgrid .prow .prsub{margin-top:1px}
-.prowgrid .prow .prbar{margin-top:6px}
+.prowgrid .prow .prbar{margin-top:var(--sp-3)}
 
 /* ---------- component C: segmented control ---------- */
 .seg{display:flex;gap:4px;background:var(--raise);border-radius:12px;padding:4px;flex-wrap:wrap}
@@ -699,10 +726,18 @@ function groupProwHTML(opts){
  const nameTokens=opts.name.split(' ');
  const first=esc(nameTokens[0]);
  const last=esc(nameTokens.slice(1).join(' '));
- const gr1='<div class="gr1"><span class="grfirst">'+first+'</span>'
-  +'<span class="grlast">'+last+'</span>'
-  +'<div class="prvalrow"><span class="prval">'+opts.value+'</span>'+pill+'</div>'
-  +(opts.tee?'<span class="grtee">'+esc(opts.tee)+'</span>':'')+'</div>';
+ /* two plain (unclassed, like .pr1's own div>div pattern) flex children, not
+    a CSS-grid area layout: the name lines and the value/tee lines need to
+    stack independently, each in its own normal block flow. A shared grid
+    row height (first+val sharing row 1, last+tee sharing row 2 — the
+    previous structure here) forces the SHORTER column's line-height to
+    stretch to match the TALLER one, reopening the exact gap this patch
+    exists to close, even with row-gap:0. Flex with align-items:baseline
+    doesn't couple the two columns' internal line spacing at all. */
+ const gr1='<div class="gr1"><div><span class="grfirst">'+first+'</span>'
+  +'<span class="grlast">'+last+'</span></div>'
+  +'<div><div class="prvalrow"><span class="prval">'+opts.value+'</span>'+pill+'</div>'
+  +(opts.tee?'<span class="grtee">'+esc(opts.tee)+'</span>':'')+'</div></div>';
  return '<button class="prow'+(opts.on?' on':'')+'"'+(opts.attrs?' '+opts.attrs:'')+' aria-pressed="'+(!!opts.on)+'">'
   +gr1
   +'<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>'

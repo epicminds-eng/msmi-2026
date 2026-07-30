@@ -10,7 +10,7 @@
    index.html never keeps its own copy). It only changes when deliberately
    bumped, unlike CACHE_VERSION which increments on every commit that
    touches index.html regardless of whether anything user-visible changed. */
-const CACHE_VERSION = 'v36';
+const CACHE_VERSION = 'v37';
 const APP_VERSION = '2.0.0';
 const CACHE_NAME = 'msmi-2026-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'msmi-2026-fonts';
