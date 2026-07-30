@@ -162,7 +162,8 @@ html[data-skin="epicminds"] .skinbtn{display:none}
    grid-area on .prvalrow/.prlabel is inert inside the old flex .pr1 — reusing
    those two classes here instead of inventing new ones is safe on purpose. */
 .prow .gr1{display:grid;grid-template-columns:1fr auto;column-gap:8px;row-gap:2px}
-.prow .grname{font-size:1rem;font-weight:700;grid-area:name;min-width:0;overflow-wrap:anywhere}
+.prow .grname{font-size:1rem;font-weight:700;grid-area:name;min-width:0;
+ overflow-wrap:normal;word-break:normal}
 .prow .grtee{display:block;font-size:.78rem;font-weight:600;color:var(--mute);grid-area:tee;min-width:0}
 .prow .prvalrow{grid-area:val}
 .prow .prlabel{grid-area:lbl}
