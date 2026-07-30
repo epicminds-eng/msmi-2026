@@ -154,6 +154,39 @@ html[data-skin="epicminds"] .skinbtn{display:none}
  color:var(--mute);text-align:right;margin-top:3px;overflow-wrap:anywhere}
 .prow .prbar{height:5px;border-radius:99px;background:var(--line);margin-top:9px;overflow:hidden}
 .prow .prbar i{display:block;height:100%;border-radius:99px}
+/* round-card / scorecard-sheet player row content (groupProwHTML) — no index,
+   a square tee swatch, and a different arrangement for the full-width row vs
+   the half-width grid cell. .pr1/.prname/.prsub above are untouched: they're
+   still what the picker and Handicaps screen render, and .gr1 never appears
+   outside .prowgrid, so nothing here reaches either of those screens.
+   grid-area on .prvalrow/.prlabel is inert inside the old flex .pr1 — reusing
+   those two classes here instead of inventing new ones is safe on purpose. */
+.prow .gr1{display:grid;grid-template-columns:1fr auto;column-gap:8px;row-gap:2px}
+.prow .grname{font-size:1rem;font-weight:700;grid-area:name;min-width:0;overflow-wrap:anywhere}
+.prow .grtee{display:block;font-size:.78rem;font-weight:600;color:var(--mute);grid-area:tee;min-width:0}
+.prow .prvalrow{grid-area:val}
+.prow .prlabel{grid-area:lbl}
+/* half-width cell (default): name only on the left; value+swatch, STROKES,
+   then the tee name stack on the right, all right-aligned. The right column
+   is a measured fixed width, not auto: auto let a long tee label like "Black
+   / Back" (rendered widest word ~47px, but unwrapped the whole label is much
+   wider) dictate the column and crush the name column down to ~52px, which
+   is narrower than several real surnames (Schurecht measures ~74px) — hence
+   the overflow this fixed width exists to prevent. 56px comfortably fits
+   STROKES (~51px) and value+swatch (~54px) unwrapped; the tee label still
+   wraps normally at its own spaces/slash within it, which is fine — it isn't
+   a name. Paired with the trimmed .prowgrid .prow padding and column-gap
+   below, this leaves ~79px for the name column, a real measured margin over
+   every surname in the current roster, not a guess. */
+.prowgrid .prow .gr1{grid-template-areas:"name val" "name lbl" "name tee";grid-template-columns:1fr 56px}
+.prowgrid .prow .grtee{text-align:right}
+/* full-width row (the selected player in an odd-sized group, or any single-
+   row card): name+tee stack on the left, value-row+STROKES on the right —
+   the same two-column shape as before, just without the index on line two.
+   This row spans the full grid width, so the auto column here is never
+   fighting the same name column for space — no fixed width needed. */
+.prowgrid.odd .prow:first-child .gr1{grid-template-areas:"name val" "tee lbl";grid-template-columns:1fr auto;align-items:baseline}
+.prowgrid.odd .prow:first-child .grtee{text-align:left}
 /* picker-only: avatar to the left of name+value, ring coloured by ramp(index).
    Picker rows are the only prowHTML consumer that passes opts.avatar. */
 .prowtop{display:flex;align-items:center;gap:12px}
@@ -173,7 +206,10 @@ html[data-skin="epicminds"] .skinbtn{display:none}
    markup to land top-left. Odd-sized groups: first card spans both columns. */
 .prowgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .prowgrid.odd .prow:first-child{grid-column:1 / -1}
-.prowgrid .prow{margin-bottom:0;padding:9px 11px 8px;min-width:0}
+/* horizontal padding trimmed from 11px to 8px — reclaims 6px total for the
+   half-width .gr1 name column (see the .gr1 comment above); harmless to the
+   old .pr1 layout too since it's just interior spacing. */
+.prowgrid .prow{margin-bottom:0;padding:9px 8px 8px;min-width:0}
 .prow .pr1>div:first-child{min-width:0;flex:1 1 auto}
 .prow .pr1>div:last-child{flex:0 0 auto}
 .prowgrid .prow .prsub{margin-top:1px}
@@ -630,6 +666,26 @@ function prowHTML(opts){
   +'<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>'
   +'</button>';
 }
+/* component A2: round-card / scorecard-sheet player row — no index (the tee
+   name already tells you what the strokes mean), a different arrangement in
+   the full-width row vs the half-width grid cell (see .gr1 CSS), a square tee
+   swatch. A dedicated function, not a prowHTML(opts) variant, so the picker
+   (renderPickerList) and the Handicaps screen (hcpPlayerRowHTML) — both of
+   which DO need the index and neither of which ever passes a pillStyle — are
+   structurally untouched by anything here. Bar math (f, ramp()) is identical
+   to prowHTML's, copied verbatim, not reimplemented. */
+function groupProwHTML(opts){
+ const f=clamp01(opts.f);
+ const pill=opts.pillStyle? '<span class="teepill" style="'+opts.pillStyle+'"></span>' : '';
+ const gr1='<div class="gr1"><span class="grname">'+esc(opts.name)+'</span>'
+  +(opts.tee?'<span class="grtee">'+esc(opts.tee)+'</span>':'')
+  +'<div class="prvalrow"><span class="prval">'+opts.value+'</span>'+pill+'</div>'
+  +'<span class="prlabel">'+opts.label+'</span></div>';
+ return '<button class="prow'+(opts.on?' on':'')+'"'+(opts.attrs?' '+opts.attrs:'')+' aria-pressed="'+(!!opts.on)+'">'
+  +gr1
+  +'<div class="prbar"><i style="width:'+Math.round(f*100)+'%;background:'+ramp(f)+'"></i></div>'
+  +'</button>';
+}
 /* literal tee colours — not theme tokens, identical in all three skins.
    Keyed by the base tee name (gender-suffix stripped, e.g. baseTee('GOLD (L)')
    -> 'GOLD') so the (L)-rated tees Dami Mui sees take the same colour as the
@@ -654,19 +710,15 @@ function teePillStyle(baseTeeName){
    whoever else is selected, so it's resolved here per-row, independently of
    any other row on the card — never take a tee/teeSheet as a parameter. */
 function groupRowHTML(nick,course,on,attrs){
- const p=playerOf(nick);
  const sc=DATA.sc[course];
  const ti=sc? teeIndexFor(upperFullName(nick),course) : -1;
  const teeSlot=ti>-1? sc.tees[ti] : null;
  const ch = teeSlot&&teeSlot.sheet? chFor(nick,course,teeSlot.sheet) : null;
  const has = ch!==null && ch!==undefined;
- const parts=[];
- if(p) parts.push(p.index.toFixed(1)+' index');
- if(teeSlot) parts.push(teeSlot.label);
  const pillStyle = teeSlot&&teeSlot.sheet? teePillStyle(baseTee(teeSlot.sheet)) : null;
- return prowHTML({
+ return groupProwHTML({
   name: fullName(nick),
-  sub: parts.join(' · '),
+  tee: teeSlot? teeSlot.label : '',
   value: has? String(ch) : '—',
   label: 'STROKES',
   f: has? ch/40 : 0,
