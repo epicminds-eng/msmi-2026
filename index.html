@@ -1491,11 +1491,11 @@ function renderUpdateBar(){
  });
  bar.hidden=!show;
 }
-/* asks the running service worker for its own CACHE_VERSION rather than
-   keeping a second copy of that constant in this file — no controller
-   (first load, or the browser doesn't support service workers at all) means
-   there's nothing to ask, so the version line renders nothing rather than a
-   guess or a placeholder. */
+/* asks the running service worker for its own APP_VERSION (v2.0.0+ — was
+   CACHE_VERSION before) rather than keeping a second copy of that constant
+   in this file — no controller (first load, or the browser doesn't support
+   service workers at all) means there's nothing to ask, so the version line
+   renders nothing rather than a guess or a placeholder. */
 function requestAppVersion(){
  const el=document.getElementById('appVersion');
  if(!el) return;

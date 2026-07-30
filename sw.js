@@ -4,8 +4,14 @@
    localStorage; it only manages the Cache Storage API.
    STANDING RULE: any commit that touches index.html must also bump
    CACHE_VERSION in the same commit, or the cache-first SW keeps serving
-   the stale page indefinitely — this bit us once already. */
-const CACHE_VERSION = 'v33';
+   the stale page indefinitely — this bit us once already.
+   APP_VERSION (v2.0.0) is separate and user-facing: it's what the footer
+   displays (still requested from here via GET_VERSION, same as always —
+   index.html never keeps its own copy). It only changes when deliberately
+   bumped, unlike CACHE_VERSION which increments on every commit that
+   touches index.html regardless of whether anything user-visible changed. */
+const CACHE_VERSION = 'v34';
+const APP_VERSION = '2.0.0';
 const CACHE_NAME = 'msmi-2026-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'msmi-2026-fonts';
 
@@ -71,10 +77,14 @@ self.addEventListener('message', event => {
     self.skipWaiting();
   }
   /* the page asks for this rather than index.html keeping its own copy of
-     CACHE_VERSION — two constants drift the first time someone bumps one
-     and not the other, which has already happened twice on this project. */
+     the version string — two constants drift the first time someone bumps
+     one and not the other, which has already happened twice on this
+     project. As of v2.0.0 this answers with APP_VERSION, not CACHE_VERSION:
+     CACHE_VERSION now increments on every commit that touches index.html
+     and is no longer meant to be user-visible; APP_VERSION only changes
+     when deliberately bumped. */
   if (event.data && event.data.type === 'GET_VERSION' && event.source) {
-    event.source.postMessage({ type: 'VERSION', version: CACHE_VERSION });
+    event.source.postMessage({ type: 'VERSION', version: APP_VERSION });
   }
 });
 
