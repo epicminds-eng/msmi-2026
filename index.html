@@ -302,11 +302,12 @@ html[data-skin="epicminds"] .changebtn{background:var(--ink)}
 .seg.teeseg .segswatch{width:100%;height:var(--sp-6);border-radius:var(--r-sm);flex:0 0 auto;box-sizing:border-box}
 .seg.teeseg .segtext{display:block;text-align:center}
 
-.ctrls{display:flex;gap:8px;margin:0 0 16px}
-.ctrls button,.ctrls a{flex:1;min-height:46px;border-radius:999px;border:1px solid var(--line);
- background:var(--card);font-size:.9rem;font-weight:600;cursor:pointer;display:flex;
- align-items:center;justify-content:center;text-decoration:none}
-.ctrls button:focus-visible,.ctrls a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* moved inside the hero card, below the tiles — they're trip-wide actions, so
+   they belong with the trip-wide card, not floating between it and the first
+   round card. Geometry now matches .actrow/.btn exactly (grid, radius, height,
+   gap) rather than duplicating those values: the two buttons carry the actual
+   .btn/.btn.fill classes, so they ARE the same component, not a copy of it. */
+.ctrls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0 0}
 
 /* ---------- cards / round card ---------- */
 .card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
@@ -551,10 +552,10 @@ footer p{margin:.45em 0}
    </button>
    <p class="sub">Aug 2–6 · Treetops Resort, Gaylord MI</p>
    <div class="tiles" id="heroTiles"></div>
-  </div>
-  <div class="ctrls">
-   <button id="grpBtn" aria-pressed="true">My group</button>
-   <a href="tel:+18663485249">Call Treetops</a>
+   <div class="ctrls">
+    <button class="btn fill" id="grpBtn" aria-pressed="true">My group</button>
+    <a class="btn" href="tel:+18663485249">Call Treetops</a>
+   </div>
   </div>
   <div id="next"></div>
   <div id="rounds"></div>
@@ -1496,7 +1497,17 @@ document.getElementById('tables').addEventListener('click',e=>{
  renderTables();
 });
 const gb=document.getElementById('grpBtn');
-function syncGrp(){gb.textContent=mineOnly?'My group':'All groups';gb.setAttribute('aria-pressed',String(mineOnly))}
+/* fill = mineOnly (the button reads "My group", the narrowed/personalised
+   view) — the same accent-fill-means-"this is the active state" language
+   .seg button.on and .prow.on already use elsewhere. Outlined when it reads
+   "All groups": the broader, unfiltered default, not a distinct choice worth
+   calling out. Fill tracks the toggle's actual state either way, so it never
+   just sits there looking like a permanent primary action. */
+function syncGrp(){
+ gb.textContent=mineOnly?'My group':'All groups';
+ gb.setAttribute('aria-pressed',String(mineOnly));
+ gb.classList.toggle('fill',mineOnly);
+}
 gb.addEventListener('click',()=>{mineOnly=!mineOnly;localStorage.setItem('msmi-group',mineOnly?'mine':'all');syncGrp();renderTrip()});
 
 /* ---------- skin ---------- */
