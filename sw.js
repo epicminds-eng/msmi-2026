@@ -2,15 +2,44 @@
    Bump CACHE_VERSION on every deploy — that's what forces old precached
    files to be dropped in activate(). This worker never reads or writes
    localStorage; it only manages the Cache Storage API.
-   STANDING RULE: any commit that touches index.html must also bump
-   CACHE_VERSION in the same commit, or the cache-first SW keeps serving
-   the stale page indefinitely — this bit us once already.
+
+   STANDING RULE: bump CACHE_VERSION whenever ANY file this app serves
+   changes — not just index.html. The fetch handler below cache-firsts
+   EVERY same-origin GET request, not only the files listed in
+   PRECACHE_URLS, so anything under this site can go stale on a returning
+   visitor's device until the version changes. This is exactly how
+   install/index.html went stale twice in a row (commits f014911, 713507d):
+   it was never even in PRECACHE_URLS, but it still got runtime-cached on
+   first visit, and neither commit bumped CACHE_VERSION, so devices kept
+   serving the old copy indefinitely. tests/check-cache-freshness.js
+   catches this locally — run it before committing.
+
+   Explicitly precached (forced into the cache on install, before any
+   device has to hit the network for them):
+     ./                  (site root, serves index.html)
+     ./index.html
+     ./install/index.html
+     ./treetops-map.webp
+     ./manifest.json
+     ./icon-180.png, ./icon-192.png, ./icon-512.png, ./icon-1024.png
+     ./favicon.ico
+     ./epicminds-light.png, ./epicminds-dark.png
+
+   Cache-first is deliberate and load-bearing — it's what makes the app
+   work with no signal at Treetops/Gaylord, verified, and not up for
+   revisiting mid-trip. But it does mean the fetch handler has no
+   allowlist: it happily runtime-caches ANY same-origin file forever,
+   precached or not. Narrowing that (e.g. cache-first only for
+   PRECACHE_URLS, network-first everything else) is a real design
+   question — just one for after the trip, not touched here.
+
    APP_VERSION (v2.0.0) is separate and user-facing: it's what the footer
    displays (still requested from here via GET_VERSION, same as always —
    index.html never keeps its own copy). It only changes when deliberately
    bumped, unlike CACHE_VERSION which increments on every commit that
-   touches index.html regardless of whether anything user-visible changed. */
-const CACHE_VERSION = 'v41';
+   touches any served file, regardless of whether anything user-visible
+   changed. */
+const CACHE_VERSION = 'v42';
 const APP_VERSION = '2.0.0';
 const CACHE_NAME = 'msmi-2026-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'msmi-2026-fonts';
@@ -18,6 +47,7 @@ const FONT_CACHE_NAME = 'msmi-2026-fonts';
 const PRECACHE_URLS = [
   './',
   './index.html',
+  './install/index.html',
   './treetops-map.webp',
   './manifest.json',
   './icon-180.png',
