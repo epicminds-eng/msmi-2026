@@ -140,9 +140,19 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .hero .kick{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 .hero h1{font-size:2.15rem;line-height:1.08;margin:.32em 0 .18em;overflow-wrap:normal;
  white-space:nowrap;color:var(--accent)}
+/* solid filled, per skin — was --raise/--ink, which read as disabled next to
+   everything else on the hero. char uses its own --accent (already #4ADE80);
+   teal and epicminds deliberately use --ink rather than THEIR accent — the
+   gold accent is already carrying the player's name directly above, and the
+   two would compete. --onacc is already the paired dark text for a light
+   fill in all three skins (it's how .btn.fill/.pickconfirmbtn read on
+   --accent already), and it turns out to read correctly on --ink too here:
+   char 9.86:1, teal 11.46:1, epicminds 13.39:1 (WCAG AAA is 7:1). */
 .changebtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;
- border:1px solid transparent;border-radius:12px;background:var(--raise);color:var(--ink);
+ border:1px solid transparent;border-radius:12px;background:var(--accent);color:var(--onacc);
  font-family:var(--sans);font-size:.88rem;font-weight:700;cursor:pointer;margin:2px 0 16px}
+html[data-skin="teal"] .changebtn,
+html[data-skin="epicminds"] .changebtn{background:var(--ink)}
 .changebtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .changebtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .hero .sub{color:var(--mute);font-size:.86rem;font-weight:600;margin:0 0 18px}
