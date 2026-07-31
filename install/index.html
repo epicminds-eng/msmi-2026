@@ -68,6 +68,11 @@ h2.sect{font-family:var(--serif);font-weight:500;font-size:1.7rem;letter-spacing
  margin:var(--sp-6) 0 var(--sp-1);box-shadow:var(--shadow)}
 .openbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .openhint{text-align:center;color:var(--muted);font-size:.82rem;margin:0 0 var(--sp-6)}
+/* compact inline variant — same fill/text colour as .openbtn, sized to its
+   own content instead of stretching full width, dropped right where someone
+   finishes a set of steps rather than making them scroll to the bottom. */
+.openbtn-inline{display:inline-flex;width:auto;min-height:44px;padding:0 var(--sp-5);
+ margin:var(--sp-3) 0 0;font-size:.95rem}
 
 .know{list-style:none;margin:0;padding:0}
 .know li{display:flex;gap:var(--sp-3);padding:var(--sp-3) 0;border-top:1px solid var(--rule)}
@@ -101,9 +106,6 @@ footer{padding:var(--sp-6) 0 var(--sp-2);color:var(--muted);font-size:.85rem;bor
   <p>Your tee times, groups, handicaps, scorecards and directions — on your phone.</p>
  </div>
 
- <a class="openbtn" href="../">Open the app</a>
- <p class="openhint">Tap this first — then add the page it opens to your home screen, not this one.</p>
-
  <div class="steps">
   <div class="eyebrow">One-time setup</div>
   <h2 class="sect">Add it to your home screen</h2>
@@ -118,6 +120,7 @@ footer{padding:var(--sp-6) 0 var(--sp-2);color:var(--muted);font-size:.85rem;bor
      <li>Make sure <b>Open as Web App</b> is turned <b>on</b> — that's what makes it work without a signal.</li>
      <li>Tap <b>Add</b>.</li>
     </ol>
+    <a class="openbtn openbtn-inline" href="../">Open the app</a>
    </div>
 
    <div class="card stepcard">
@@ -127,6 +130,7 @@ footer{padding:var(--sp-6) 0 var(--sp-2);color:var(--muted);font-size:.85rem;bor
      <li>Tap the <svg class="i" aria-hidden="true"><use href="#i-dots-v"></use></svg> menu, then <b>Install app</b> — or <b>Add to Home screen</b>, depending on your Chrome version.</li>
      <li>Tap <b>Install</b> (or <b>Add</b>).</li>
     </ol>
+    <a class="openbtn openbtn-inline" href="../">Open the app</a>
    </div>
 
    <div class="card stepcard">
