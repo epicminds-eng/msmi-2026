@@ -58,6 +58,7 @@ h2.sect{font-family:var(--serif);font-weight:500;font-size:1.7rem;letter-spacing
 .stepcard li{margin:0 0 var(--sp-2)}
 .stepcard li:last-child{margin-bottom:0}
 .stepcard b{font-weight:700}
+.i{width:.85em;height:.85em;vertical-align:-.05em;margin:0 .05em;flex:none}
 .steps .cards{display:flex;flex-direction:column;gap:var(--sp-3)}
 .stepcard .warn{background:var(--warn-bg);border-left:3px solid var(--warn);
  padding:var(--sp-2) var(--sp-3);border-radius:0 8px 8px 0;font-size:.94rem}
@@ -86,6 +87,12 @@ footer{padding:var(--sp-6) 0 var(--sp-2);color:var(--muted);font-size:.85rem;bor
 </style>
 </head>
 <body>
+<svg aria-hidden="true" style="display:none">
+ <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 2v13m0-13-4 4m4-4 4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+ <symbol id="i-dots-h" viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.2" fill="currentColor"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><circle cx="19" cy="12" r="2.2" fill="currentColor"/></symbol>
+ <symbol id="i-dots-v" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2" fill="currentColor"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><circle cx="12" cy="19" r="2.2" fill="currentColor"/></symbol>
+ <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+</svg>
 <div class="wrap">
 
  <div class="hero">
@@ -103,8 +110,10 @@ footer{padding:var(--sp-6) 0 var(--sp-2);color:var(--muted);font-size:.85rem;bor
     <h3>📱 iPhone</h3>
     <p class="warn">Open this link in <b>Safari</b> — not Chrome, and not straight from a text or email. That's the #1 thing that goes wrong.</p>
     <ol>
-     <li>Tap <b>Share</b> — the square with an arrow pointing up. (On newer iPhones, tap <b>⋯</b> first, then Share. If you don't see either, look for that square-with-an-arrow icon.)</li>
-     <li>Tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+     <li>Tap <b>Share</b> <svg class="i" aria-hidden="true"><use href="#i-share"></use></svg> — the square with an arrow pointing up. (On newer iPhones, tap the menu button <svg class="i" aria-hidden="true"><use href="#i-dots-h"></use></svg> first, then Share.)</li>
+     <li>Tap <b>Add to Home Screen</b>. Don't see it in the list? Scroll to the bottom, tap <b>Edit Actions</b> <svg class="i" aria-hidden="true"><use href="#i-plus"></use></svg>, and add it from there.</li>
+     <li>Make sure <b>Open as Web App</b> is turned <b>on</b> — that's what makes it work without a signal.</li>
+     <li>Tap <b>Add</b>.</li>
     </ol>
    </div>
 
@@ -112,7 +121,7 @@ footer{padding:var(--sp-6) 0 var(--sp-2);color:var(--muted);font-size:.85rem;bor
     <h3>🤖 Android</h3>
     <ol>
      <li>Open this link in <b>Chrome.</b></li>
-     <li>Tap the <b>⋮</b> menu, then <b>Install app</b> — or <b>Add to Home screen</b>, depending on your Chrome version.</li>
+     <li>Tap the <svg class="i" aria-hidden="true"><use href="#i-dots-v"></use></svg> menu, then <b>Install app</b> — or <b>Add to Home screen</b>, depending on your Chrome version.</li>
      <li>Tap <b>Install</b> (or <b>Add</b>).</li>
     </ol>
    </div>
