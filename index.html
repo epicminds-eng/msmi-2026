@@ -956,21 +956,35 @@ function defaultTeeIdx(course){
  return idx<0?0:idx;
 }
 /* per-player remembered tee, index into DATA.sc[course].tees (0 = longest) — a
-   fact about the person, not the card or sheet showing them. Clamped to the
-   course's own tee count so a player's index carried over from a course with
-   more tees (e.g. Masterpiece's 5) never overruns a shorter one (e.g. Classic's 4). */
+   fact about the person AND the course: picking Blue on Signature must never
+   flip Black Lake to Blue too. Storage key is 'msmi-tee:<NAME>:<COURSE>'.
+   Clamped to the course's own tee count so a player's index carried over from
+   a course with more tees (e.g. Masterpiece's 5) never overruns a shorter one
+   (e.g. Classic's 4).
+
+   MIGRATION: this used to be one global 'msmi-tee:<NAME>' key shared by every
+   course (the bug this replaces). That legacy key is never written again,
+   but it's still read as a fallback the first time a given course has no
+   per-course key of its own yet — so someone who already had a saved tee
+   keeps seeing it as the STARTING choice on every course, exactly once each,
+   until they change a course's tee explicitly, which then only writes that
+   course's own key. The legacy key itself is left alone (harmless orphan),
+   never deleted, never written to again. */
 function teeIndexFor(fullNameKey,course){
  const c=DATA.sc[course]; const n=c?c.tees.length:0;
  if(n<=0) return 0;
  let stored=null;
- try{ stored=localStorage.getItem('msmi-tee:'+fullNameKey); }catch(e){}
+ try{ stored=localStorage.getItem('msmi-tee:'+fullNameKey+':'+course); }catch(e){}
+ if(stored===null||stored===''){
+  try{ stored=localStorage.getItem('msmi-tee:'+fullNameKey); }catch(e){}
+ }
  if(stored===null||stored==='') return defaultTeeIdx(course);
  const idx=parseInt(stored,10);
  if(!Number.isFinite(idx)) return defaultTeeIdx(course);
  return Math.max(0,Math.min(n-1,idx));
 }
-function setTeeIndexFor(fullNameKey,idx){
- try{ localStorage.setItem('msmi-tee:'+fullNameKey,String(idx)); }catch(e){}
+function setTeeIndexFor(fullNameKey,course,idx){
+ try{ localStorage.setItem('msmi-tee:'+fullNameKey+':'+course,String(idx)); }catch(e){}
 }
 
 /* ---------- "Tees" section: segmented tee control + 4 stat tiles, shared by
@@ -1331,9 +1345,12 @@ document.getElementById('pg-trip').addEventListener('click',e=>{
   if(ctBtn){
    const r=rounds.find(x=>x.id===rid);
    const idx=Number(ctBtn.getAttribute('data-cardtee-'+rid));
-   setTeeIndexFor(r.nohcp?ME_FULL:upperFullName(selFor(r)),idx);
-   /* a player's tee is now a global fact, not a per-card one — re-render every
-      round card so any other card showing the same person stays in sync */
+   setTeeIndexFor(r.nohcp?ME_FULL:upperFullName(selFor(r)),r.course,idx);
+   /* a player's tee is a fact about (player, course), not the card — the same
+      course can appear on more than one round (e.g. Black Lake, tue-am and
+      tue-pm), so re-render every round card to keep any OTHER card for that
+      SAME course in sync; cards for a different course read a different key
+      and are unaffected. */
    renderTrip();
    return;
   }
@@ -1375,7 +1392,8 @@ document.getElementById('money').addEventListener('input',e=>{
 document.getElementById('sheet').addEventListener('click',e=>{
  if(e.target.id==='sheet'||e.target.id==='closeSheet'){ closeSheet(); return }
  const t=e.target.closest('button[data-tee]'); if(t){
-  setTeeIndexFor(upperFullName(scState.nick),Number(t.dataset.tee));
+  const scCourse=scState.which===1?scState.alt:scState.course;
+  setTeeIndexFor(upperFullName(scState.nick),scCourse,Number(t.dataset.tee));
   drawSheet(); renderTrip(); return
  }
  const w=e.target.closest('button[data-which]'); if(w){

@@ -37,9 +37,18 @@ let failures = 0;
 // say things like "v2.0.0 dropped the separate full-width variant" when
 // documenting what changed in that release, which is prose about history,
 // not a second copy of the runtime constant — searching them would make this
-// test punish normal code comments instead of catching the real bug.
-const htmlCodeOnly = htmlSrc.replace(/\/\*[\s\S]*?\*\//g, '');
-const literalOccurrences = (htmlCodeOnly.match(new RegExp(version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+// test punish normal code comments instead of catching the real bug. Inline
+// <svg> markup is stripped too: since APP_VERSION became the short "2.1"
+// (v2.1+, up from the long "2.0.0"), a bare substring search starts colliding
+// with unrelated numbers that happen to read "2.1" — an SVG path's coordinate
+// list ("... 2.5 2.1 2.6 ...") is exactly that kind of false positive, and
+// unlike a version string it's never quoted/tagged as a standalone token.
+// Matching is also boundary-anchored (\b...\b) so "2.15rem" in the stylesheet
+// doesn't false-positive either — a real hardcoded copy would appear as its
+// own standalone token, not fused to more digits.
+const htmlCodeOnly = htmlSrc.replace(/\/\*[\s\S]*?\*\//g, '').replace(/<svg[\s\S]*?<\/svg>/g, '');
+const versionPattern = new RegExp('\\b' + version.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g');
+const literalOccurrences = (htmlCodeOnly.match(versionPattern) || []).length;
 const noHardcodedCopy = literalOccurrences === 0;
 console.log(`${noHardcodedCopy ? 'PASS' : 'FAIL'}  index.html contains no hardcoded copy of '${version}' outside comments -> ${literalOccurrences} occurrence(s)`);
 if (!noHardcodedCopy) failures++;
