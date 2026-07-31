@@ -140,6 +140,10 @@ html[data-skin="epicminds"] .skinbtn{display:none}
 .hero .kick{font-size:.68rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
 .hero h1{font-size:2.15rem;line-height:1.08;margin:.32em 0 .18em;overflow-wrap:normal;
  white-space:nowrap;color:var(--accent)}
+/* charcoal only: --accent here is #4ADE80, the exact fill the Change golfer
+   button below now uses, so the two collide. Teal/epicminds keep the gold
+   name -- their Change golfer button is --ink there, so there's no clash. */
+html[data-skin="char"] .hero h1{color:var(--ink)}
 /* solid filled, per skin — was --raise/--ink, which read as disabled next to
    everything else on the hero. char uses its own --accent (already #4ADE80);
    teal and epicminds deliberately use --ink rather than THEIR accent — the
