@@ -553,8 +553,8 @@ footer p{margin:.45em 0}
    <p class="sub">Aug 2–6 · Treetops Resort, Gaylord MI</p>
    <div class="tiles" id="heroTiles"></div>
    <div class="ctrls">
-    <button class="btn fill" id="grpBtn" aria-pressed="true">My group</button>
-    <a class="btn" href="tel:+18663485249">Call Treetops</a>
+    <button class="btn fill" id="grpBtnMine" data-group="mine" aria-pressed="true">My group</button>
+    <button class="btn" id="grpBtnAll" data-group="all" aria-pressed="false">All groups</button>
    </div>
   </div>
   <div id="next"></div>
@@ -1496,19 +1496,23 @@ document.getElementById('tables').addEventListener('click',e=>{
  hcpTee[wrap.dataset.hcpcourse]=Number(btn.getAttribute('data-tee'));
  renderTables();
 });
-const gb=document.getElementById('grpBtn');
-/* fill = mineOnly (the button reads "My group", the narrowed/personalised
-   view) — the same accent-fill-means-"this is the active state" language
-   .seg button.on and .prow.on already use elsewhere. Outlined when it reads
-   "All groups": the broader, unfiltered default, not a distinct choice worth
-   calling out. Fill tracks the toggle's actual state either way, so it never
-   just sits there looking like a permanent primary action. */
+/* two fixed-label buttons, not a relabelling toggle — "My group" always says
+   "My group", "All groups" always says "All groups", conceptually identical
+   to the tee segmented control: both options always visible, the filled one
+   is where you are. Same accent-fill-means-"this is the active state"
+   language .seg button.on/.prow.on already use elsewhere. Tapping the
+   already-filled one is a no-op (mineOnly already matches, so nothing to
+   flip and no need to special-case it). */
+const gbMine=document.getElementById('grpBtnMine'), gbAll=document.getElementById('grpBtnAll');
 function syncGrp(){
- gb.textContent=mineOnly?'My group':'All groups';
- gb.setAttribute('aria-pressed',String(mineOnly));
- gb.classList.toggle('fill',mineOnly);
+ gbMine.classList.toggle('fill',mineOnly); gbMine.setAttribute('aria-pressed',String(mineOnly));
+ gbAll.classList.toggle('fill',!mineOnly); gbAll.setAttribute('aria-pressed',String(!mineOnly));
 }
-gb.addEventListener('click',()=>{mineOnly=!mineOnly;localStorage.setItem('msmi-group',mineOnly?'mine':'all');syncGrp();renderTrip()});
+function setGroupView(mine){
+ mineOnly=mine; localStorage.setItem('msmi-group',mineOnly?'mine':'all'); syncGrp(); renderTrip();
+}
+gbMine.addEventListener('click',()=>setGroupView(true));
+gbAll.addEventListener('click',()=>setGroupView(false));
 
 /* ---------- skin ---------- */
 function currentSkin(){ return document.documentElement.getAttribute('data-skin'); }
