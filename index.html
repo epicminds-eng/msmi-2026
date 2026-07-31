@@ -1041,8 +1041,17 @@ function cardHTML(r,isNext){
   } else if(!r.groups.length){
    if(r.tbd) h+='<div class="note">'+r.tbd+'</div>';
   } else {
-   h+=sechead(ICON_GROUP,'Your group');
-   const mine=myGroup(r); let list=r.groups.map((g,i)=>({g,i}));
+   const mine=myGroup(r);
+   /* the group number already exists in DATA (r.groups' own index) -- name it
+      directly instead of the generic "Your group". mine>-1 whenever the
+      selected player actually appears in one of this round's groups, which
+      is everyone here except the nohcp branch above (handled separately,
+      never reaches this code at all) -- but a "playing" flag that's ever out
+      of sync with the groups list (a data inconsistency, not a real case
+      today) would leave mine at -1, so this falls back to the old generic
+      wording rather than ever rendering "GROUP 0" or "GROUP undefined". */
+   h+=sechead(ICON_GROUP, mine>-1?'Group '+(mine+1):'Your group');
+   let list=r.groups.map((g,i)=>({g,i}));
    if(mineOnly&&mine>-1) list=[list[mine]];
    const ra=n=>'data-r="'+r.id+'" data-n="'+esc(n)+'"';
    const ti=teeIndexFor(upperFullName(selFor(r)),r.course);
