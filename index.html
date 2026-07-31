@@ -624,8 +624,6 @@ footer p{margin:.45em 0}
   <div class="note">Only North Condominiums is a separate drive. The other four are all on the main property at the same address — the landmark is more useful than the pin. The North Condominiums pin is approximate; Treetops publishes no street address for it.</div>
 
   <footer>
-   <p><strong>Fri 8/7 — not playing.</strong></p>
-   <p>Sunday's Threetops pairings and Tuesday afternoon's tee time were blank in the pairings sheet.</p>
    <p>Tap any player on a round card to switch the handicap bar to their numbers.</p>
   </footer>
  </div>
@@ -1049,7 +1047,6 @@ function cardHTML(r,isNext){
      +tileHTML(sc.par.reduce((s,v)=>s+v,0),'Par',sc.par.reduce((s,v)=>s+v,0)/27)
      +'</div>';
    }
-   h+='<div class="note">Par-3 course — not in the pairings sheet, so no course handicap. Scorecard is here.</div>';
   } else if(!r.groups.length){
    if(r.tbd) h+='<div class="note">'+r.tbd+'</div>';
   } else {
@@ -1088,7 +1085,15 @@ function cardHTML(r,isNext){
  h+='<div class="actrow"><button class="btn fill" data-sc="'+r.course+'" data-alt="'+(r.alt||'')+'" data-rid="'+r.id+'">Scorecard</button>'
   +'<a class="btn" href="'+mapsHref(r.maps)+'">Directions <span>↗</span></a></div>';
  h+='<div class="addr">'+r.addr+' · '+mapsLabel()+'</div>';
- if(r.note) h+='<div class="note">'+r.note+'</div>';
+ /* !r.nohcp: DATA's sun-pm round carries a note field that was the same
+    literal text as the hardcoded Threetops note above (both said "Par-3
+    course... Scorecard is here.") -- two independent sources for one
+    sentence, rendered back to back on the same card. The hardcoded copy is
+    gone now; this guard stops the DATA-driven copy from rendering in its
+    place, without editing DATA itself (r.note is a real, general-purpose
+    field other rounds use for their own distinct notes, e.g. tue-am's
+    "About 50 minutes from Treetops." -- only nohcp rounds are affected). */
+ if(r.note && !r.nohcp) h+='<div class="note">'+r.note+'</div>';
  return h+'</article>';
 }
 
