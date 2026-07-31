@@ -39,7 +39,7 @@
    bumped, unlike CACHE_VERSION which increments on every commit that
    touches any served file, regardless of whether anything user-visible
    changed. */
-const CACHE_VERSION = 'v42';
+const CACHE_VERSION = 'v43';
 const APP_VERSION = '2.0.0';
 const CACHE_NAME = 'msmi-2026-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'msmi-2026-fonts';
