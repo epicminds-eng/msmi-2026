@@ -353,7 +353,19 @@ html[data-skin="epicminds"] .skinbtn{display:none}
  color:var(--ink);font-family:var(--sans);font-size:1rem;padding:0 14px;margin-bottom:14px}
 #search:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .tblock{margin-bottom:20px}
-.tblock h3{font-family:var(--dispfont);font-weight:var(--dispweight);font-size:1.25rem;margin:0 0 12px}
+.tblock h3{font-family:var(--dispfont);font-weight:var(--dispweight);font-size:1.25rem;margin:0}
+/* course name is the tap target that expands/collapses its card — a plain
+   button (not a details/summary element: Handicaps already drives everything
+   through renderTables()'s own innerHTML string, and this stays consistent
+   with that single render path rather than mixing in native disclosure
+   behaviour). The chevron glyph is the state affordance; aria-expanded
+   carries the same state for assistive tech. */
+.tblockhead{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);
+ width:100%;min-height:44px;border:0;background:none;padding:0;margin:0;cursor:pointer;
+ text-align:left;font-family:inherit;color:inherit}
+.tblockhead:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tblockchev{flex:0 0 auto;font-size:1.3rem;font-weight:700;color:var(--mute);line-height:1}
+.tblockbody{margin-top:var(--sp-3)}
 /* the [hidden] attribute is how the search filter hides rows — an author rule
    at equal specificity to the UA default silently wins over it otherwise,
    which bit the picker once already, so this stays explicit */
@@ -1274,6 +1286,10 @@ function tc(s){return s.toLowerCase().split(' ').map(w=>w==='jt'?'JT':w.charAt(0
    NOT msmi-tee:<NAME>, which is a player's own remembered tee on round cards
    and must not be overwritten by someone just browsing this screen */
 let hcpTee={};
+/* which course cards are expanded — in-memory only, deliberately not
+   persisted (no localStorage key): the screen is meant to open as a short
+   list of seven collapsed names every time, not remember last visit's state. */
+let hcpExpanded={};
 /* one player's course handicap at an explicit tee (not that player's own
    stored preference — this screen shows every player at the SAME tee, picked
    locally). Gender resolution reuses courseTeeIndex exactly as chFor does,
@@ -1298,9 +1314,19 @@ function renderTables(){
   const sc=DATA.sc[c.name];
   const ti=hcpTee[c.name]!==undefined? hcpTee[c.name] : defaultTeeIdx(c.name);
   const teeSlot=sc? sc.tees[ti] : null;
-  let t='<div class="card tblock" data-hcpcourse="'+esc(c.name)+'"><h3 class="disp">'+tc(c.name)+'</h3>';
+  const expanded=!!hcpExpanded[c.name];
+  /* the outer div's opening tag (class="card tblock" + data-hcpcourse) must
+     stay exactly this string — tests/handicaps-render-conformance.test.js
+     locates each course's block by searching for it literally. Everything
+     collapse-related lives one level in (.tblockhead/.tblockbody), so that
+     test is untouched by this feature. */
+  let t='<div class="card tblock" data-hcpcourse="'+esc(c.name)+'">';
+  t+='<button class="tblockhead" data-toggle="'+esc(c.name)+'" aria-expanded="'+expanded+'">'
+   +'<h3 class="disp">'+tc(c.name)+'</h3><span class="tblockchev">'+(expanded?'−':'+')+'</span></button>';
+  t+='<div class="tblockbody"'+(expanded?'':' hidden')+'>';
   if(sc) t+=segHTML(sc.tees.map(x=>x.label),ti,'tee',true);
   t+='<div style="margin-top:12px">'+ps.map(p=>hcpPlayerRowHTML(p,c.name,teeSlot)).join('')+'</div>';
+  t+='</div>';
   return t+'</div>';
  }).join('');
 }
@@ -1412,13 +1438,39 @@ document.getElementById('sheet').addEventListener('click',e=>{
  const sc=e.target.closest('button[data-scn]'); if(sc){ scState.nick=sc.dataset.scn; drawSheet(); return }
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet() });
+/* a match inside a collapsed course card is invisible unless that card
+   expands — so while a search is active, force-expand any course card that
+   still has a visible match and force-collapse the rest (decluttering to
+   just the courses that matter for this query), all without touching
+   hcpExpanded: the moment the box is cleared, every card reverts to
+   whatever the player had actually clicked open, not to "expanded because
+   you searched a minute ago". */
 document.getElementById('search').addEventListener('input',e=>{
  const q=e.target.value.trim().toLowerCase();
  document.querySelectorAll('#tables .prow[data-name]').forEach(row=>{
   row.hidden = q && row.dataset.name.indexOf(q)===-1;
  });
+ document.querySelectorAll('#tables [data-hcpcourse]').forEach(card=>{
+  const body=card.querySelector('.tblockbody'); if(!body) return;
+  const head=card.querySelector('button[data-toggle]');
+  let show;
+  if(q){
+   show=[...body.querySelectorAll('.prow[data-name]')].some(row=>!row.hidden);
+  } else {
+   show=!!hcpExpanded[card.dataset.hcpcourse];
+  }
+  body.hidden=!show;
+  if(head){ head.setAttribute('aria-expanded',String(show)); head.querySelector('.tblockchev').textContent=show?'−':'+'; }
+ });
 });
 document.getElementById('tables').addEventListener('click',e=>{
+ const toggle=e.target.closest('button[data-toggle]');
+ if(toggle){
+  const name=toggle.dataset.toggle;
+  hcpExpanded[name]=!hcpExpanded[name];
+  renderTables();
+  return;
+ }
  const btn=e.target.closest('button[data-tee]'); if(!btn) return;
  const wrap=btn.closest('[data-hcpcourse]'); if(!wrap) return;
  hcpTee[wrap.dataset.hcpcourse]=Number(btn.getAttribute('data-tee'));

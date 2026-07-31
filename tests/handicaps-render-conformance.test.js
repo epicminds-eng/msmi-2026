@@ -73,6 +73,7 @@ const pieceList = [
   { name: 'defaultTeeIdx', text: extract('defaultTeeIdx', /function defaultTeeIdx\(course\)\{[\s\S]*?\n\}/) },
   { name: 'tc', text: extract('tc', /function tc\(s\)\{[^\n]*\}/) },
   { name: 'hcpTee', text: extract('hcpTee', /let hcpTee=\{\};/) },
+  { name: 'hcpExpanded', text: extract('hcpExpanded', /let hcpExpanded=\{\};/) },
   { name: 'hcpPlayerRowHTML', text: extract('hcpPlayerRowHTML', /function hcpPlayerRowHTML\(p,courseName,teeSlot\)\{[\s\S]*?\n\}/) },
   { name: 'renderTables', text: extract('renderTables', /function renderTables\(\)\{[\s\S]*?\n\}/) },
 ];
