@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Trip HQ">
+<title>MSMI 2026 — Trip HQ</title>
+<style>
+  :root{
+    --bg:#F2F2F7;            /* systemGroupedBackground */
+    --cell:#FFFFFF;          /* secondarySystemGroupedBackground */
+    --label:#000000;
+    --secondary:rgba(60,60,67,.60);
+    --tertiary:rgba(60,60,67,.30);
+    --sep:rgba(60,60,67,.29);
+    --blue:#007AFF;          /* systemBlue */
+    --green:#34C759;         /* systemGreen */
+    --gray:#8E8E93;          /* systemGray */
+    --fill:#E9E9EB;          /* tertiarySystemFill-ish */
+    --track:#E5E5EA;         /* systemGray5 */
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{background:#F2F2F7 !important;}
+  body{
+    background:#F2F2F7 !important;color:#000 !important;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size:17px;line-height:1.4;-webkit-font-smoothing:antialiased;
+    padding-bottom:calc(84px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:12px 16px 24px;}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important;}}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+
+  /* large-title header */
+  .sign{background:transparent;padding:16px 0 6px;margin-bottom:6px;}
+  .sign.guide,.sign.service{background:transparent;color:var(--label);box-shadow:none;}
+  .sign .in{padding:0;color:var(--label);}
+  .sign .route{font-size:13px;font-weight:600;color:var(--secondary);letter-spacing:0;text-transform:none;font-family:inherit;}
+  .sign h1{font-size:34px;font-weight:700;letter-spacing:.01em;line-height:1.15;text-transform:none;margin:2px 0 3px;color:var(--label);font-family:inherit;}
+  .sign .sub{font-size:15px;color:var(--secondary);font-weight:400;opacity:1;}
+
+  /* progress */
+  .roadbar{background:var(--cell);border:none;border-radius:12px;padding:14px 16px;margin:6px 0 22px;}
+  .roadbar .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
+  .roadbar .lbl{font-size:15px;font-weight:600;color:var(--label);letter-spacing:0;text-transform:none;font-family:inherit;}
+  .roadbar .num{font-size:15px;color:var(--secondary);font-weight:400;font-family:inherit;}
+  .road{height:4px;border-radius:2px;background:var(--track);position:relative;overflow:hidden;}
+  .road::after{content:none;}
+  .road .fill{position:absolute;inset:0;right:auto;background:var(--green);width:0%;transition:width .35s ease;}
+
+  /* grouped sections: header outside, inset rounded group */
+  .card{background:transparent;border:none;border-radius:0;margin-bottom:26px;overflow:visible;box-shadow:none;}
+  .sec-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:0 16px 7px;cursor:pointer;user-select:none;background:transparent !important;color:var(--secondary);box-shadow:none;
+  }
+  .sec-head .t{font-size:13px;font-weight:400;letter-spacing:.03em;text-transform:uppercase;color:var(--secondary);font-family:inherit;}
+  .sec-head .m{font-size:13px;color:var(--secondary);display:flex;align-items:center;gap:8px;white-space:nowrap;font-family:inherit;font-weight:400;}
+  .chev{display:inline-block;transition:transform .15s;font-size:10px;color:var(--tertiary);}
+  .card.closed .chev{transform:rotate(-90deg);}
+  .card.closed .sec-body{display:none;}
+  .sec-body{background:var(--cell);border-radius:12px;overflow:hidden;}
+  .sec-note{font-size:13px;color:var(--secondary);padding:10px 16px 0;}
+
+  /* rows */
+  .item{padding:11px 16px 12px;position:relative;}
+  .item + .item::before{content:"";position:absolute;left:16px;right:0;top:0;height:.5px;background:var(--sep);}
+  .item .name{font-weight:400;font-size:17px;color:var(--label);}
+  .item .note{font-size:13px;color:var(--secondary);margin-top:1px;}
+  .item.is-bring .name{color:var(--secondary);text-decoration:line-through;text-decoration-color:var(--tertiary);}
+  .item.is-bring,.item.is-ship,.item.is-leave{background:var(--cell);}
+
+  /* segmented control */
+  .tagrow{display:flex;gap:0;margin-top:9px;background:var(--fill);border-radius:9px;padding:2px;}
+  .tag{
+    flex:1;font-family:inherit;font-weight:500;font-size:13px;letter-spacing:0;text-transform:none;
+    padding:6px 4px;border-radius:7px;border:none;background:transparent;color:var(--label);cursor:pointer;line-height:1.3;
+  }
+  .tag.on-bring,.tag.on-ship,.tag.on-leave{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12),0 0 0 .5px rgba(0,0,0,.04);font-weight:600;}
+  .tag.on-bring{color:var(--green);}
+  .tag.on-ship{color:var(--blue);}
+  .tag.on-leave{color:var(--gray);}
+
+  .del{margin-top:8px;background:none;border:none;font-family:inherit;font-size:13px;color:#FF3B30;cursor:pointer;padding:2px 0;}
+  .addrow{display:flex;gap:8px;padding:11px 16px 12px;position:relative;}
+  .addrow::before{content:"";position:absolute;left:16px;right:0;top:0;height:.5px;background:var(--sep);}
+  .addrow input{flex:1;font-family:inherit;font-size:17px;padding:8px 12px;border:none;border-radius:9px;outline:none;background:var(--fill);color:var(--label);}
+  .addrow button{font-family:inherit;font-size:15px;font-weight:600;padding:8px 14px;border-radius:9px;border:none;background:transparent;color:var(--blue);cursor:pointer;}
+
+  .chips{display:flex;gap:8px;margin:0 0 18px;}
+  .chip{font-family:inherit;font-size:15px;font-weight:400;letter-spacing:0;text-transform:none;
+    padding:7px 14px;border-radius:999px;border:none;background:var(--fill);cursor:pointer;color:var(--label);}
+  .chip.on{background:var(--blue);color:#fff;font-weight:600;}
+
+  /* today / timeline rows */
+  .exit{display:flex;gap:12px;padding:11px 16px;position:relative;align-items:flex-start;}
+  .exit + .exit::before{content:"";position:absolute;left:16px;right:0;top:0;height:.5px;background:var(--sep);}
+  .exitn{flex:none;min-width:44px;height:26px;border-radius:7px;background:var(--fill);color:var(--label);
+    font-family:inherit;font-weight:600;font-size:12px;display:flex;align-items:center;justify-content:center;box-shadow:none;margin-top:2px;}
+  .exit .t{font-weight:400;font-size:17px;color:var(--label);}
+  .exit .d{font-size:13px;color:var(--secondary);}
+  .diamond{margin:8px 16px 0;padding:0 0 12px;border:none;background:transparent;font-size:13px;color:var(--secondary);border-radius:0;}
+  .fact{padding:12px 16px;font-size:15px;color:var(--label);position:relative;}
+  img.ph + .fact::before{content:none;}
+  .fact strong{font-weight:600;}
+  img.ph{width:100%;height:180px;object-fit:cover;display:block;background:var(--track);}
+  .btns{display:flex;flex-wrap:wrap;gap:8px;padding:4px 16px 14px;}
+  a.btn{display:inline-block;font-family:inherit;font-size:15px;font-weight:600;letter-spacing:0;text-transform:none;
+    padding:10px 16px;border-radius:12px;text-decoration:none;border:none;color:var(--blue);background:var(--fill);}
+  a.btn.go{background:var(--blue);color:#fff;box-shadow:none;}
+  .slot{margin:0 16px 16px;padding:12px;border:none;border-radius:12px;background:var(--bg);}
+  .slot label{font-family:inherit;font-size:13px;letter-spacing:0;text-transform:none;color:var(--secondary);display:block;margin-bottom:7px;font-weight:400;}
+  .slot .srow{display:flex;gap:8px;}
+  .slot input{flex:1;font-family:inherit;font-size:15px;padding:9px 11px;border:none;border-radius:9px;outline:none;background:#fff;color:var(--label);}
+  .slot button{font-family:inherit;font-size:15px;font-weight:600;padding:9px 13px;border-radius:9px;border:none;background:transparent;color:var(--blue);cursor:pointer;}
+  .slot a.saved{display:inline-block;margin-top:8px;font-weight:500;color:var(--blue);word-break:break-all;font-size:14px;}
+
+  /* links: iOS list rows */
+  .linkgrid{display:block;background:var(--cell);border-radius:12px;overflow:hidden;}
+  .linkgrid a{display:flex;align-items:center;gap:12px;text-decoration:none;border:none;border-radius:0;padding:12px 16px;color:var(--label);background:var(--cell);box-shadow:none;min-height:0;position:relative;}
+  .linkgrid a + a::before{content:"";position:absolute;left:16px;right:0;top:0;height:.5px;background:var(--sep);}
+  .linkgrid a.blue,.linkgrid a.gold-dest{background:var(--cell);color:var(--label);}
+  .linkgrid a .k{font-family:inherit;font-size:13px;letter-spacing:0;text-transform:none;color:var(--secondary);order:2;margin-left:auto;}
+  .linkgrid a .n{font-family:inherit;font-weight:400;font-size:17px;line-height:1.3;text-transform:none;margin:0;order:1;}
+  .linkgrid a .ar{position:static;order:3;font-weight:600;font-size:15px;color:var(--tertiary);}
+
+  /* tab bar: translucent blur */
+  nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;
+    background:rgba(249,249,249,.92);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom));display:flex;gap:0;
+    border-top:.5px solid var(--sep);box-shadow:none;
+  }
+  nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    font-family:inherit;font-weight:500;font-size:10px;letter-spacing:0;text-transform:none;
+    padding:6px 2px 4px;border-radius:0;border:none;background:transparent;color:var(--gray);cursor:pointer;}
+  nav button svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  nav button.active{background:transparent;color:var(--blue);}
+  .page{display:none;}
+  .page.show{display:block;}
+  footer{text-align:center;font-family:inherit;font-size:13px;letter-spacing:0;text-transform:none;color:var(--secondary);margin-top:20px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= TODAY ================= -->
+  <div class="page show" id="page-today">
+    <div class="sign guide" id="todaySign">
+      <div class="in">
+        <div class="route" id="todayRoute">MSMI 2026</div>
+        <h1 id="todayTitle">Trip HQ</h1>
+        <div class="sub" id="todaySub"></div>
+      </div>
+    </div>
+    <div id="todayBody"></div>
+  </div>
+
+  <!-- ================= PACK ================= -->
+  <div class="page" id="page-pack">
+    <div class="sign guide">
+      <div class="in">
+        <div class="route">Aug 1–6 · Treetops</div>
+        <h1>Pack list</h1>
+        <div class="sub">Packed · Buy · Skip — tag everything, nothing rides untagged.</div>
+      </div>
+    </div>
+    <div class="roadbar">
+      <div class="row"><span class="lbl">Progress</span><span class="num" id="packNum">0 / 0</span></div>
+      <div class="road"><div class="fill" id="packFill"></div></div>
+    </div>
+    <div class="chips">
+      <button class="chip" id="hideDone" type="button">Hide tagged</button>
+    </div>
+    <div id="groups"></div>
+  </div>
+
+  <!-- ================= NIGHT 1 ================= -->
+  <div class="page" id="page-night">
+    <div class="sign service">
+      <div class="in">
+        <div class="route">Night One · Sat Aug 1</div>
+        <h1>Big Rapids</h1>
+        <div class="sub">Barrington → Country Inn &amp; Suites → 1.5 hrs to Treetops Sunday.</div>
+      </div>
+    </div>
+
+    <div class="card" data-static>
+      <div class="sec-head" role="button" tabindex="0" style="--sec:var(--guide);"><span class="t">The Day</span><span class="m"><span class="chev">▼</span></span></div>
+      <div class="sec-body">
+        <div class="exit"><div class="exitn">1</div><div><div class="t">Pack the car — morning</div><div class="d">Loaded before Kane leaves the house</div></div></div>
+        <div class="exit"><div class="exitn">2</div><div><div class="t">12:30 PM — Kane to boarding</div><div class="d">Canine Country Club of Barrington</div></div></div>
+        <div class="exit"><div class="exitn">3</div><div><div class="t">12:45 PM — northbound</div><div class="d">~250 mi, ~4 hrs. Send the trip to the car first; one mid-route charge keeps you over 20%</div></div></div>
+        <div class="exit"><div class="exitn">4</div><div><div class="t">~6 PM (MI time) — arrive Big Rapids</div><div class="d">Pull straight onto the Supercharger in the hotel lot</div></div></div>
+        <div class="exit"><div class="exitn">5</div><div><div class="t">Charge to ~90–100% during dinner</div><div class="d">Culver's + Meijer walkable, then move off the stall</div></div></div>
+        <div class="exit"><div class="exitn">6</div><div><div class="t">Sunday AM — 1.5 hrs to Treetops</div><div class="d">No charge stop needed</div></div></div>
+      </div>
+    </div>
+
+    <div class="card" data-static>
+      <div class="sec-head" role="button" tabindex="0" style="--sec:var(--service);"><span class="t">Hotel</span><span class="m"><span class="chev">▼</span></span></div>
+      <div class="sec-body">
+        <img class="ph" referrerpolicy="no-referrer" onerror="this.style.display='none'"
+          src="https://lh3.googleusercontent.com/place-photos/AG9NLjAzbFsZY5G0s_DxdC_wDCw0LEg3oywEIm0n7LX5gtWDMxGkdQPUlOMC_OpYWkNZfZ3zrH93nMi1pMKYHY65R32LQ4FekqJ-NIsgiXV_ITsDXdiJlQUNI37VQqT6d65u-sGIGpTefcKeFnePPj8ShpMcNQ=s4800-w711-h400"
+          alt="Country Inn & Suites Big Rapids">
+        <div class="fact"><strong>Country Inn &amp; Suites — 4.2★ (731)</strong><br>15344 Waldron Way, Big Rapids MI · pool · breakfast · Meijer next door</div>
+        <div class="btns">
+          <a class="btn go" href="https://maps.apple.com/?q=Country+Inn+%26+Suites+Big+Rapids+MI&amp;ll=43.6905,-85.5148">Apple Maps</a>
+          <a class="btn" href="tel:+12315988898">Call</a>
+          <a class="btn" href="https://www.choicehotels.com/michigan/big-rapids/country-inn-suites-hotels/mi615">Hotel site</a>
+          <a class="btn" href="https://www.orbitz.com/Hotel-Search?destination=Big%20Rapids%2C%20Michigan">Orbitz</a>
+        </div>
+        <div class="slot">
+          <label>Your booking link — paste when booked</label>
+          <div class="srow">
+            <input id="bookInput" type="url" placeholder="https://…">
+            <button id="bookSave" type="button">Save</button>
+          </div>
+          <a id="bookLink" class="saved" href="#" style="display:none" target="_blank"></a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" data-static>
+      <div class="sec-head" role="button" tabindex="0" style="--sec:var(--service);"><span class="t">Charging</span><span class="m"><span class="chev">▼</span></span></div>
+      <div class="sec-body">
+        <img class="ph" referrerpolicy="no-referrer" onerror="this.style.display='none'"
+          src="https://lh3.googleusercontent.com/place-photos/AG9NLjBySbZwHczNI79O0CiaA1J5fzn3hZ0LMuo2Z9hdNHIp4adoPUTJHxmyiIoZNT-OPaHf-6F5hapocngxhnv8-pEXINei6_vHRgNf4pboj9bVlrEtPUN2azjSaJcViUrBywuVQ-ULHxjlTboE7Q=s4800-w800-h600"
+          alt="Big Rapids Tesla Supercharger">
+        <div class="fact"><strong>Big Rapids Supercharger</strong> — 150 kW · 4.7★ · same lot as the hotel</div>
+        <div class="btns">
+          <a class="btn go" href="https://maps.apple.com/?q=Tesla+Supercharger+Big+Rapids+MI&amp;ll=43.6898,-85.5156">Apple Maps</a>
+        </div>
+        <div class="diamond">⚠ Charge during dinner, then move off the stall — idle fees start once charging finishes.</div>
+      </div>
+    </div>
+
+    <div class="card" data-static>
+      <div class="sec-head" role="button" tabindex="0" style="--sec:var(--guide);"><span class="t">Return — Fri Aug 7</span><span class="m"><span class="chev">▼</span></span></div>
+      <div class="sec-body">
+        <div class="fact"><strong>8 AM</strong> leave Gaylord → <strong>1–2 PM</strong> pick up Kane → home, unload, breathe → <strong>9:03 PM</strong> Liz lands (UA 1777, conf HFV8CV). Wait for the bag call, then roll to O'Hare.</div>
+        <div class="btns">
+          <a class="btn" href="https://maps.apple.com/?q=Canine+Country+Club+of+Barrington">Kane pickup</a>
+          <a class="btn" href="https://maps.apple.com/?q=O%27Hare+International+Airport">O'Hare</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LINKS ================= -->
+  <div class="page" id="page-links">
+    <div class="sign guide">
+      <div class="in">
+        <div class="route">Guide signs</div>
+        <h1>Links</h1>
+        <div class="sub">Everything opens in Apple Maps.</div>
+      </div>
+    </div>
+    <div class="linkgrid">
+      <a href="https://maps.apple.com/?q=Treetops+Resort+Gaylord+MI"><span class="k">Destination</span><div class="n">Treetops Resort</div><span class="ar">›</span></a>
+      <a class="blue" href="https://maps.apple.com/?q=Country+Inn+%26+Suites+Big+Rapids+MI&amp;ll=43.6905,-85.5148"><span class="k">Lodging</span><div class="n">Night-One Hotel</div><span class="ar">›</span></a>
+      <a class="blue" href="https://maps.apple.com/?q=Tesla+Supercharger+Big+Rapids+MI&amp;ll=43.6898,-85.5156"><span class="k">Charging</span><div class="n">Big Rapids SC</div><span class="ar">›</span></a>
+      <a class="blue" href="https://maps.apple.com/?q=Tesla+Supercharger+Cadillac+MI&amp;ll=44.2825,-85.4031"><span class="k">Charging</span><div class="n">Cadillac SC</div><span class="ar">›</span></a>
+      <a class="blue" href="https://maps.apple.com/?q=Tesla+Supercharger+Gaylord+MI"><span class="k">Charging</span><div class="n">Gaylord SC</div><span class="ar">›</span></a>
+      <a href="https://maps.apple.com/?q=Canine+Country+Club+of+Barrington"><span class="k">Kane</span><div class="n">Boarding</div><span class="ar">›</span></a>
+    </div>
+  </div>
+
+  <footer>MSMI 2026 · Trip HQ</footer>
+</div>
+
+<nav>
+  <button id="nav-today" class="active" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>Today</button>
+  <button id="nav-pack" type="button"><svg viewBox="0 0 24 24"><path d="M4 6.5l1.5 1.5L8 5.5"/><path d="M11 6.5h9"/><path d="M4 12.5l1.5 1.5L8 11.5"/><path d="M11 12.5h9"/><path d="M4 18.5l1.5 1.5L8 17.5"/><path d="M11 18.5h9"/></svg>Pack</button>
+  <button id="nav-night" type="button"><svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg>Night 1</button>
+  <button id="nav-links" type="button"><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.4-6.5-10A6.5 6.5 0 0 1 12 4.5 6.5 6.5 0 0 1 18.5 11c0 4.6-6.5 10-6.5 10z"/><circle cx="12" cy="11" r="2.3"/></svg>Links</button>
+</nav>
+
+<script>
+(function(){
+  "use strict";
+  var KEY="miTripPack_v1", BKEY="brBooking_v1";
+
+  /* ---------- storage ---------- */
+  var mem=null, bmem="";
+  function load(){ try{ var r=window.localStorage.getItem(KEY); return r?JSON.parse(r):mem; }catch(e){ return mem; } }
+  function save(s){ mem=s; try{ window.localStorage.setItem(KEY,JSON.stringify(s)); }catch(e){} }
+  function bload(){ try{ return window.localStorage.getItem(BKEY)||bmem; }catch(e){ return bmem; } }
+  function bsave(v){ bmem=v; try{ window.localStorage.setItem(BKEY,v); }catch(e){} }
+
+  /* ---------- data (ids match previous versions so tags persist) ---------- */
+  var DATA=[
+    {id:"predep",title:"Before You Leave",note:"Saturday morning — house squared away",items:[
+      {id:"p-check",t:"8 AM — walk the check to Dayanne",n:"One-minute walk. First thing, before packing"},
+      {id:"p-pack",t:"Pack the car — morning",n:"Loaded before Kane leaves the house"},
+      {id:"p-sim",t:"Break down the golf simulator",n:"Everything has its place — stack it there"},
+      {id:"p-vacuum",t:"Vacuum after the sim comes down",n:"Mats shed everywhere"},
+      {id:"p-bed",t:"Move bed to second bedroom",n:"Tyson arrives the 8th"},
+      {id:"p-deck",t:"Pressure wash the deck",n:""},
+      {id:"p-mop",t:"Mop the floor",n:""},
+      {id:"p-room",t:"Clean the room",n:""},
+      {id:"p-sheets",t:"Fresh sheets + clean towels out",n:"Liz lands the 7th — you arrive together"},
+      {id:"p-fridge",t:"Fridge purge + run dishwasher",n:"6 days away in August heat"},
+      {id:"p-garbage",t:"Garbage out — front AND back",n:"Last thing before you leave"},
+      {id:"p-kane",t:"12:30 — Kane to boarding",n:"Then northbound straight from there"}
+    ]},
+    {id:"golf",title:"Golf",note:"8 rounds in 6 days — pack for volume",items:[
+      {id:"g-clubs",t:"Gamer bag + clubs",n:"Count the putter and wedges before loading"},
+      {id:"g-shoes",t:"Golf shoes — two pairs",n:"Morning dew + 36-hole days; let one dry"},
+      {id:"g-gloves",t:"Gloves — 3+",n:"8 rounds eats gloves"},
+      {id:"g-balls",t:"Balls — more than you think",n:"Threetops and Black Lake will take some"},
+      {id:"g-tees",t:"Tees, markers, divot tool",n:""},
+      {id:"g-gps",t:"GPS / rangefinder + charger",n:"The charger is the one that gets forgotten"},
+      {id:"g-rain",t:"Rain suit + umbrella",n:"Northern Michigan — it will rain at least once"},
+      {id:"g-towels",t:"Golf towels",n:""},
+      {id:"g-hats",t:"Hats — a couple",n:""},
+      {id:"g-extraclubs",t:"Extra clubs",n:"The backup sticks"},
+      {id:"g-extraputter",t:"Extra putter",n:""},
+      {id:"g-sunscreen",t:"Sunscreen + lip balm",n:"Lives in the bag, not the room"}
+    ]},
+    {id:"clothes",title:"Clothes",note:"Gaylord = 50s mornings, 80s afternoons",items:[
+      {id:"c-polos",t:"Polos — 6–7",n:"One per round day"},
+      {id:"c-bottoms",t:"Golf shorts + one pair of pants",n:"Pants for cold morning tee times"},
+      {id:"c-layers",t:"Quarter-zip / hoodie — 2",n:"You'll wear one every morning"},
+      {id:"c-rainjacket",t:"Rain jacket (doubles as wind layer)",n:""},
+      {id:"c-evening",t:"Evening casual for dinners",n:""},
+      {id:"c-socks",t:"Socks + underwear — extras",n:"Wet mornings, pack spares"},
+      {id:"c-mesh",t:"Mesh shorts",n:""},
+      {id:"c-sweats",t:"Sweatpants",n:""},
+      {id:"c-swim",t:"Swimsuit",n:"Pool / hot tub"},
+      {id:"c-sandals",t:"Sandals / post-round shoes",n:"Your feet will thank you"},
+      {id:"c-sleep",t:"Sleep stuff",n:""}
+    ]},
+    {id:"tech",title:"Tech",note:"chargers are the usual casualty",items:[
+      {id:"t-phone",t:"Phone charger + car cable",n:""},
+      {id:"t-watch",t:"Watch charger",n:"If the GPS watch is coming"},
+      {id:"t-battery",t:"Portable battery pack",n:"Long days on the course"},
+      {id:"t-earbuds",t:"Earbuds",n:""},
+      {id:"t-ipad",t:"iPad",n:""},
+      {id:"t-vision",t:"Vision Pro",n:""},
+      {id:"t-tesla",t:"Tesla mobile charger + adapter",n:"Trickle-charge at the resort overnight"},
+      {id:"t-camera",t:"Camera / content kit — optional",n:"Only if you're shooting the trip"}
+    ]},
+    {id:"health",title:"Toiletries / Health",note:"the recovery kit",items:[
+      {id:"h-dopp",t:"Dopp kit",n:""},
+      {id:"h-meds",t:"Daily meds — all 6 days",n:""},
+      {id:"h-ibu",t:"Ibuprofen",n:"8 rounds. You'll need it"},
+      {id:"h-blister",t:"Blister care / band-aids",n:""},
+      {id:"h-allergy",t:"Allergy meds",n:"Northern Michigan in August"},
+      {id:"h-bugspray",t:"Bug spray",n:"Evening rounds"},
+      {id:"h-vision",t:"Contacts + glasses",n:"Both — backup matters on a golf trip"},
+      {id:"h-wipes",t:"Wet wipes",n:""}
+    ]},
+    {id:"trip",title:"Trip Stuff",note:"the difference-makers",items:[
+      {id:"tr-cash",t:"Cash for games / skins",n:"Small bills"},
+      {id:"tr-yeti",t:"YETI cooler + drinks",n:"Load it cold the night before"},
+      {id:"tr-snacks",t:"Course snacks",n:""},
+      {id:"tr-bottles",t:"Water bottles",n:""},
+      {id:"tr-bars",t:"Protein bars",n:""},
+      {id:"tr-pillow",t:"Pillows",n:"Your own — resort pillows are a gamble"},
+      {id:"tr-weights",t:"Weights + ankle weights",n:"Morning routine on the road"},
+      {id:"tr-confirm",t:"Confirmations — Treetops + tee times",n:"Screenshot them; resort wifi is a gamble"},
+      {id:"tr-ghin",t:"GHIN / handicap ready",n:"Know your strokes per course"},
+      {id:"tr-charge",t:"Send Supercharger route to the car",n:"Night before"}
+    ]},
+    {id:"groceries",title:"Groceries",note:"smoothie kit — check the fridge first",items:[
+      {id:"gr-smoothies",t:"Smoothies — check refrigerator",n:"See what's already made"},
+      {id:"gr-straw",t:"Strawberries",n:""},
+      {id:"gr-blue",t:"Blueberries",n:""},
+      {id:"gr-walnuts",t:"Walnuts",n:""}
+    ]}
+  ];
+
+  var state=load()||{disp:{},collapsed:{},custom:{}};
+  state.disp=state.disp||{}; state.collapsed=state.collapsed||{}; state.custom=state.custom||{};
+  var hideTagged=!!state.hideTagged;
+
+  var DISPO=["bring","ship","leave"];
+  var LABEL={bring:"Packed",ship:"Buy",leave:"Skip"};
+
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
+
+  /* ---------- pack render ---------- */
+  var groupsEl=document.getElementById("groups");
+  function render(){
+    groupsEl.innerHTML="";
+    DATA.forEach(function(g){
+      var custom=state.custom[g.id]||[];
+      var all=g.items.concat(custom.map(function(c){return{id:c.id,t:c.t,n:"",custom:true};}));
+      var done=all.filter(function(it){return state.disp[it.id];}).length;
+
+      var card=document.createElement("div");
+      card.className="card"+(state.collapsed[g.id]?" closed":"");
+
+      var head=document.createElement("div");
+      head.className="sec-head";head.setAttribute("role","button");head.setAttribute("tabindex","0");
+      head.innerHTML='<span class="t">'+esc(g.title)+'</span><span class="m">'+done+'/'+all.length+' <span class="chev">\u25BC</span></span>';
+      function toggle(){state.collapsed[g.id]=!state.collapsed[g.id];save(state);render();}
+      head.addEventListener("click",toggle);
+      head.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();}});
+      card.appendChild(head);
+
+      var body=document.createElement("div");
+      body.className="sec-body";
+      if(g.note){var sn=document.createElement("div");sn.className="sec-note";sn.textContent=g.note;body.appendChild(sn);}
+
+      all.forEach(function(it){
+        var d=state.disp[it.id]||"";
+        if(hideTagged&&d)return;
+        var row=document.createElement("div");
+        row.className="item"+(d?" is-"+d:"");
+        var tags=DISPO.map(function(k){
+          return '<button class="tag'+(d===k?" on-"+k:"")+'" data-k="'+k+'" type="button">'+LABEL[k]+'</button>';
+        }).join("");
+        row.innerHTML='<div class="name">'+esc(it.t)+'</div>'+
+          (it.n?'<div class="note">'+esc(it.n)+'</div>':'')+
+          '<div class="tagrow">'+tags+'</div>'+
+          (it.custom?'<button class="del" type="button">Remove</button>':'');
+        DISPO.forEach(function(k){
+          row.querySelector('[data-k="'+k+'"]').addEventListener("click",function(){
+            state.disp[it.id]=(state.disp[it.id]===k)?"":k;
+            save(state);render();
+          });
+        });
+        if(it.custom){
+          row.querySelector(".del").addEventListener("click",function(){
+            state.custom[g.id]=(state.custom[g.id]||[]).filter(function(c){return c.id!==it.id;});
+            delete state.disp[it.id];save(state);render();
+          });
+        }
+        body.appendChild(row);
+      });
+
+      var add=document.createElement("div");
+      add.className="addrow";
+      add.innerHTML='<input type="text" placeholder="Add to '+esc(g.title)+'\u2026" aria-label="Add item"><button type="button">Add</button>';
+      var inp=add.querySelector("input"),btn=add.querySelector("button");
+      function addItem(){
+        var v=inp.value.trim();if(!v)return;
+        if(!state.custom[g.id])state.custom[g.id]=[];
+        state.custom[g.id].push({id:g.id+"-c"+Date.now(),t:v});
+        inp.value="";save(state);render();
+      }
+      btn.addEventListener("click",addItem);
+      inp.addEventListener("keydown",function(e){if(e.key==="Enter")addItem();});
+      body.appendChild(add);
+
+      card.appendChild(body);
+      groupsEl.appendChild(card);
+    });
+    progress();
+  }
+  function progress(){
+    var total=0,done=0;
+    DATA.forEach(function(g){
+      var ids=g.items.map(function(i){return i.id;}).concat((state.custom[g.id]||[]).map(function(c){return c.id;}));
+      total+=ids.length;
+      ids.forEach(function(id){if(state.disp[id])done++;});
+    });
+    var pct=total?Math.round(done/total*100):0;
+    document.getElementById("packNum").textContent=done+" / "+total;
+    document.getElementById("packFill").style.width=pct+"%";
+  }
+  var hideBtn=document.getElementById("hideDone");
+  function syncHide(){hideBtn.classList.toggle("on",hideTagged);hideBtn.textContent=hideTagged?"Show all":"Hide tagged";}
+  hideBtn.addEventListener("click",function(){hideTagged=!hideTagged;state.hideTagged=hideTagged;save(state);syncHide();render();});
+  syncHide();
+
+  /* ---------- static section toggles ---------- */
+  document.querySelectorAll("[data-static] .sec-head").forEach(function(h){
+    function t(){h.parentElement.classList.toggle("closed");}
+    h.addEventListener("click",t);
+    h.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();t();}});
+  });
+
+  /* ---------- booking slot ---------- */
+  (function(){
+    var input=document.getElementById("bookInput"),btn=document.getElementById("bookSave"),link=document.getElementById("bookLink");
+    function show(v){if(!v){link.style.display="none";return;}link.href=v;link.textContent="Open booking \u2192 "+v;link.style.display="inline-block";}
+    var ex=bload();if(ex){input.value=ex;show(ex);}
+    function commit(){var v=input.value.trim();if(!v)return;if(!/^https?:\/\//i.test(v))v="https://"+v;bsave(v);show(v);}
+    btn.addEventListener("click",commit);
+    input.addEventListener("keydown",function(e){if(e.key==="Enter")commit();});
+  })();
+
+  /* ---------- tabs ---------- */
+  var pages=["today","pack","night","links"];
+  function show(name){
+    pages.forEach(function(p){
+      document.getElementById("page-"+p).classList.toggle("show",p===name);
+      document.getElementById("nav-"+p).classList.toggle("active",p===name);
+    });
+    window.scrollTo(0,0);
+  }
+  pages.forEach(function(p){
+    document.getElementById("nav-"+p).addEventListener("click",function(){show(p);});
+  });
+
+  /* ---------- TODAY: date-aware ---------- */
+  function phaseFor(d){
+    var k=d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+    if(k<20260801)return{p:"prep",k:k};
+    if(k===20260801)return{p:"depart"};
+    if(k>=20260802&&k<=20260806)return{p:"golf",day:d.getDate()-1};
+    if(k===20260807)return{p:"return"};
+    return{p:"done"};
+  }
+  function exitRow(n,t,d){return '<div class="exit"><div class="exitn">'+n+'</div><div><div class="t">'+t+'</div>'+(d?'<div class="d">'+d+'</div>':'')+'</div></div>';}
+  function card(inner){return '<div class="card"><div class="sec-body">'+inner+'</div></div>';}
+
+  function renderToday(now){
+    var ph=phaseFor(now);
+    var route=document.getElementById("todayRoute"),title=document.getElementById("todayTitle"),
+        sub=document.getElementById("todaySub"),body=document.getElementById("todayBody");
+    if(ph.p==="prep"){
+      route.textContent="Tomorrow \u00b7 Sat Aug 1";
+      title.textContent="Wheels up soon";
+      sub.textContent="Tonight: load the cooler cold, send the route to the car, sleep.";
+      body.innerHTML=card(
+        exitRow("8A","Walk the check to Dayanne","First thing tomorrow \u2014 one-minute walk")+
+        exitRow("AM","House + pack the car","Chores and load-out \u2014 full list on the Pack tab")+
+        exitRow("12:30","Kane to boarding","Then northbound straight from there")+
+        exitRow("PM","Big Rapids overnight","Details on the Night 1 tab")
+      );
+    }else if(ph.p==="depart"){
+      route.textContent="Sat Aug 1 \u00b7 Departure day";
+      title.textContent="Northbound";
+      sub.textContent="Check at 8, house squared, Kane at 12:30, road by 12:45.";
+      body.innerHTML=card(
+        exitRow("1","8 AM \u2014 check to Dayanne","")+
+        exitRow("2","Morning \u2014 chores + pack","Tag off Before You Leave on the Pack tab")+
+        exitRow("3","12:30 \u2014 Kane to boarding","")+
+        exitRow("4","12:45 \u2014 drive, ~4 hrs","Route to the car first \u00b7 one mid-route charge")+
+        exitRow("5","Evening \u2014 Big Rapids","Charge at dinner, then off the stall \u2014 Night 1 tab")
+      );
+    }else if(ph.p==="golf"){
+      route.textContent="Treetops \u00b7 Day "+ph.day+" of 5";
+      title.textContent="Golf day";
+      sub.textContent="Phone down, swing easy.";
+      body.innerHTML=card(
+        exitRow("\u2691","Play golf","That's the whole list")+
+        exitRow("PM","Trickle-charge overnight","Tesla mobile charger at the resort")+
+        exitRow("FRI","Return day is planned","8 AM out \u00b7 Kane 1\u20132 \u00b7 Liz 9:03 PM \u2014 Night 1 tab has it")
+      );
+    }else if(ph.p==="return"){
+      route.textContent="Fri Aug 7 \u00b7 Drive home";
+      title.textContent="The long Friday";
+      sub.textContent="Three pickups, one day. All planned.";
+      body.innerHTML=card(
+        exitRow("8A","Leave Gaylord","~5\u20136 hrs home with a charge stop")+
+        exitRow("1\u20132","Pick up Kane","Canine Country Club")+
+        exitRow("PM","Unload \u00b7 shower \u00b7 breathe","Real gap before the airport")+
+        exitRow("9:03","Liz lands \u2014 UA 1777","Wait for the bag call, then roll to O'Hare")
+      )+
+      '<div class="btns" style="padding-left:0;padding-right:0;"><a class="btn go" href="https://maps.apple.com/?q=Canine+Country+Club+of+Barrington">Kane pickup</a><a class="btn" href="https://maps.apple.com/?q=O%27Hare+International+Airport">O\u0027Hare</a></div>';
+    }else{
+      route.textContent="MSMI 2026";
+      title.textContent="Trip complete";
+      sub.textContent="Clubs away, dog home, Liz landed. Jamaica's next.";
+      body.innerHTML=card(exitRow("\u2713","Nothing left on this one","See you at the next trip"));
+    }
+  }
+  window.__phaseFor=phaseFor; /* testable */
+  renderToday(new Date());
+  render();
+})();
+</script>
+</body>
+</html>
